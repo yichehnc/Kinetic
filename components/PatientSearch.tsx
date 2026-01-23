@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Search, Lock, Unlock, AlertTriangle, FileText, Calendar, CheckCircle, Activity, User, Upload, Download, Eye, Copy, Check, Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Lock, Unlock, AlertTriangle, FileText, Calendar, CheckCircle, Activity, User, Upload, Download, Eye, Copy, Check, Save, CalendarClock } from 'lucide-react';
 import { Patient, HistoryEntry } from '../types';
 import { DEMO_PDF_BASE64 } from '../constants';
 
@@ -10,6 +10,10 @@ interface PatientSearchProps {
   credits: number;
   onUnlock: (patientId: string) => void;
   onUploadReport: (patientId: string, fileName: string) => void;
+  soapDrafts: Record<string, { s: string; o: string; a: string; p: string }>;
+  onSaveSoap: (patientId: string, data: { s: string; o: string; a: string; p: string }) => void;
+  isOptedIn: boolean;
+  pointsExpiry: Date | null;
 }
 
 export const PatientSearch: React.FC<PatientSearchProps> = ({ 
@@ -18,7 +22,11 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   unlockedPatients, 
   credits, 
   onUnlock,
-  onUploadReport
+  onUploadReport,
+  soapDrafts,
+  onSaveSoap,
+  isOptedIn,
+  pointsExpiry
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -32,13 +40,18 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   const [isSavingSoap, setIsSavingSoap] = useState(false);
   const [lastSavedSoap, setLastSavedSoap] = useState<Date | null>(null);
 
-  // Reset states when patient changes
-  React.useEffect(() => {
+  // Reset states or load draft when patient changes
+  useEffect(() => {
     setIsUploading(false);
     setCopied(false);
-    setSoap({ s: '', o: '', a: '', p: '' });
+    if (selectedPatient) {
+      const draft = soapDrafts[selectedPatient.id] || { s: '', o: '', a: '', p: '' };
+      setSoap(draft);
+    } else {
+      setSoap({ s: '', o: '', a: '', p: '' });
+    }
     setLastSavedSoap(null);
-  }, [selectedPatient]);
+  }, [selectedPatient, soapDrafts]);
 
   const filteredPatients = patients.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -50,9 +63,10 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
     : null;
 
   const isUnlocked = selectedPatient ? unlockedPatients.includes(selectedPatient.id) : false;
+  const isExpired = pointsExpiry && new Date() > pointsExpiry;
 
   const handleUnlock = () => {
-    if (selectedPatient && credits > 0) {
+    if (selectedPatient && credits > 0 && !isExpired && isOptedIn) {
       onUnlock(selectedPatient.id);
     }
   };
@@ -113,11 +127,14 @@ Source: Kinetic Network (${patientHistory.sourceClinicHash.substring(0,8)})
   };
 
   const handleSaveSoap = () => {
+    if (!selectedPatient) return;
     setIsSavingSoap(true);
+    // Call parent handler to save draft
+    onSaveSoap(selectedPatient.id, soap);
     setTimeout(() => {
       setIsSavingSoap(false);
       setLastSavedSoap(new Date());
-    }, 800);
+    }, 500);
   };
 
   return (
@@ -388,18 +405,29 @@ Source: Kinetic Network (${patientHistory.sourceClinicHash.substring(0,8)})
                            <span className={`font-bold ${credits > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{credits}</span>
                         </div>
                      </div>
-
-                     <button
-                        onClick={handleUnlock}
-                        disabled={credits <= 0}
-                        className={`px-8 py-3 rounded-xl font-bold transition-all ${
-                          credits > 0 
-                            ? 'bg-kinetic-600 hover:bg-kinetic-500 shadow-lg shadow-kinetic-900/50' 
-                            : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                        }`}
-                      >
-                        {credits > 0 ? 'Unlock History' : 'Insufficient Points'}
-                      </button>
+                     
+                     {isExpired ? (
+                       <div className="inline-flex items-center px-4 py-2 bg-rose-500/20 text-rose-300 rounded-lg text-sm border border-rose-500/50">
+                         <CalendarClock className="w-4 h-4 mr-2" />
+                         Points Expired
+                       </div>
+                     ) : !isOptedIn ? (
+                       <div className="inline-flex items-center px-4 py-2 bg-slate-800 text-slate-400 rounded-lg text-sm border border-slate-700">
+                         Opt-In Required
+                       </div>
+                     ) : (
+                       <button
+                          onClick={handleUnlock}
+                          disabled={credits <= 0}
+                          className={`px-8 py-3 rounded-xl font-bold transition-all ${
+                            credits > 0 
+                              ? 'bg-kinetic-600 hover:bg-kinetic-500 shadow-lg shadow-kinetic-900/50' 
+                              : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                          }`}
+                        >
+                          {credits > 0 ? 'Unlock History' : 'Insufficient Points'}
+                        </button>
+                     )}
                   </div>
                 )}
               </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, Unlock, Calendar, Clock, CheckCircle, MoreHorizontal, X, Activity, AlertTriangle } from 'lucide-react';
+import { Lock, Unlock, Calendar, Clock, CheckCircle, MoreHorizontal, X, Activity, AlertTriangle, CalendarClock } from 'lucide-react';
 import { Patient, HistoryEntry, Appointment } from '../types';
 import { MOCK_SCHEDULE } from '../constants';
 
@@ -10,6 +10,8 @@ interface DashboardProps {
   histories: HistoryEntry[];
   onNavigate: (tab: string) => void;
   onUnlock: (patientId: string) => void;
+  isOptedIn: boolean;
+  pointsExpiry: Date | null;
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
@@ -17,7 +19,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
   unlockedPatients, 
   patients, 
   histories,
-  onUnlock 
+  onUnlock,
+  isOptedIn,
+  pointsExpiry
 }) => {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
@@ -30,8 +34,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleUnlockAndOpen = (patientId: string) => {
     onUnlock(patientId);
-    // Determine if it was actually unlocked (credit check happens in parent, but we can assume if credits > 0 it works for demo UI)
-    if (credits > 0) {
+    // UI check: we assume parent handles validation. If not opted in or expired, parent won't unlock.
+    // We only open modal if it WAS unlocked (sync or async)
+    // For this simple demo, we can just attempt to open if we know it *should* work
+    if (isOptedIn && credits > 0 && (!pointsExpiry || new Date() <= pointsExpiry)) {
       setSelectedPatientId(patientId);
     }
   };
@@ -41,6 +47,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const selectedPatient = selectedPatientId ? getPatient(selectedPatientId) : null;
   const selectedHistory = selectedPatientId ? getHistory(selectedPatientId) : null;
   const isSelectedUnlocked = selectedPatientId ? unlockedPatients.includes(selectedPatientId) : false;
+  const isExpired = pointsExpiry && new Date() > pointsExpiry;
 
   return (
     <div className="space-y-8">
@@ -54,6 +61,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex items-center">
              <span className="text-xs font-bold text-slate-400 uppercase tracking-wide mr-2">Points</span>
              <span className="text-xl font-bold text-kinetic-600">{credits}</span>
+             {isExpired && (
+               <span className="ml-2 px-2 py-0.5 bg-rose-100 text-rose-700 text-xs rounded font-bold">Expired</span>
+             )}
           </div>
         </div>
       </div>
@@ -105,15 +115,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   ) : (
                     <button 
                       onClick={() => handleUnlockAndOpen(apt.patientId)}
-                      disabled={credits <= 0}
+                      disabled={credits <= 0 || isExpired || !isOptedIn}
                       className={`flex items-center text-sm font-medium px-3 py-1.5 rounded-lg border transition-all ${
-                        credits > 0 
+                        credits > 0 && !isExpired && isOptedIn
                           ? 'bg-white border-slate-200 text-slate-700 hover:border-kinetic-500 hover:text-kinetic-600 shadow-sm' 
                           : 'bg-slate-100 border-transparent text-slate-400 cursor-not-allowed'
                       }`}
                     >
-                      <Lock className="w-3 h-3 mr-2" />
-                      Unlock (-1 Pt)
+                      {isExpired ? <CalendarClock className="w-3 h-3 mr-2" /> : <Lock className="w-3 h-3 mr-2" />}
+                      {isExpired ? 'Expired' : !isOptedIn ? 'Locked' : 'Unlock (-1 Pt)'}
                     </button>
                   )}
                 </div>
@@ -200,15 +210,26 @@ export const Dashboard: React.FC<DashboardProps> = ({
                    <p className="text-slate-500 mb-6 max-w-xs mx-auto">
                      Unlock this patient's history to view clinical outcomes and contraindications.
                    </p>
-                   <button 
-                     onClick={() => onUnlock(selectedPatientId!)}
-                     disabled={credits <= 0}
-                     className={`px-6 py-2 rounded-lg font-semibold text-white transition-all ${
-                        credits > 0 ? 'bg-kinetic-600 hover:bg-kinetic-700' : 'bg-slate-300 cursor-not-allowed'
-                     }`}
-                   >
-                     Unlock for 1 Point
-                   </button>
+                   {isExpired ? (
+                       <div className="inline-flex items-center px-4 py-2 bg-rose-500/20 text-rose-300 rounded-lg text-sm border border-rose-500/50">
+                         <CalendarClock className="w-4 h-4 mr-2" />
+                         Points Expired
+                       </div>
+                   ) : !isOptedIn ? (
+                       <div className="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-500 rounded-lg text-sm border border-slate-200">
+                         Opt-In Required
+                       </div>
+                   ) : (
+                       <button 
+                         onClick={() => onUnlock(selectedPatientId!)}
+                         disabled={credits <= 0}
+                         className={`px-6 py-2 rounded-lg font-semibold text-white transition-all ${
+                            credits > 0 ? 'bg-kinetic-600 hover:bg-kinetic-700' : 'bg-slate-300 cursor-not-allowed'
+                         }`}
+                       >
+                         Unlock for 1 Point
+                       </button>
+                   )}
                 </div>
               )}
             </div>

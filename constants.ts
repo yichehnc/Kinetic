@@ -32,6 +32,18 @@ export const MOCK_HISTORY: HistoryEntry[] = [
     contraindications: ['Overhead loading'],
     createdAt: '2024-01-15',
     sourceClinicHash: 'CLINIC_ABC_HASH'
+  },
+  {
+    id: 'H004',
+    patientId: 'P004',
+    condition: 'Lateral Ankle Sprain (Grade II)',
+    timelineStart: '2023-12-05',
+    status: Status.PLATEAUED,
+    successfulTreatments: [TreatmentType.TAPING, TreatmentType.EXERCISE_REHAB],
+    unsuccessfulTreatments: [TreatmentType.MANUAL_THERAPY],
+    contraindications: ['High impact loading'],
+    createdAt: '2024-02-01',
+    sourceClinicHash: 'CLINIC_LMN_HASH'
   }
 ];
 

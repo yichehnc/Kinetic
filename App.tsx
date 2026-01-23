@@ -6,7 +6,7 @@ import { ContributionForm } from './components/ContributionForm';
 import { Referral } from './components/Referral';
 import { MOCK_PATIENTS, MOCK_HISTORY } from './constants';
 import { Patient, HistoryEntry, Status } from './types';
-import { CheckCircle, Shield, PlayCircle } from 'lucide-react';
+import { CheckCircle, Shield, PlayCircle, AlertTriangle, CalendarClock } from 'lucide-react';
 
 // Simple Alert Component for notifications
 const Notification = ({ message, onClose }: { message: string; onClose: () => void }) => (
@@ -24,11 +24,15 @@ const App: React.FC = () => {
   // App State
   const [activeTab, setActiveTab] = useState('dashboard');
   const [credits, setCredits] = useState(0); // Start with 0 until opt-in
+  const [pointsExpiry, setPointsExpiry] = useState<Date | null>(null);
   const [unlockedPatients, setUnlockedPatients] = useState<string[]>([]);
   const [contributionCount, setContributionCount] = useState(12);
   const [localHistory, setLocalHistory] = useState<HistoryEntry[]>(MOCK_HISTORY);
   const [localPatients, setLocalPatients] = useState<Patient[]>(MOCK_PATIENTS);
   const [notification, setNotification] = useState<string | null>(null);
+  
+  // Persistent SOAP Drafts
+  const [soapDrafts, setSoapDrafts] = useState<Record<string, { s: string; o: string; a: string; p: string }>>({});
   
   // Phase 1 Logic
   const [optedIn, setOptedIn] = useState(false);
@@ -41,6 +45,23 @@ const App: React.FC = () => {
 
   // Actions
   const handleUnlockPatient = (patientId: string) => {
+    if (!optedIn) {
+      setNotification('Must Opt-In to network to unlock history.');
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+
+    if (unlockedPatients.includes(patientId)) {
+      // Already unlocked, do nothing or notify
+      return;
+    }
+
+    if (pointsExpiry && new Date() > pointsExpiry) {
+      setNotification('Points have expired. Contribute to earn fresh points.');
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+
     if (credits > 0) {
       setCredits(prev => prev - 1);
       setUnlockedPatients(prev => [...prev, patientId]);
@@ -71,14 +92,38 @@ const App: React.FC = () => {
   const handleOptIn = () => {
     setOptedIn(true);
     setCredits(prev => prev + 5);
+    // Set mock expiry date (30 days from now)
+    const expiry = new Date();
+    expiry.setDate(expiry.getDate() + 30);
+    setPointsExpiry(expiry);
+    
     setNotification('Network Opt-In Successful. 5 Points Granted.');
     setTimeout(() => setNotification(null), 4000);
   };
 
+  const handleOptOut = () => {
+    setOptedIn(false);
+    // Logic: Freezing access? For now, we'll just set state to false
+    // which effectively disables unlock capabilities in the UI checks.
+    setNotification('You have opted out of the Kinetic Network.');
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   const handleContribution = (data: any) => {
+    if (!optedIn) {
+      setNotification('Please Opt-In to contribute.');
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+
     setCredits(prev => prev + 1);
     setContributionCount(prev => prev + 1);
     
+    // Extend expiry if contributing? Let's say yes for demo
+    const newExpiry = new Date();
+    newExpiry.setDate(newExpiry.getDate() + 30);
+    setPointsExpiry(newExpiry);
+
     // Optimistically add to local data so we can see it
     const newHistory: HistoryEntry = {
       id: `H-${Math.random().toString(36).substr(2, 9)}`,
@@ -125,6 +170,13 @@ const App: React.FC = () => {
     }, 2000);
   };
 
+  const handleSaveSoapDraft = (patientId: string, data: { s: string; o: string; a: string; p: string }) => {
+    setSoapDrafts(prev => ({
+      ...prev,
+      [patientId]: data
+    }));
+  };
+
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab} credits={credits}>
       {activeTab === 'dashboard' && (
@@ -135,6 +187,8 @@ const App: React.FC = () => {
           histories={localHistory}
           onNavigate={setActiveTab}
           onUnlock={handleUnlockPatient}
+          isOptedIn={optedIn}
+          pointsExpiry={pointsExpiry}
         />
       )}
       
@@ -146,6 +200,10 @@ const App: React.FC = () => {
           credits={credits}
           onUnlock={handleUnlockPatient}
           onUploadReport={handleUploadReport}
+          soapDrafts={soapDrafts}
+          onSaveSoap={handleSaveSoapDraft}
+          isOptedIn={optedIn}
+          pointsExpiry={pointsExpiry}
         />
       )}
 
@@ -201,6 +259,23 @@ const App: React.FC = () => {
                     </button>
                   </div>
                 )}
+
+                {optedIn && (
+                   <div className="mt-6 pt-6 border-t border-slate-200">
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center space-x-2 text-slate-700 font-medium">
+                            <CalendarClock className="w-4 h-4 text-slate-400" />
+                            <span>Points Expiry: {pointsExpiry ? pointsExpiry.toLocaleDateString() : 'N/A'}</span>
+                         </div>
+                         <button 
+                           onClick={handleOptOut}
+                           className="text-sm text-red-500 hover:text-red-700 font-medium underline"
+                         >
+                           Opt Out of Network
+                         </button>
+                      </div>
+                   </div>
+                )}
               </div>
 
               {/* Other Settings */}
@@ -227,7 +302,7 @@ const App: React.FC = () => {
 
            <div className="mt-8 p-4 bg-slate-50 rounded-lg text-xs text-slate-500 font-mono">
              Clinic ID: KIN-ORG-882192<br/>
-             Version: v0.4.3 (Beta)
+             Version: v0.4.4 (Beta)
            </div>
         </div>
       )}
