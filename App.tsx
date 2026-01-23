@@ -182,6 +182,7 @@ const App: React.FC = () => {
       {activeTab === 'dashboard' && (
         <Dashboard 
           credits={credits} 
+          contributionCount={contributionCount}
           unlockedPatients={unlockedPatients}
           patients={localPatients}
           histories={localHistory}

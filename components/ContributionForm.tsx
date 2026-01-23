@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Info, Plus, X, ArrowRight, RefreshCcw, AlertCircle, Loader2, Save, FileText } from 'lucide-react';
+import { Check, Plus, ArrowRight, RefreshCcw, Loader2, Save, FileText, Info, X } from 'lucide-react';
 import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
+import { InfoCard } from './ui/cards';
 
 interface ContributionFormProps {
   onSubmit: (data: any) => void;
@@ -217,28 +218,19 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
         </div>
 
         {error && (
-          <div className="bg-rose-50 border-b border-rose-100 p-4 flex items-center text-rose-800 text-sm">
-            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-            <span className="font-medium">{error}</span>
-            <button 
-              type="button" 
-              onClick={() => setError(null)}
-              className="ml-auto text-rose-500 hover:text-rose-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
+          <div className="p-4">
+             <InfoCard type="error" title="Validation Error" message={error} onDismiss={() => setError(null)} />
           </div>
         )}
 
         <div className="p-8 space-y-8">
           {step === 1 && (
             <div className="space-y-6">
-              <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800 flex items-start">
-                <Info className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-                <p>
-                  <strong>Strictly Structured Data Only.</strong> To ensure privacy and utility, free-text notes are disabled.
-                </p>
-              </div>
+              <InfoCard 
+                type="info" 
+                title="Strictly Structured Data Only" 
+                message="To ensure privacy and utility, free-text notes are disabled." 
+              />
 
               <div className="grid grid-cols-2 gap-6">
                 <div>

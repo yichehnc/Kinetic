@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Lock, Unlock, Calendar, Clock, CheckCircle, MoreHorizontal, X, Activity, AlertTriangle, CalendarClock } from 'lucide-react';
-import { Patient, HistoryEntry, Appointment } from '../types';
+import { Lock, Unlock, Clock, X, Award, Database, CalendarClock, AlertTriangle } from 'lucide-react';
+import { Patient, HistoryEntry } from '../types';
 import { MOCK_SCHEDULE } from '../constants';
+import { StatCard, Card, CardHeader, CardBody } from './ui/cards';
 
 interface DashboardProps {
   credits: number;
+  contributionCount: number;
   unlockedPatients: string[];
   patients: Patient[];
   histories: HistoryEntry[];
@@ -16,6 +18,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
   credits, 
+  contributionCount,
   unlockedPatients, 
   patients, 
   histories,
@@ -34,9 +37,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   const handleUnlockAndOpen = (patientId: string) => {
     onUnlock(patientId);
-    // UI check: we assume parent handles validation. If not opted in or expired, parent won't unlock.
-    // We only open modal if it WAS unlocked (sync or async)
-    // For this simple demo, we can just attempt to open if we know it *should* work
     if (isOptedIn && credits > 0 && (!pointsExpiry || new Date() <= pointsExpiry)) {
       setSelectedPatientId(patientId);
     }
@@ -51,87 +51,106 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* Header Stats */}
-      <div className="flex items-center justify-between">
-        <div>
-           <h2 className="text-2xl font-bold text-slate-900">Today's Schedule</h2>
-           <p className="text-slate-500">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-        </div>
-        <div className="flex space-x-4">
-          <div className="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex items-center">
-             <span className="text-xs font-bold text-slate-400 uppercase tracking-wide mr-2">Points</span>
-             <span className="text-xl font-bold text-kinetic-600">{credits}</span>
-             {isExpired && (
-               <span className="ml-2 px-2 py-0.5 bg-rose-100 text-rose-700 text-xs rounded font-bold">Expired</span>
-             )}
-          </div>
-        </div>
+      {/* Header */}
+      <div>
+         <h2 className="text-2xl font-bold text-slate-900">Today's Schedule</h2>
+         <p className="text-slate-500">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard
+          title="Available Points"
+          value={credits}
+          subtitle={isExpired ? "Expired" : "Ready to use"}
+          icon={<Award className="w-6 h-6" />}
+          iconColor={isExpired ? "bg-rose-100 text-rose-600" : "bg-emerald-100 text-emerald-600"}
+          trend={{ value: "+2 this week", isPositive: true }}
+        />
+        <StatCard
+          title="Contributions"
+          value={contributionCount}
+          subtitle="Histories shared"
+          icon={<Database className="w-6 h-6" />}
+          iconColor="bg-blue-100 text-blue-600"
+        />
+        <StatCard
+          title="Unlocked Records"
+          value={unlockedPatients.length}
+          subtitle="Total access granted"
+          icon={<Unlock className="w-6 h-6" />}
+          iconColor="bg-purple-100 text-purple-600"
+        />
       </div>
 
       {/* Schedule List */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 bg-slate-50 border-b border-slate-200 grid grid-cols-12 gap-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-          <div className="col-span-2">Time</div>
-          <div className="col-span-4">Patient</div>
-          <div className="col-span-3">Reason</div>
-          <div className="col-span-3 text-right">Actions</div>
-        </div>
-        <div className="divide-y divide-slate-100">
-          {MOCK_SCHEDULE.map((apt) => {
-            const patient = getPatient(apt.patientId);
-            const isUnlocked = unlockedPatients.includes(apt.patientId);
-            const hasHistory = patient?.historyAvailable;
+      <Card>
+        <CardHeader className="border-b border-slate-100 bg-slate-50 py-4">
+          <div className="grid grid-cols-12 gap-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <div className="col-span-2">Time</div>
+            <div className="col-span-4">Patient</div>
+            <div className="col-span-3">Reason</div>
+            <div className="col-span-3 text-right">Actions</div>
+          </div>
+        </CardHeader>
+        <CardBody className="p-0">
+          <div className="divide-y divide-slate-100">
+            {MOCK_SCHEDULE.map((apt) => {
+              const patient = getPatient(apt.patientId);
+              const isUnlocked = unlockedPatients.includes(apt.patientId);
+              const hasHistory = patient?.historyAvailable;
 
-            return (
-              <div key={apt.id} className="p-4 grid grid-cols-12 gap-4 items-center hover:bg-slate-50 transition-colors">
-                <div className="col-span-2 flex items-center text-slate-700 font-medium">
-                  <Clock className="w-4 h-4 mr-2 text-slate-400" />
-                  {apt.time}
-                </div>
-                <div className="col-span-4">
-                  <div className="font-semibold text-slate-900">{patient?.name || 'Unknown'}</div>
-                  <div className="text-xs text-slate-500 flex items-center">
-                    <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
-                      apt.status === 'Arrived' ? 'bg-emerald-500' :
-                      apt.status === 'Completed' ? 'bg-slate-300' : 'bg-blue-500'
-                    }`}></span>
-                    {apt.status}
+              return (
+                <div key={apt.id} className="p-4 grid grid-cols-12 gap-4 items-center hover:bg-slate-50 transition-colors">
+                  <div className="col-span-2 flex items-center text-slate-700 font-medium">
+                    <Clock className="w-4 h-4 mr-2 text-slate-400" />
+                    {apt.time}
+                  </div>
+                  <div className="col-span-4">
+                    <div className="font-semibold text-slate-900">{patient?.name || 'Unknown'}</div>
+                    <div className="text-xs text-slate-500 flex items-center">
+                      <span className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                        apt.status === 'Arrived' ? 'bg-emerald-500' :
+                        apt.status === 'Completed' ? 'bg-slate-300' : 'bg-blue-500'
+                      }`}></span>
+                      {apt.status}
+                    </div>
+                  </div>
+                  <div className="col-span-3 text-sm text-slate-600">
+                    {apt.reason}
+                  </div>
+                  <div className="col-span-3 flex justify-end">
+                    {!hasHistory ? (
+                      <span className="text-xs text-slate-400 italic py-2">No history</span>
+                    ) : isUnlocked ? (
+                      <button 
+                        onClick={() => handleOpenHistory(apt.patientId)}
+                        className="flex items-center text-sm font-medium text-kinetic-600 bg-kinetic-50 px-3 py-1.5 rounded-lg hover:bg-kinetic-100 transition-colors"
+                      >
+                        <Unlock className="w-3 h-3 mr-2" />
+                        View History
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleUnlockAndOpen(apt.patientId)}
+                        disabled={credits <= 0 || isExpired || !isOptedIn}
+                        className={`flex items-center text-sm font-medium px-3 py-1.5 rounded-lg border transition-all ${
+                          credits > 0 && !isExpired && isOptedIn
+                            ? 'bg-white border-slate-200 text-slate-700 hover:border-kinetic-500 hover:text-kinetic-600 shadow-sm' 
+                            : 'bg-slate-100 border-transparent text-slate-400 cursor-not-allowed'
+                        }`}
+                      >
+                        {isExpired ? <CalendarClock className="w-3 h-3 mr-2" /> : <Lock className="w-3 h-3 mr-2" />}
+                        {isExpired ? 'Expired' : !isOptedIn ? 'Locked' : 'Unlock (-1 Pt)'}
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div className="col-span-3 text-sm text-slate-600">
-                  {apt.reason}
-                </div>
-                <div className="col-span-3 flex justify-end">
-                  {!hasHistory ? (
-                    <span className="text-xs text-slate-400 italic py-2">No history</span>
-                  ) : isUnlocked ? (
-                    <button 
-                      onClick={() => handleOpenHistory(apt.patientId)}
-                      className="flex items-center text-sm font-medium text-kinetic-600 bg-kinetic-50 px-3 py-1.5 rounded-lg hover:bg-kinetic-100 transition-colors"
-                    >
-                      <Unlock className="w-3 h-3 mr-2" />
-                      View History
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={() => handleUnlockAndOpen(apt.patientId)}
-                      disabled={credits <= 0 || isExpired || !isOptedIn}
-                      className={`flex items-center text-sm font-medium px-3 py-1.5 rounded-lg border transition-all ${
-                        credits > 0 && !isExpired && isOptedIn
-                          ? 'bg-white border-slate-200 text-slate-700 hover:border-kinetic-500 hover:text-kinetic-600 shadow-sm' 
-                          : 'bg-slate-100 border-transparent text-slate-400 cursor-not-allowed'
-                      }`}
-                    >
-                      {isExpired ? <CalendarClock className="w-3 h-3 mr-2" /> : <Lock className="w-3 h-3 mr-2" />}
-                      {isExpired ? 'Expired' : !isOptedIn ? 'Locked' : 'Unlock (-1 Pt)'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              );
+            })}
+          </div>
+        </CardBody>
+      </Card>
 
       {/* History Modal */}
       {selectedPatientId && (
