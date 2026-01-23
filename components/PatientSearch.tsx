@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Lock, Unlock, AlertTriangle, FileText, Calendar, CheckCircle, Activity, User, Upload, Download, Eye, Copy, Check, Save, CalendarClock } from 'lucide-react';
 import { Patient, HistoryEntry } from '../types';
 import { DEMO_PDF_BASE64 } from '../constants';
+import { ClinicalSnapshotCard } from './ClinicalSnapshotCard';
 
 interface PatientSearchProps {
   patients: Patient[];
@@ -280,71 +281,46 @@ Source: Kinetic Network (${patientHistory.sourceClinicHash.substring(0,8)})
 
               {/* External History Section */}
               <div className="border-t border-slate-200 pt-8">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
-                   <Activity className="w-5 h-5 mr-2 text-slate-500" />
-                   Network History
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center">
+                     <Activity className="w-5 h-5 mr-2 text-slate-500" />
+                     Network History
+                  </h3>
+                  {isUnlocked && (
+                     <button 
+                       onClick={handleCopyHistory}
+                       className={`flex items-center text-xs font-medium px-3 py-1.5 rounded-lg transition-all ${
+                         copied ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                       }`}
+                     >
+                        {copied ? <Check className="w-3 h-3 mr-1.5" /> : <Copy className="w-3 h-3 mr-1.5" />}
+                        {copied ? 'Copied' : 'Copy Text'}
+                     </button>
+                  )}
+                </div>
 
                 {!selectedPatient.historyAvailable ? (
                    <div className="p-8 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-center text-slate-500">
                      No external history records found in Kinetic network.
                    </div>
-                ) : isUnlocked ? (
-                  /* Unlocked View */
-                  patientHistory ? (
-                    <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 animate-fade-in">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Condition</label>
-                          <p className="text-lg font-semibold text-slate-900">{patientHistory.condition}</p>
-                          <span className={`inline-block mt-2 px-2 py-0.5 rounded text-xs font-bold uppercase ${
-                             patientHistory.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                           }`}>{patientHistory.status}</span>
-                        </div>
-                        <div>
-                          <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Timeline</label>
-                          <p className="text-sm text-slate-800">{patientHistory.timelineStart} — {patientHistory.timelineEnd || 'Present'}</p>
-                          <label className="text-xs font-bold text-slate-400 uppercase mt-4 mb-1 block">Source</label>
-                          <p className="text-xs text-slate-500 font-mono">Clinic ({patientHistory.sourceClinicHash.substring(0,8)})</p>
-                        </div>
-                      </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Clinical Snapshot Card Integration */}
+                    <ClinicalSnapshotCard
+                      patientId={selectedPatient.id}
+                      isUnlocked={isUnlocked}
+                      credits={credits}
+                      onUnlock={handleUnlock}
+                      historyEntry={patientHistory}
+                    />
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                         <div>
-                            <span className="text-xs font-semibold text-emerald-600 block mb-2">Effective</span>
-                            <div className="flex flex-wrap gap-2">
-                              {patientHistory.successfulTreatments.map(t => (
-                                <span key={t} className="px-3 py-1 bg-white border border-emerald-200 text-emerald-700 rounded-md text-sm shadow-sm">{t}</span>
-                              ))}
-                            </div>
-                         </div>
-                         <div>
-                            <span className="text-xs font-semibold text-rose-600 block mb-2">Ineffective</span>
-                            <div className="flex flex-wrap gap-2">
-                              {patientHistory.unsuccessfulTreatments.map(t => (
-                                <span key={t} className="px-3 py-1 bg-white border border-rose-200 text-rose-700 rounded-md text-sm shadow-sm">{t}</span>
-                              ))}
-                            </div>
-                         </div>
-                      </div>
-
-                      <div className="mb-6">
-                        <span className="text-xs font-semibold text-rose-600 block mb-2">Contraindications</span>
-                        <div className="flex flex-wrap gap-2">
-                          {patientHistory.contraindications.map(c => (
-                            <span key={c} className="flex items-center px-3 py-1 bg-white text-rose-700 border border-rose-200 rounded-md text-sm font-medium">
-                              <AlertTriangle className="w-3 h-3 mr-1.5" /> {c}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Documents */}
-                      <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between mb-4">
+                    {/* Additional Documents (e.g. PDF) shown when unlocked */}
+                    {isUnlocked && patientHistory && (
+                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-center justify-between animate-fade-in">
                         <div className="flex items-center">
                           <FileText className="w-8 h-8 text-slate-400 mr-3" />
                           <div>
-                            <p className="text-sm font-bold text-slate-900">SOAP Report</p>
+                            <p className="text-sm font-bold text-slate-900">Original SOAP Report</p>
                             <p className="text-xs text-slate-500">
                               {patientHistory.reportFile ? `Available: ${patientHistory.reportFile}` : 'No report attached'}
                             </p>
@@ -354,7 +330,7 @@ Source: Kinetic Network (${patientHistory.sourceClinicHash.substring(0,8)})
                           {patientHistory.reportFile ? (
                              <button 
                                onClick={handleDownloadReport}
-                               className="flex items-center px-3 py-1.5 bg-kinetic-600 border border-transparent rounded text-sm font-medium text-white hover:bg-kinetic-700 shadow-sm"
+                               className="flex items-center px-3 py-1.5 bg-white border border-slate-200 rounded text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm"
                              >
                                <Download className="w-4 h-4 mr-2" /> Download PDF
                              </button>
@@ -370,64 +346,7 @@ Source: Kinetic Network (${patientHistory.sourceClinicHash.substring(0,8)})
                           )}
                         </div>
                       </div>
-                      
-                      <div className="flex justify-end">
-                        <button 
-                          onClick={handleCopyHistory}
-                          className={`flex items-center text-sm font-medium px-4 py-2 rounded-lg transition-all ${
-                            copied ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                          }`}
-                        >
-                           {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                           {copied ? 'Copied to Clipboard' : 'Copy History Text'}
-                        </button>
-                      </div>
-                    </div>
-                  ) : <div className="text-red-500">Error data</div>
-                ) : (
-                  /* Locked View */
-                  <div className="bg-slate-900 rounded-xl p-8 text-center text-white relative overflow-hidden">
-                     <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-                     <Lock className="w-12 h-12 mx-auto text-slate-400 mb-4" />
-                     <h3 className="text-xl font-bold mb-2">History Available</h3>
-                     <p className="text-slate-400 mb-6 max-w-sm mx-auto">
-                       Unlock verified clinical outcomes, treatment responses, and contraindications.
-                     </p>
-                     
-                     <div className="flex items-center justify-center space-x-4 mb-6">
-                        <div className="text-sm">
-                           <span className="text-slate-400 mr-2">Cost:</span>
-                           <span className="font-bold">1 Point</span>
-                        </div>
-                        <div className="w-px h-4 bg-slate-700"></div>
-                        <div className="text-sm">
-                           <span className="text-slate-400 mr-2">Balance:</span>
-                           <span className={`font-bold ${credits > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{credits}</span>
-                        </div>
-                     </div>
-                     
-                     {isExpired ? (
-                       <div className="inline-flex items-center px-4 py-2 bg-rose-500/20 text-rose-300 rounded-lg text-sm border border-rose-500/50">
-                         <CalendarClock className="w-4 h-4 mr-2" />
-                         Points Expired
-                       </div>
-                     ) : !isOptedIn ? (
-                       <div className="inline-flex items-center px-4 py-2 bg-slate-800 text-slate-400 rounded-lg text-sm border border-slate-700">
-                         Opt-In Required
-                       </div>
-                     ) : (
-                       <button
-                          onClick={handleUnlock}
-                          disabled={credits <= 0}
-                          className={`px-8 py-3 rounded-xl font-bold transition-all ${
-                            credits > 0 
-                              ? 'bg-kinetic-600 hover:bg-kinetic-500 shadow-lg shadow-kinetic-900/50' 
-                              : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                          }`}
-                        >
-                          {credits > 0 ? 'Unlock History' : 'Insufficient Points'}
-                        </button>
-                     )}
+                    )}
                   </div>
                 )}
               </div>
