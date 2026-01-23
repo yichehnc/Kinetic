@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, Lock, Unlock, AlertTriangle, FileText, Calendar, CheckCircle, Activity, User, Upload, Download, Eye } from 'lucide-react';
+import { Search, Lock, Unlock, AlertTriangle, FileText, Calendar, CheckCircle, Activity, User, Upload, Download, Eye, Copy, Check, Save } from 'lucide-react';
 import { Patient, HistoryEntry } from '../types';
+import { DEMO_PDF_BASE64 } from '../constants';
 
 interface PatientSearchProps {
   patients: Patient[];
@@ -8,6 +9,7 @@ interface PatientSearchProps {
   unlockedPatients: string[];
   credits: number;
   onUnlock: (patientId: string) => void;
+  onUploadReport: (patientId: string, fileName: string) => void;
 }
 
 export const PatientSearch: React.FC<PatientSearchProps> = ({ 
@@ -15,19 +17,27 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   histories, 
   unlockedPatients, 
   credits, 
-  onUnlock 
+  onUnlock,
+  onUploadReport
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   
-  // Feature State for SOAP Report
-  const [reportFile, setReportFile] = useState<string | null>(null);
+  // Local state for UI feedback
   const [isUploading, setIsUploading] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  // Reset local report state when patient changes
+  // SOAP Form State
+  const [soap, setSoap] = useState({ s: '', o: '', a: '', p: '' });
+  const [isSavingSoap, setIsSavingSoap] = useState(false);
+  const [lastSavedSoap, setLastSavedSoap] = useState<Date | null>(null);
+
+  // Reset states when patient changes
   React.useEffect(() => {
-    setReportFile(null);
     setIsUploading(false);
+    setCopied(false);
+    setSoap({ s: '', o: '', a: '', p: '' });
+    setLastSavedSoap(null);
   }, [selectedPatient]);
 
   const filteredPatients = patients.filter(p => 
@@ -48,12 +58,66 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   };
 
   const handleFileUpload = () => {
+    if (!selectedPatient) return;
     setIsUploading(true);
     // Simulate upload delay
     setTimeout(() => {
-      setReportFile("soap_report_final.pdf");
+      onUploadReport(selectedPatient.id, "soap_report_final.pdf");
       setIsUploading(false);
     }, 1500);
+  };
+
+  const handleDownloadReport = () => {
+    // Convert Base64 to Blob
+    const byteCharacters = atob(DEMO_PDF_BASE64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+    
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', patientHistory?.reportFile || 'soap_report.pdf');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleCopyHistory = () => {
+    if (!patientHistory) return;
+    const text = `
+Patient History: ${selectedPatient?.name} (ID: ${selectedPatient?.id})
+Condition: ${patientHistory.condition}
+Status: ${patientHistory.status}
+Timeline: ${patientHistory.timelineStart} - ${patientHistory.timelineEnd || 'Present'}
+
+Effective Interventions:
+${patientHistory.successfulTreatments.join(', ') || 'None listed'}
+
+Ineffective Interventions:
+${patientHistory.unsuccessfulTreatments.join(', ') || 'None listed'}
+
+Contraindications:
+${patientHistory.contraindications.join(', ') || 'None listed'}
+
+Source: Kinetic Network (${patientHistory.sourceClinicHash.substring(0,8)})
+    `.trim();
+
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveSoap = () => {
+    setIsSavingSoap(true);
+    setTimeout(() => {
+      setIsSavingSoap(false);
+      setLastSavedSoap(new Date());
+    }, 800);
   };
 
   return (
@@ -134,175 +198,211 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
               </div>
             </div>
 
-            {/* Content Area */}
-            <div className="flex-1 overflow-y-auto p-6 relative">
-              {!selectedPatient.historyAvailable ? (
-                 <div className="text-center py-12 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                   <p className="text-slate-500">No external history found for this patient.</p>
+            {/* Content Area - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              
+              {/* SOAP Report Section (Interactive) */}
+              <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 relative">
+                 <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center">
+                       <FileText className="w-5 h-5 mr-2 text-slate-500" />
+                       Clinical Note (SOAP)
+                    </h3>
+                    <button 
+                      onClick={handleSaveSoap}
+                      className="text-sm font-medium text-kinetic-600 hover:text-kinetic-700 flex items-center"
+                    >
+                      {isSavingSoap ? 'Saving...' : lastSavedSoap ? 'Saved' : 'Save Draft'}
+                      {!isSavingSoap && lastSavedSoap && <Check className="w-4 h-4 ml-1" />}
+                    </button>
                  </div>
-              ) : isUnlocked ? (
-                /* Unlocked View */
-                patientHistory ? (
-                  <div className="space-y-6 animate-fade-in">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                        <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Primary Condition</label>
-                        <p className="text-lg font-semibold text-slate-900">{patientHistory.condition}</p>
-                        <div className="mt-2 flex space-x-2">
-                           <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${
+                 
+                 <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                       <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Subjective</label>
+                          <textarea 
+                             className="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-kinetic-500 outline-none h-24 resize-none"
+                             placeholder="Patient reports..."
+                             value={soap.s}
+                             onChange={e => setSoap({...soap, s: e.target.value})}
+                          ></textarea>
+                       </div>
+                       <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Objective</label>
+                          <textarea 
+                             className="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-kinetic-500 outline-none h-24 resize-none"
+                             placeholder="ROM, Strength, etc..."
+                             value={soap.o}
+                             onChange={e => setSoap({...soap, o: e.target.value})}
+                          ></textarea>
+                       </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Assessment</label>
+                          <textarea 
+                             className="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-kinetic-500 outline-none h-24 resize-none"
+                             placeholder="Diagnosis/Impression..."
+                             value={soap.a}
+                             onChange={e => setSoap({...soap, a: e.target.value})}
+                          ></textarea>
+                       </div>
+                       <div>
+                          <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Plan</label>
+                          <textarea 
+                             className="w-full p-3 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-kinetic-500 outline-none h-24 resize-none"
+                             placeholder="Treatment plan..."
+                             value={soap.p}
+                             onChange={e => setSoap({...soap, p: e.target.value})}
+                          ></textarea>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              {/* External History Section */}
+              <div className="border-t border-slate-200 pt-8">
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
+                   <Activity className="w-5 h-5 mr-2 text-slate-500" />
+                   Network History
+                </h3>
+
+                {!selectedPatient.historyAvailable ? (
+                   <div className="p-8 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-center text-slate-500">
+                     No external history records found in Kinetic network.
+                   </div>
+                ) : isUnlocked ? (
+                  /* Unlocked View */
+                  patientHistory ? (
+                    <div className="bg-slate-50 rounded-xl border border-slate-200 p-6 animate-fade-in">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                          <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Condition</label>
+                          <p className="text-lg font-semibold text-slate-900">{patientHistory.condition}</p>
+                          <span className={`inline-block mt-2 px-2 py-0.5 rounded text-xs font-bold uppercase ${
                              patientHistory.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                            }`}>{patientHistory.status}</span>
                         </div>
+                        <div>
+                          <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Timeline</label>
+                          <p className="text-sm text-slate-800">{patientHistory.timelineStart} — {patientHistory.timelineEnd || 'Present'}</p>
+                          <label className="text-xs font-bold text-slate-400 uppercase mt-4 mb-1 block">Source</label>
+                          <p className="text-xs text-slate-500 font-mono">Clinic ({patientHistory.sourceClinicHash.substring(0,8)})</p>
+                        </div>
                       </div>
-                      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                        <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Timeline</label>
-                        <p className="text-sm text-slate-800">{patientHistory.timelineStart} — {patientHistory.timelineEnd || 'Present'}</p>
-                        <label className="text-xs font-bold text-slate-400 uppercase mt-4 mb-1 block">Source</label>
-                        <p className="text-xs text-slate-500 font-mono">Anonymized Clinic ({patientHistory.sourceClinicHash.substring(0,8)})</p>
-                      </div>
-                    </div>
 
-                    <div>
-                       <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide border-b border-slate-200 pb-2 mb-4">Treatment Efficacy</h3>
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                          <div>
-                            <span className="text-xs font-semibold text-emerald-600 block mb-2">Effective Interventions</span>
+                            <span className="text-xs font-semibold text-emerald-600 block mb-2">Effective</span>
                             <div className="flex flex-wrap gap-2">
                               {patientHistory.successfulTreatments.map(t => (
-                                <span key={t} className="px-3 py-1 bg-white border border-emerald-200 text-emerald-700 rounded-md text-sm shadow-sm">
-                                  {t}
-                                </span>
+                                <span key={t} className="px-3 py-1 bg-white border border-emerald-200 text-emerald-700 rounded-md text-sm shadow-sm">{t}</span>
                               ))}
                             </div>
                          </div>
                          <div>
-                            <span className="text-xs font-semibold text-rose-600 block mb-2">Ineffective Interventions</span>
+                            <span className="text-xs font-semibold text-rose-600 block mb-2">Ineffective</span>
                             <div className="flex flex-wrap gap-2">
                               {patientHistory.unsuccessfulTreatments.map(t => (
-                                <span key={t} className="px-3 py-1 bg-white border border-rose-200 text-rose-700 rounded-md text-sm shadow-sm">
-                                  {t}
-                                </span>
+                                <span key={t} className="px-3 py-1 bg-white border border-rose-200 text-rose-700 rounded-md text-sm shadow-sm">{t}</span>
                               ))}
                             </div>
                          </div>
-                       </div>
-                    </div>
+                      </div>
 
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide border-b border-slate-200 pb-2 mb-4">Safety & Contraindications</h3>
-                      <div className="bg-rose-50 border border-rose-100 rounded-lg p-4">
+                      <div className="mb-6">
+                        <span className="text-xs font-semibold text-rose-600 block mb-2">Contraindications</span>
                         <div className="flex flex-wrap gap-2">
                           {patientHistory.contraindications.map(c => (
                             <span key={c} className="flex items-center px-3 py-1 bg-white text-rose-700 border border-rose-200 rounded-md text-sm font-medium">
-                              <AlertTriangle className="w-3 h-3 mr-1.5" />
-                              {c}
+                              <AlertTriangle className="w-3 h-3 mr-1.5" /> {c}
                             </span>
                           ))}
-                          {patientHistory.contraindications.length === 0 && <span className="text-sm text-rose-400 italic">None recorded</span>}
                         </div>
                       </div>
-                    </div>
-                    
-                    {/* Clinical Reports Section */}
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide border-b border-slate-200 pb-2 mb-4">Clinical Documents</h3>
-                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 flex items-center justify-between">
+
+                      {/* Documents */}
+                      <div className="bg-white border border-slate-200 rounded-lg p-4 flex items-center justify-between mb-4">
                         <div className="flex items-center">
                           <FileText className="w-8 h-8 text-slate-400 mr-3" />
                           <div>
                             <p className="text-sm font-bold text-slate-900">SOAP Report</p>
-                            <p className="text-xs text-slate-500">{reportFile ? 'Available for download' : 'No report attached'}</p>
+                            <p className="text-xs text-slate-500">
+                              {patientHistory.reportFile ? `Available: ${patientHistory.reportFile}` : 'No report attached'}
+                            </p>
                           </div>
                         </div>
-                        
                         <div className="flex items-center space-x-2">
-                          {reportFile ? (
-                             <>
-                                <button className="flex items-center px-3 py-1.5 bg-white border border-slate-200 rounded text-sm font-medium text-slate-700 hover:bg-slate-50">
-                                  <Eye className="w-4 h-4 mr-2" /> View
-                                </button>
-                                <button className="flex items-center px-3 py-1.5 bg-kinetic-600 border border-transparent rounded text-sm font-medium text-white hover:bg-kinetic-700 shadow-sm">
-                                  <Download className="w-4 h-4 mr-2" /> Download PDF
-                                </button>
-                             </>
+                          {patientHistory.reportFile ? (
+                             <button 
+                               onClick={handleDownloadReport}
+                               className="flex items-center px-3 py-1.5 bg-kinetic-600 border border-transparent rounded text-sm font-medium text-white hover:bg-kinetic-700 shadow-sm"
+                             >
+                               <Download className="w-4 h-4 mr-2" /> Download PDF
+                             </button>
                           ) : (
                              <button 
                                onClick={handleFileUpload}
                                disabled={isUploading}
                                className="flex items-center px-3 py-1.5 bg-white border border-slate-200 rounded text-sm font-medium text-slate-700 hover:bg-slate-50"
                              >
-                               {isUploading ? 'Uploading...' : 'Upload SOAP Report'}
+                               {isUploading ? 'Uploading...' : 'Upload SOAP'}
                                {!isUploading && <Upload className="w-4 h-4 ml-2 text-slate-400" />}
                              </button>
                           )}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="pt-8 border-t border-slate-100 text-right">
-                      <p className="text-xs text-slate-400">
-                        Access ID: {Math.random().toString(36).substring(7).toUpperCase()} • Viewed {new Date().toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ) : <div className="text-red-500">Error loading history data.</div>
-              ) : (
-                /* Locked View */
-                <div className="absolute inset-0 bg-slate-50 flex flex-col items-center justify-center p-8 z-10">
-                   <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200 max-w-md w-full text-center">
-                      <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                        <Lock className="w-8 h-8 text-slate-400" />
-                      </div>
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">Structured History Available</h3>
-                      <p className="text-slate-500 mb-8">
-                        This patient has verified clinical history from the Kinetic network. Unlock to view outcomes, contraindications, and timelines.
-                      </p>
                       
-                      <div className="flex items-center justify-center space-x-2 text-sm text-slate-500 mb-6 bg-slate-50 py-2 rounded-lg border border-slate-100">
-                        <span>Cost:</span>
-                        <span className="font-bold text-slate-900">1 Credit</span>
-                        <span className="text-slate-300">|</span>
-                        <span>Your Balance:</span>
-                        <span className={`font-bold ${credits > 0 ? 'text-emerald-600' : 'text-red-500'}`}>{credits}</span>
+                      <div className="flex justify-end">
+                        <button 
+                          onClick={handleCopyHistory}
+                          className={`flex items-center text-sm font-medium px-4 py-2 rounded-lg transition-all ${
+                            copied ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                           {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                           {copied ? 'Copied to Clipboard' : 'Copy History Text'}
+                        </button>
                       </div>
+                    </div>
+                  ) : <div className="text-red-500">Error data</div>
+                ) : (
+                  /* Locked View */
+                  <div className="bg-slate-900 rounded-xl p-8 text-center text-white relative overflow-hidden">
+                     <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+                     <Lock className="w-12 h-12 mx-auto text-slate-400 mb-4" />
+                     <h3 className="text-xl font-bold mb-2">History Available</h3>
+                     <p className="text-slate-400 mb-6 max-w-sm mx-auto">
+                       Unlock verified clinical outcomes, treatment responses, and contraindications.
+                     </p>
+                     
+                     <div className="flex items-center justify-center space-x-4 mb-6">
+                        <div className="text-sm">
+                           <span className="text-slate-400 mr-2">Cost:</span>
+                           <span className="font-bold">1 Point</span>
+                        </div>
+                        <div className="w-px h-4 bg-slate-700"></div>
+                        <div className="text-sm">
+                           <span className="text-slate-400 mr-2">Balance:</span>
+                           <span className={`font-bold ${credits > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{credits}</span>
+                        </div>
+                     </div>
 
-                      <button
+                     <button
                         onClick={handleUnlock}
                         disabled={credits <= 0}
-                        className={`w-full flex items-center justify-center px-6 py-3 rounded-xl font-bold text-white transition-all transform active:scale-95 ${
+                        className={`px-8 py-3 rounded-xl font-bold transition-all ${
                           credits > 0 
-                            ? 'bg-kinetic-600 hover:bg-kinetic-700 shadow-lg shadow-kinetic-200' 
-                            : 'bg-slate-300 cursor-not-allowed'
+                            ? 'bg-kinetic-600 hover:bg-kinetic-500 shadow-lg shadow-kinetic-900/50' 
+                            : 'bg-slate-700 text-slate-500 cursor-not-allowed'
                         }`}
                       >
-                        {credits > 0 ? (
-                          <>
-                            <Unlock className="w-5 h-5 mr-2" />
-                            Unlock History
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="w-5 h-5 mr-2" />
-                            Insufficient Credits
-                          </>
-                        )}
+                        {credits > 0 ? 'Unlock History' : 'Insufficient Points'}
                       </button>
-                      
-                      {credits <= 0 && (
-                        <p className="mt-4 text-xs text-rose-500 font-medium">
-                          Contribute a patient history to earn more credits.
-                        </p>
-                      )}
-                   </div>
-                   
-                   {/* Blurred Preview Background */}
-                   <div className="absolute top-0 left-0 w-full h-full -z-10 opacity-30 filter blur-sm pointer-events-none p-6 space-y-4">
-                      <div className="h-32 bg-slate-300 rounded-lg w-full"></div>
-                      <div className="h-16 bg-slate-300 rounded-lg w-2/3"></div>
-                      <div className="h-48 bg-slate-300 rounded-lg w-full"></div>
-                   </div>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </div>
           </>
         )}

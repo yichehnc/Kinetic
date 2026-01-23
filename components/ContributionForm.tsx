@@ -426,7 +426,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
               ) : (
                 <>
                   <Plus className="w-5 h-5" />
-                  <span>Submit & Earn Credit</span>
+                  <span>Submit & Earn Points</span>
                 </>
               )}
             </button>

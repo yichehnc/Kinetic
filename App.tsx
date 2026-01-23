@@ -6,7 +6,7 @@ import { ContributionForm } from './components/ContributionForm';
 import { Referral } from './components/Referral';
 import { MOCK_PATIENTS, MOCK_HISTORY } from './constants';
 import { Patient, HistoryEntry, Status } from './types';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Shield, PlayCircle } from 'lucide-react';
 
 // Simple Alert Component for notifications
 const Notification = ({ message, onClose }: { message: string; onClose: () => void }) => (
@@ -23,12 +23,16 @@ const Notification = ({ message, onClose }: { message: string; onClose: () => vo
 const App: React.FC = () => {
   // App State
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [credits, setCredits] = useState(2); // Start with trial credits
+  const [credits, setCredits] = useState(0); // Start with 0 until opt-in
   const [unlockedPatients, setUnlockedPatients] = useState<string[]>([]);
   const [contributionCount, setContributionCount] = useState(12);
   const [localHistory, setLocalHistory] = useState<HistoryEntry[]>(MOCK_HISTORY);
   const [localPatients, setLocalPatients] = useState<Patient[]>(MOCK_PATIENTS);
   const [notification, setNotification] = useState<string | null>(null);
+  
+  // Phase 1 Logic
+  const [optedIn, setOptedIn] = useState(false);
+  const isEligible = true; // Hardcoded for demo: "Riversdale Physio" is inner-city/high-turnover
 
   // Clear notification when changing tabs to avoid stale messages
   useEffect(() => {
@@ -43,6 +47,32 @@ const App: React.FC = () => {
       setNotification(`Unlocked history. Balance: ${credits - 1}`);
       setTimeout(() => setNotification(null), 3000);
     }
+  };
+
+  const handleUploadReport = (patientId: string, fileName: string) => {
+    // Find history entry for this patient
+    const historyIndex = localHistory.findIndex(h => h.patientId === patientId);
+    
+    if (historyIndex >= 0) {
+      const updatedHistory = [...localHistory];
+      updatedHistory[historyIndex] = {
+        ...updatedHistory[historyIndex],
+        reportFile: fileName
+      };
+      setLocalHistory(updatedHistory);
+      setNotification('SOAP Report uploaded successfully.');
+      setTimeout(() => setNotification(null), 3000);
+    } else {
+      setNotification('Error: No history found for this patient.');
+      setTimeout(() => setNotification(null), 3000);
+    }
+  };
+
+  const handleOptIn = () => {
+    setOptedIn(true);
+    setCredits(prev => prev + 5);
+    setNotification('Network Opt-In Successful. 5 Points Granted.');
+    setTimeout(() => setNotification(null), 4000);
   };
 
   const handleContribution = (data: any) => {
@@ -67,7 +97,6 @@ const App: React.FC = () => {
     setLocalHistory(prev => [...prev, newHistory]);
     
     // Check if patient exists, if not add them
-    // CRITICAL FIX: Ensure the patient is marked as having history available
     const existingPatientIndex = localPatients.findIndex(p => p.id === data.patientId);
     
     if (existingPatientIndex >= 0) {
@@ -90,11 +119,8 @@ const App: React.FC = () => {
       setLocalPatients(prev => [...prev, newPatient]);
     }
 
-    setNotification('Contribution verified. +1 Credit earned.');
+    setNotification('Contribution verified. +1 Point earned.');
     setTimeout(() => {
-      // Note: We don't clear notification here immediately if the user navigates away, 
-      // but the useEffect above handles clearing it on navigation.
-      // This timeout is just for auto-dismissal on the same screen.
       setNotification(null); 
     }, 2000);
   };
@@ -104,9 +130,11 @@ const App: React.FC = () => {
       {activeTab === 'dashboard' && (
         <Dashboard 
           credits={credits} 
-          contributionCount={contributionCount} 
-          unlockedCount={unlockedPatients.length}
+          unlockedPatients={unlockedPatients}
+          patients={localPatients}
+          histories={localHistory}
           onNavigate={setActiveTab}
+          onUnlock={handleUnlockPatient}
         />
       )}
       
@@ -117,6 +145,7 @@ const App: React.FC = () => {
           unlockedPatients={unlockedPatients}
           credits={credits}
           onUnlock={handleUnlockPatient}
+          onUploadReport={handleUploadReport}
         />
       )}
 
@@ -132,28 +161,70 @@ const App: React.FC = () => {
       )}
 
       {activeTab === 'settings' && (
-        <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-           <h2 className="text-2xl font-bold mb-6">Settings</h2>
-           <div className="space-y-6">
-              <div className="flex items-center justify-between pb-6 border-b border-slate-100">
-                <div>
-                  <h3 className="font-semibold text-slate-900">Network Opt-in</h3>
-                  <p className="text-sm text-slate-500">Allow other clinics to request your data (anonymized)</p>
+        <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200 animate-fade-in">
+           <h2 className="text-2xl font-bold mb-6 text-slate-900">Settings</h2>
+           
+           <div className="space-y-8">
+              {/* Phase 1 Opt-In Section */}
+              <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 relative overflow-hidden">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center">
+                      <Shield className={`w-5 h-5 mr-2 ${optedIn ? 'text-emerald-500' : 'text-slate-400'}`} />
+                      Kinetic Network Status
+                    </h3>
+                    <p className="text-sm text-slate-500 mt-1 max-w-sm">
+                      Participate in the shared history network. Contributing data earns points for future access.
+                    </p>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${
+                    optedIn ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'
+                  }`}>
+                    {optedIn ? 'Active Member' : 'Not Enrolled'}
+                  </div>
                 </div>
-                <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full bg-emerald-500">
-                   <span className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform translate-x-6"></span>
-                </div>
+
+                {!optedIn && isEligible && (
+                  <div className="mt-6 pt-6 border-t border-slate-200">
+                    <div className="flex items-center space-x-2 text-indigo-600 font-semibold mb-2">
+                      <PlayCircle className="w-4 h-4" />
+                      <span>Phase 1 Pilot Eligibility Confirmed</span>
+                    </div>
+                    <p className="text-sm text-slate-600 mb-4">
+                      Your clinic (Riversdale Physio) meets the criteria for the Phase 1 Pilot. Join today to receive 5 trial points immediately.
+                    </p>
+                    <button 
+                      onClick={handleOptIn}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold shadow-lg shadow-indigo-200 transition-all flex items-center"
+                    >
+                      Join Network & Claim 5 Points
+                    </button>
+                  </div>
+                )}
               </div>
+
+              {/* Other Settings */}
               <div className="flex items-center justify-between pb-6 border-b border-slate-100">
                 <div>
-                  <h3 className="font-semibold text-slate-900">Credit Auto-Refill</h3>
-                  <p className="text-sm text-slate-500">Purchase credits if contribution isn't possible</p>
+                  <h3 className="font-semibold text-slate-900">Auto-Refill Points</h3>
+                  <p className="text-sm text-slate-500">Purchase points if contribution isn't possible</p>
                 </div>
-                 <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full bg-slate-200">
+                 <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full bg-slate-200 cursor-not-allowed">
                    <span className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md"></span>
                 </div>
               </div>
+
+              <div className="flex items-center justify-between pb-6 border-b border-slate-100">
+                <div>
+                  <h3 className="font-semibold text-slate-900">Data Retention</h3>
+                  <p className="text-sm text-slate-500">Automatically archive contributions after 7 years</p>
+                </div>
+                 <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full bg-emerald-500 cursor-pointer">
+                   <span className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transform translate-x-6"></span>
+                </div>
+              </div>
            </div>
+
            <div className="mt-8 p-4 bg-slate-50 rounded-lg text-xs text-slate-500 font-mono">
              Clinic ID: KIN-ORG-882192<br/>
              Version: v0.4.3 (Beta)

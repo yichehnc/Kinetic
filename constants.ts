@@ -1,4 +1,4 @@
-import { Patient, HistoryEntry, Status, TreatmentType } from './types';
+import { Patient, HistoryEntry, Status, TreatmentType, Appointment } from './types';
 
 export const MOCK_PATIENTS: Patient[] = [
   { id: 'P001', name: 'Sarah Jenkins', dob: '1985-04-12', lastVisit: '2023-10-15', historyAvailable: true },
@@ -35,6 +35,13 @@ export const MOCK_HISTORY: HistoryEntry[] = [
   }
 ];
 
+export const MOCK_SCHEDULE: Appointment[] = [
+  { id: 'APT01', time: '09:00 AM', patientId: 'P001', reason: 'LBP Maintenance', status: 'Completed' },
+  { id: 'APT02', time: '10:00 AM', patientId: 'P002', reason: 'Shoulder Assessment', status: 'Arrived' },
+  { id: 'APT03', time: '11:30 AM', patientId: 'P004', reason: 'Ankle Rehab', status: 'Scheduled' },
+  { id: 'APT04', time: '01:00 PM', patientId: 'P003', reason: 'Initial Consult', status: 'Scheduled' },
+];
+
 export const TREATMENTS_LIST = Object.values(TreatmentType);
 
 export const CONTRAINDICATIONS_LIST = [
@@ -46,3 +53,6 @@ export const CONTRAINDICATIONS_LIST = [
   'Specific Loading',
   'Cervical Traction'
 ];
+
+// Minimal valid PDF base64 for demo purposes (A blank page with "Kinetic Demo Report" text)
+export const DEMO_PDF_BASE64 = "JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXwKICAvTWVkaWFCb3ggWyAwIDAgNTk1LjI4IDg0MS44OSBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSCisgICAgPj4KICA+PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9udAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvSGVsdmV0aWNhCj4+CmVuZG9iagoKNSAwIG9iago8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCjcwIDUwIFRECi9GMSAxMiBUZgooS2luZXRpYyBEZW1vIFJlcG9ydCkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNjAgMDAwMDAgbiAKMDAwMDAwMDE1NyAwMDAwMCBuIAowMDAwMDAwMzA2IDAwMDAwIG4gCjAwMDAwMDAzOTIgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9GCg==";

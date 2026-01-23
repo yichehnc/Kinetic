@@ -34,6 +34,15 @@ export interface HistoryEntry {
   createdAt: string;
   // Metadata
   sourceClinicHash: string; // Anonymized
+  reportFile?: string; // SOAP Report filename or URL
+}
+
+export interface Appointment {
+  id: string;
+  time: string;
+  patientId: string;
+  reason: string;
+  status: 'Arrived' | 'Scheduled' | 'Completed' | 'Late';
 }
 
 export interface ClinicState {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, FilePlus, Settings, Activity, ShieldCheck, Share2 } from 'lucide-react';
+import { LayoutDashboard, Users, FilePlus, Settings, ShieldCheck, Share2 } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,11 +21,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
     <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans">
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col shadow-xl z-20">
-        <div className="p-6 flex items-center space-x-2 border-b border-slate-800">
-          <div className="bg-kinetic-500 p-2 rounded-lg">
-            <Activity className="w-6 h-6 text-white" />
+        <div className="p-6 flex items-center space-x-3 border-b border-slate-800">
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-sky-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+            <div className="relative bg-gradient-to-br from-kinetic-500 to-kinetic-600 p-2 rounded-xl shadow-lg border border-white/10">
+              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
           </div>
-          <span className="text-xl font-bold tracking-tight">Kinetic</span>
+          <span className="text-xl font-bold tracking-tight text-white">Kinetic</span>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2">
@@ -66,7 +71,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
           
           <div className="flex items-center space-x-6">
             <div className="flex items-center bg-slate-100 rounded-full px-4 py-1.5 border border-slate-200">
-              <span className="text-sm text-slate-500 mr-2 font-medium">History Credits</span>
+              <span className="text-sm text-slate-500 mr-2 font-medium">Kinetic Points</span>
               <div className={`text-lg font-bold ${credits > 0 ? 'text-kinetic-600' : 'text-red-500'}`}>
                 {credits}
               </div>
