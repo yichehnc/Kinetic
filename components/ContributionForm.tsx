@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Plus, ArrowRight, RefreshCcw, Loader2, Save, FileText, Info, X } from 'lucide-react';
+import { Check, Info, Plus, X, ArrowRight, RefreshCcw, AlertCircle, Loader2, Save, FileText, ArrowLeft } from 'lucide-react';
 import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
-import { InfoCard } from './ui/cards';
 
 interface ContributionFormProps {
   onSubmit: (data: any) => void;
@@ -18,8 +17,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   
+  // BUG FIX #2: Added patientName and dob fields
   const initialFormState = {
     patientId: '',
+    patientName: '',  // NEW FIELD
+    dob: '',          // NEW FIELD
     condition: '',
     status: Status.ONGOING,
     start: '',
@@ -78,8 +80,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     });
   };
 
+  // BUG FIX #2: Updated validation to include name and DOB
   const validateStep1 = () => {
     if (!formData.patientId.trim()) return "Patient ID is required.";
+    if (!formData.patientName.trim()) return "Patient Name is required.";
+    if (!formData.dob) return "Date of Birth is required.";
     if (!formData.condition.trim()) return "Primary Condition is required.";
     if (!formData.start) return "Treatment Start Date is required.";
     return null;
@@ -121,13 +126,13 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
         }, 1500);
       });
 
-      // Submit to parent (this will trigger the parent's notification)
+      // Submit to parent
       onSubmit(formData);
       
       // Clear draft
       localStorage.removeItem(STORAGE_KEY);
       
-      // Navigate to success screen (step 3)
+      // Navigate to success screen
       setStep(3);
       
     } catch (err: any) {
@@ -148,12 +153,12 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
   // SUCCESS SCREEN (Step 3)
   if (step === 3) {
     return (
-      <div className="max-w-2xl mx-auto mt-12 text-center">
-        <div className="bg-emerald-50 rounded-3xl p-12 border border-emerald-100 shadow-sm animate-fade-in">
+      <div className="max-w-2xl mx-auto mt-12 text-center px-4">
+        <div className="bg-emerald-50 rounded-3xl p-8 md:p-12 border border-emerald-100 shadow-sm animate-fade-in">
           <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-emerald-600" />
           </div>
-          <h2 className="text-3xl font-bold text-slate-900 mb-2">Contribution Verified</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Contribution Verified</h2>
           <p className="text-slate-600 mb-8 max-w-md mx-auto">
             Thank you for improving the network. Your data has been structured and anonymized.
           </p>
@@ -188,8 +193,19 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
 
   // FORM SCREENS (Step 1 & 2)
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-8 flex items-end justify-between">
+    <div className="max-w-3xl mx-auto px-4 md:px-0">
+      {/* BUG FIX #6: More obvious back button */}
+      <div className="mb-6">
+        <button
+          onClick={onReturn}
+          className="flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors border border-slate-300"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          <span>Back to Patient Search</span>
+        </button>
+      </div>
+
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Contribute Patient History</h2>
           <p className="text-slate-500 mt-2">
@@ -218,23 +234,34 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
         </div>
 
         {error && (
-          <div className="p-4">
-             <InfoCard type="error" title="Validation Error" message={error} onDismiss={() => setError(null)} />
+          <div className="bg-rose-50 border-b border-rose-100 p-4 flex items-center text-rose-800 text-sm">
+            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+            <span className="font-medium">{error}</span>
+            <button 
+              type="button" 
+              onClick={() => setError(null)}
+              className="ml-auto text-rose-500 hover:text-rose-700"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
 
-        <div className="p-8 space-y-8">
+        <div className="p-6 md:p-8 space-y-8">
           {step === 1 && (
             <div className="space-y-6">
-              <InfoCard 
-                type="info" 
-                title="Strictly Structured Data Only" 
-                message="To ensure privacy and utility, free-text notes are disabled." 
-              />
+              <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800 flex items-start">
+                <Info className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                <p>
+                  <strong>Strictly Structured Data Only.</strong> To ensure privacy and utility, free-text notes are disabled.
+                </p>
+              </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Patient ID / Reference</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Patient ID / Reference <span className="text-red-500">*</span>
+                  </label>
                   <input 
                     required
                     type="text" 
@@ -244,8 +271,42 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                     onChange={e => handleInputChange('patientId', e.target.value)}
                   />
                 </div>
+                
+                {/* BUG FIX #2: Patient Name field */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Primary Condition</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Patient Name <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    required
+                    type="text" 
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                    placeholder="e.g. John Doe"
+                    value={formData.patientName}
+                    onChange={e => handleInputChange('patientName', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* BUG FIX #2: Date of Birth field */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Date of Birth <span className="text-red-500">*</span>
+                  </label>
+                  <input 
+                    required
+                    type="date" 
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                    value={formData.dob}
+                    onChange={e => handleInputChange('dob', e.target.value)}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Primary Condition <span className="text-red-500">*</span>
+                  </label>
                   <input 
                     required
                     type="text" 
@@ -259,13 +320,13 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-3">Outcome Status</label>
-                <div className="flex space-x-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {Object.values(Status).map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => handleInputChange('status', s)}
-                      className={`flex-1 py-3 px-4 rounded-lg border text-sm font-semibold transition-all ${
+                      className={`py-3 px-4 rounded-lg border text-sm font-semibold transition-all ${
                         formData.status === s
                           ? 'bg-emerald-50 border-emerald-500 text-emerald-700 ring-1 ring-emerald-500'
                           : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -277,9 +338,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Treatment Start</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Treatment Start <span className="text-red-500">*</span>
+                  </label>
                   <input 
                     type="date" 
                     required
@@ -378,7 +441,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
           )}
         </div>
 
-        <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+        <div className="px-6 md:px-8 py-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
           {step === 2 ? (
             <button
               type="button"
@@ -418,7 +481,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
               ) : (
                 <>
                   <Plus className="w-5 h-5" />
-                  <span>Submit & Earn Points</span>
+                  <span>Submit & Earn Credit</span>
                 </>
               )}
             </button>
