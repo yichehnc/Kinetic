@@ -20,12 +20,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 gap-4">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md">
                 <span className="text-white font-bold text-lg">K</span>
               </div>
               <div>
@@ -44,8 +44,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
             </div>
           </div>
 
-          {/* Navigation - BUG FIX #5: Responsive navigation */}
-          <nav className="border-t border-slate-200 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 overflow-x-auto">
+          {/* Navigation - Responsive */}
+          <nav 
+            className="border-t border-slate-200 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 overflow-x-auto"
+            role="navigation"
+            aria-label="Main navigation"
+          >
             <div className="flex space-x-1 min-w-max sm:min-w-0">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -54,13 +58,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
                   <button
                     key={tab.id}
                     onClick={() => onTabChange(tab.id)}
-                    className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-medium text-sm transition-colors whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
                       isActive
-                        ? 'border-emerald-500 text-emerald-600'
-                        : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                        ? 'border-emerald-600 text-emerald-700 bg-emerald-50'
+                        : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4" aria-hidden="true" />
                     <span className="hidden sm:inline">{tab.label}</span>
                     <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
                   </button>
@@ -72,7 +77,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main">
         {children}
       </main>
 
@@ -82,11 +87,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
             <p>© 2024 Kinetic Network. All rights reserved.</p>
             <div className="flex flex-wrap items-center gap-4 justify-center">
-              <a href="#" className="hover:text-slate-900 transition-colors">Privacy Policy</a>
-              <span className="hidden sm:inline">•</span>
-              <a href="#" className="hover:text-slate-900 transition-colors">Terms of Service</a>
-              <span className="hidden sm:inline">•</span>
-              <a href="#" className="hover:text-slate-900 transition-colors">Documentation</a>
+              <a href="#" className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded">
+                Privacy Policy
+              </a>
+              <span className="hidden sm:inline" aria-hidden="true">•</span>
+              <a href="#" className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded">
+                Terms of Service
+              </a>
+              <span className="hidden sm:inline" aria-hidden="true">•</span>
+              <a href="#" className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded">
+                Documentation
+              </a>
             </div>
           </div>
         </div>
