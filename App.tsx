@@ -23,43 +23,50 @@ const Notification = ({ message, onClose }: { message: string; onClose: () => vo
 const App: React.FC = () => {
   // App State
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [credits, setCredits] = useState(0); // Start with 0, give 5 on first opt-in
+  const [credits, setCredits] = useState(0); // Start with 0
   const [unlockedPatients, setUnlockedPatients] = useState<string[]>([]);
   const [contributionCount, setContributionCount] = useState(12);
   const [localHistory, setLocalHistory] = useState<HistoryEntry[]>(MOCK_HISTORY);
   const [localPatients, setLocalPatients] = useState<Patient[]>(MOCK_PATIENTS);
   const [notification, setNotification] = useState<string | null>(null);
   
-  // BUG FIX #4: Track if initial credits were awarded (only once ever)
+  // Track if initial credits were awarded (only once ever)
   const [hasReceivedInitialCredits, setHasReceivedInitialCredits] = useState(false);
-  const [isOptedIn, setIsOptedIn] = useState(true); // Network opt-in status
+  const [isOptedIn, setIsOptedIn] = useState(false); // Default to false - user must opt in
 
-  // Load initial credits flag and opt-in status from storage
+  // Load initial credits flag and opt-in status from storage on mount
   useEffect(() => {
     const hasReceived = localStorage.getItem('kinetic_initial_credits_awarded');
     const optInStatus = localStorage.getItem('kinetic_opted_in');
+    const savedCredits = localStorage.getItem('kinetic_credits');
     
     if (hasReceived === 'true') {
       setHasReceivedInitialCredits(true);
     }
     
-    if (optInStatus !== null) {
-      setIsOptedIn(optInStatus === 'true');
-    }
-    
-    // If they've received credits before and are opted in, restore their credits
-    if (hasReceived === 'true' && optInStatus === 'true') {
-      const savedCredits = localStorage.getItem('kinetic_credits');
-      if (savedCredits) {
+    // Set opt-in status
+    if (optInStatus === 'true') {
+      setIsOptedIn(true);
+      // If opted in and has received credits before, restore them
+      if (savedCredits && hasReceived === 'true') {
         setCredits(parseInt(savedCredits, 10));
+      }
+    } else {
+      // FIX: First-time users should opt in and get 5 credits
+      if (!hasReceived && !optInStatus) {
+        // This is a brand new user - they need to opt in
+        setIsOptedIn(false);
+        setCredits(0);
       }
     }
   }, []);
 
   // Save credits to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('kinetic_credits', credits.toString());
-  }, [credits]);
+    if (credits > 0 || hasReceivedInitialCredits) {
+      localStorage.setItem('kinetic_credits', credits.toString());
+    }
+  }, [credits, hasReceivedInitialCredits]);
 
   // Clear notification when changing tabs to avoid stale messages
   useEffect(() => {
@@ -76,7 +83,7 @@ const App: React.FC = () => {
     }
   };
 
-  // BUG FIX #1: Auto-unlock contributed patient history
+  // Auto-unlock contributed patient history
   const handleContribution = (data: any) => {
     setCredits(prev => prev + 1);
     setContributionCount(prev => prev + 1);
@@ -134,18 +141,24 @@ const App: React.FC = () => {
     }, 3000);
   };
 
-  // BUG FIX #4: Network opt-in handler - 5 trial credits only once
+  // FIX: Network opt-in handler - 5 trial credits only once
   const handleOptIn = () => {
     setIsOptedIn(true);
     localStorage.setItem('kinetic_opted_in', 'true');
     
-    // Only award 5 credits on first-ever opt-in
+    // FIX: Always award 5 credits on first-ever opt-in
     if (!hasReceivedInitialCredits) {
-      setCredits(prev => prev + 5);
+      setCredits(5); // Set to 5 instead of adding
       setHasReceivedInitialCredits(true);
       localStorage.setItem('kinetic_initial_credits_awarded', 'true');
-      setNotification('Opted in! +5 welcome credits awarded (one-time bonus).');
+      localStorage.setItem('kinetic_credits', '5');
+      setNotification('Welcome! +5 trial credits awarded (one-time bonus).');
     } else {
+      // Restore previous credits if they had any
+      const savedCredits = localStorage.getItem('kinetic_credits');
+      if (savedCredits) {
+        setCredits(parseInt(savedCredits, 10));
+      }
       setNotification('Opted back in to network. Your credits have been restored.');
     }
     setTimeout(() => setNotification(null), 3000);
@@ -156,6 +169,7 @@ const App: React.FC = () => {
     setIsOptedIn(false);
     setCredits(0); // Remove all credits when opting out
     localStorage.setItem('kinetic_opted_in', 'false');
+    localStorage.setItem('kinetic_credits', '0');
     setNotification('Opted out of network. All credits removed. Your data will not be shared.');
     setTimeout(() => setNotification(null), 3000);
   };
@@ -204,8 +218,11 @@ const App: React.FC = () => {
                 <div>
                   <h3 className="font-semibold text-slate-900">Network Opt-in</h3>
                   <p className="text-sm text-slate-500">Allow other clinics to request your data (anonymized)</p>
-                  {!isOptedIn && (
-                    <p className="text-xs text-amber-600 mt-1">⚠️ Opting out removes all credits</p>
+                  {!isOptedIn && !hasReceivedInitialCredits && (
+                    <p className="text-xs text-emerald-600 mt-1 font-semibold">✨ Get 5 free trial credits when you opt in!</p>
+                  )}
+                  {!isOptedIn && hasReceivedInitialCredits && (
+                    <p className="text-xs text-amber-600 mt-1">⚠️ Opting out removed your credits</p>
                   )}
                 </div>
                 <button
@@ -230,7 +247,7 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* BUG FIX #3: Data Security & Privacy Section */}
+              {/* Data Security & Privacy Section */}
               <div className="pt-6 border-t border-slate-200">
                 <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
                   <Shield className="w-5 h-5 mr-2 text-blue-600" />
