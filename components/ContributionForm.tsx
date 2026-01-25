@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Info, Plus, X, ArrowRight, RefreshCcw, AlertCircle, Loader2, Save, FileText, ArrowLeft } from 'lucide-react';
+import { Check, Info, Plus, X, ArrowRight, RefreshCcw, AlertCircle, Loader2, Save, FileText, ArrowLeft, Tag, Activity, Calendar } from 'lucide-react';
 import { Status } from '../types';
+import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
+import { InfoCard } from './ui/cards';
 
 interface ContributionFormProps {
   onSubmit: (data: any) => void;
   onReturn?: () => void;
 }
 
-const STORAGE_KEY = 'kinetic_contribution_draft';
+const STORAGE_KEY = 'kinetic_contribution_draft_v2';
+
+const BODY_REGIONS = ['Cervical Spine', 'Thoracic Spine', 'Lumbar Spine', 'Shoulder', 'Elbow', 'Wrist/Hand', 'Hip', 'Knee', 'Ankle/Foot'];
+const COMPLAINT_TYPES = ['Pain', 'Stiffness', 'Instability', 'Weakness', 'Post-Operative', 'Mobility Deficit'];
+const REHAB_STAGES = ['Acute', 'Sub-Acute', 'Chronic', 'Return to Sport', 'Maintenance'];
 
 export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onReturn }) => {
   const [step, setStep] = useState(1);
@@ -16,54 +22,27 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  // Comprehensive form state based on progress note structure
   const initialFormState = {
-    // Patient Demographics
+    // Step 1: Patient Info
     patientId: '',
     patientName: '',
     dob: '',
-    
-    // Subjective / History of Present Condition
-    primaryComplaint: '',
-    injuryDescription: '',
-    mechanismOfInjury: '',
-    symptomProgression: '',
-    patientSelfReport: '',
-    activityLevel: '',
-    disabilityStatus: '',
-    socialHistory: '',
-    treatmentGoals: '',
-    priorTreatmentResponse: '',
-    
-    // Objective Findings
-    posturalObservations: '',
-    rangeOfMotion: '',
-    strengthTesting: '',
-    functionalTests: '',
-    specificMeasurements: '',
-    vitalSigns: '',
-    physicalExamFindings: '',
-    investigationResults: '',
-    
-    // Assessment
-    clinicalOpinion: '',
-    progressChanges: '',
-    factorsAffectingProgress: '',
-    referralsNeeded: '',
-    treatmentResponse: '',
-    patientEducation: '',
-    equipmentRequired: '',
-    
-    // Plan - Charges & Exercises
-    interventions: '',
-    treatmentFrequency: '',
-    exercisesPerformed: '',
-    patientEducationProvided: '',
-    
-    // Timeline
     start: '',
     end: '',
-    status: Status.ONGOING
+    
+    // Step 2: Keywords & Structure
+    bodyRegion: '',
+    complaintType: '',
+    rehabStage: '',
+    status: Status.ONGOING,
+    successful: [] as string[],
+    unsuccessful: [] as string[],
+    contraindications: [] as string[],
+
+    // Step 3: Optional SOAP (Simplified)
+    objectiveFindings: '',
+    assessment: '',
+    plan: ''
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -83,10 +62,10 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     setIsLoaded(true);
   }, []);
 
-  // Auto-save draft (debounced)
+  // Auto-save draft
   useEffect(() => {
     if (!isLoaded) return;
-    if (step === 4) return; // Don't save when on success screen
+    if (step === 4) return; // Don't save on success screen
 
     setIsSaving(true);
     const handler = setTimeout(() => {
@@ -103,7 +82,19 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Updated validation for required fields
+  const toggleArraySelection = (field: 'successful' | 'unsuccessful' | 'contraindications', value: string) => {
+    setError(null);
+    setFormData(prev => {
+      const current = prev[field];
+      if (current.includes(value)) {
+        return { ...prev, [field]: current.filter(item => item !== value) };
+      } else {
+        return { ...prev, [field]: [...current, value] };
+      }
+    });
+  };
+
+  // Validation Logic
   const validateStep1 = () => {
     if (!formData.patientId.trim()) return "Patient ID is required.";
     if (!formData.patientName.trim()) return "Patient Name is required.";
@@ -112,74 +103,63 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
   };
 
   const validateStep2 = () => {
-    if (!formData.primaryComplaint.trim()) return "Primary Complaint is required.";
-    if (!formData.injuryDescription.trim()) return "Detailed injury description is required.";
-    return null;
-  };
-
-  const validateStep3 = () => {
-    if (!formData.clinicalOpinion.trim()) return "Clinical assessment/opinion is required.";
+    if (!formData.bodyRegion) return "Please select a Body Region.";
+    if (!formData.complaintType) return "Please select a Complaint Type.";
+    if (!formData.rehabStage) return "Please select a Rehab Stage.";
     return null;
   };
 
   const handleNextStep = () => {
     let validationError = null;
-    
-    if (step === 1) {
-      validationError = validateStep1();
-    } else if (step === 2) {
-      validationError = validateStep2();
-    } else if (step === 3) {
-      validationError = validateStep3();
-    }
+    if (step === 1) validationError = validateStep1();
+    if (step === 2) validationError = validateStep2();
     
     if (validationError) {
       setError(validationError);
+      window.scrollTo(0, 0);
       return;
     }
     
     setError(null);
-    setStep(step + 1);
+    setStep(prev => prev + 1);
+    window.scrollTo(0, 0);
+  };
+
+  const handleBack = () => {
+    setStep(prev => prev - 1);
+    setError(null);
+    window.scrollTo(0, 0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate all steps
-    const errors = [validateStep1(), validateStep2(), validateStep3()].filter(Boolean);
-    if (errors.length > 0) {
-      setError(errors[0]!);
-      setStep(1);
+    // Final check
+    const err1 = validateStep1();
+    const err2 = validateStep2();
+
+    if (err1 || err2) {
+      setError(err1 || err2);
+      setStep(err1 ? 1 : 2);
       return;
     }
 
     setIsSubmitting(true);
-    setError(null);
-
     try {
-      // Simulate API call
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          const isError = Math.random() > 0.98; 
-          if (isError) {
-            reject(new Error("Network connection timed out. Please try again."));
-          } else {
-            resolve(true);
-          }
-        }, 1500);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Construct the composite condition string for the legacy type definition
+      const compositeCondition = `${formData.bodyRegion} - ${formData.complaintType}`;
+      
+      onSubmit({
+        ...formData,
+        condition: compositeCondition
       });
-
-      // Submit to parent
-      onSubmit(formData);
       
-      // Clear draft
       localStorage.removeItem(STORAGE_KEY);
-      
-      // Navigate to success screen
       setStep(4);
-      
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+      setError(err.message || "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
@@ -189,21 +169,20 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     setFormData(initialFormState);
     localStorage.removeItem(STORAGE_KEY);
     setStep(1);
-    setLastSaved(null);
     setError(null);
   };
 
-  // SUCCESS SCREEN (Step 4)
+  // Success Screen
   if (step === 4) {
     return (
       <div className="max-w-2xl mx-auto mt-12 text-center px-4">
-        <div className="bg-emerald-50 rounded-3xl p-8 md:p-12 border border-emerald-100 shadow-sm">
+        <div className="bg-emerald-50 rounded-3xl p-8 md:p-12 border border-emerald-100 shadow-sm animate-fade-in-up">
           <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-emerald-600" />
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Contribution Verified</h2>
           <p className="text-slate-600 mb-8 max-w-md mx-auto">
-            Thank you for improving the network. Your progress note has been structured and anonymized.
+            Your structured clinical data has been successfully added to the Kinetic Network.
           </p>
           
           <div className="inline-flex items-center space-x-2 bg-white px-6 py-3 rounded-xl border border-emerald-200 shadow-sm mb-8">
@@ -234,490 +213,367 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     );
   }
 
-  // FORM SCREENS
   return (
-    <div className="max-w-4xl mx-auto px-4 md:px-0">
-      {/* Back Button */}
+    <div className="max-w-4xl mx-auto px-4 pb-24">
+      {/* Header & Nav */}
       <div className="mb-6">
         <button
           onClick={onReturn}
-          className="flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors border border-slate-300"
+          className="flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors border border-slate-300 mb-6"
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <span>Back to Patient Search</span>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Dashboard
         </button>
+
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Contribute History</h2>
+            <p className="text-slate-500 mt-1">Earn points by sharing structured clinical outcomes.</p>
+          </div>
+          
+          <div className="flex items-center space-x-3 text-sm">
+             {isSaving && <span className="text-slate-400 flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin"/> Saving draft...</span>}
+             {!isSaving && lastSaved && <span className="text-slate-400 flex items-center"><Check className="w-3 h-3 mr-1"/> Saved</span>}
+          </div>
+        </div>
       </div>
 
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Contribute Progress Note</h2>
-          <p className="text-slate-500 mt-2">
-            Structured SOAP documentation - Earn 1 Kinetic Point
-          </p>
+      {/* Progress Stepper */}
+      <div className="mb-8 bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-center justify-between">
+        <div className={`flex items-center ${step >= 1 ? 'text-emerald-600' : 'text-slate-400'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${step >= 1 ? 'bg-emerald-100' : 'bg-slate-100'}`}>1</div>
+          <span className="hidden sm:inline font-medium">Patient Info</span>
         </div>
+        <div className="h-0.5 w-12 bg-slate-200"></div>
+        <div className={`flex items-center ${step >= 2 ? 'text-emerald-600' : 'text-slate-400'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${step >= 2 ? 'bg-emerald-100' : 'bg-slate-100'}`}>2</div>
+          <span className="hidden sm:inline font-medium">Key Data</span>
+        </div>
+        <div className="h-0.5 w-12 bg-slate-200"></div>
+        <div className={`flex items-center ${step >= 3 ? 'text-blue-600' : 'text-slate-400'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${step >= 3 ? 'bg-blue-100' : 'bg-slate-100'}`}>3</div>
+          <span className="hidden sm:inline font-medium">Notes (Optional)</span>
+        </div>
+      </div>
+
+      {error && (
+        <InfoCard 
+          type="error" 
+          title="Validation Error" 
+          message={error} 
+          onDismiss={() => setError(null)} 
+        />
+      )}
+
+      {/* Form Steps */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         
-        <div className="flex items-center space-x-2">
-           {isSaving ? (
-              <div className="flex items-center text-xs font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
-                <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
-                Saving...
+        {/* Step 1: Demographics */}
+        {step === 1 && (
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center mb-4">
+              <div className="bg-emerald-100 p-2 rounded-lg mr-3">
+                <FileText className="w-6 h-6 text-emerald-600" />
               </div>
-           ) : lastSaved ? (
-              <div className="flex items-center text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-                <Save className="w-3 h-3 mr-1.5 text-slate-400" />
-                Draft saved
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Patient Identification</h3>
+                <p className="text-sm text-slate-500">Basic demographic information required for record linkage.</p>
               </div>
-           ) : null}
-        </div>
-      </div>
+            </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        {/* Progress Bar */}
-        <div className="h-2 bg-slate-100 flex">
-          <div className={`h-full bg-emerald-500 transition-all duration-500 ${
-            step === 1 ? 'w-1/4' : step === 2 ? 'w-1/2' : step === 3 ? 'w-3/4' : 'w-full'
-          }`}></div>
-        </div>
-
-        {error && (
-          <div className="bg-rose-50 border-b border-rose-100 p-4 flex items-center text-rose-800 text-sm">
-            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-            <span className="font-medium">{error}</span>
-            <button 
-              type="button" 
-              onClick={() => setError(null)}
-              className="ml-auto text-rose-500 hover:text-rose-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Patient ID <span className="text-red-500">*</span></label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  placeholder="e.g. PT-8821"
+                  value={formData.patientId}
+                  onChange={e => handleInputChange('patientId', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name <span className="text-red-500">*</span></label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  placeholder="e.g. Jane Doe"
+                  value={formData.patientName}
+                  onChange={e => handleInputChange('patientName', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Date of Birth <span className="text-red-500">*</span></label>
+                <input 
+                  type="date" 
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  value={formData.dob}
+                  onChange={e => handleInputChange('dob', e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Treatment Start Date</label>
+                <input 
+                  type="date" 
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  value={formData.start}
+                  onChange={e => handleInputChange('start', e.target.value)}
+                />
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="p-6 md:p-8 space-y-8">
-          {/* STEP 1: Patient Demographics */}
-          {step === 1 && (
+        {/* Step 2: Keywords */}
+        {step === 2 && (
+          <div className="p-6 md:p-8 space-y-8">
+            <div className="flex items-center mb-4">
+              <div className="bg-emerald-100 p-2 rounded-lg mr-3">
+                <Tag className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Clinical Classification</h3>
+                <p className="text-sm text-slate-500">Select structured keywords to categorize the case.</p>
+              </div>
+            </div>
+
+            {/* Keyword Selection Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Body Region <span className="text-red-500">*</span></label>
+                <div className="space-y-2">
+                  {BODY_REGIONS.map(region => (
+                    <button
+                      key={region}
+                      type="button"
+                      onClick={() => handleInputChange('bodyRegion', region)}
+                      className={`w-full text-left px-4 py-2 rounded-lg text-sm border transition-all ${
+                        formData.bodyRegion === region 
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm' 
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {region}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Complaint Type <span className="text-red-500">*</span></label>
+                <div className="space-y-2">
+                  {COMPLAINT_TYPES.map(type => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => handleInputChange('complaintType', type)}
+                      className={`w-full text-left px-4 py-2 rounded-lg text-sm border transition-all ${
+                        formData.complaintType === type 
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm' 
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Rehab Stage <span className="text-red-500">*</span></label>
+                <div className="space-y-2">
+                  {REHAB_STAGES.map(stage => (
+                    <button
+                      key={stage}
+                      type="button"
+                      onClick={() => handleInputChange('rehabStage', stage)}
+                      className={`w-full text-left px-4 py-2 rounded-lg text-sm border transition-all ${
+                        formData.rehabStage === stage 
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm' 
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {stage}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Treatments & Outcome */}
+            <div className="pt-6 border-t border-slate-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                   <label className="block text-sm font-semibold text-slate-700 mb-3 flex items-center">
+                     <Check className="w-4 h-4 text-emerald-500 mr-2" />
+                     Effective Interventions
+                   </label>
+                   <div className="flex flex-wrap gap-2">
+                     {TREATMENTS_LIST.map(t => (
+                       <button
+                         key={t}
+                         type="button"
+                         onClick={() => toggleArraySelection('successful', t)}
+                         className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                           formData.successful.includes(t)
+                             ? 'bg-emerald-100 border-emerald-500 text-emerald-800'
+                             : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                         }`}
+                       >
+                         {t}
+                       </button>
+                     ))}
+                   </div>
+                </div>
+
+                <div>
+                   <label className="block text-sm font-semibold text-slate-700 mb-3 flex items-center">
+                     <X className="w-4 h-4 text-rose-500 mr-2" />
+                     Ineffective Interventions
+                   </label>
+                   <div className="flex flex-wrap gap-2">
+                     {TREATMENTS_LIST.map(t => (
+                       <button
+                         key={t}
+                         type="button"
+                         onClick={() => toggleArraySelection('unsuccessful', t)}
+                         className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                           formData.unsuccessful.includes(t)
+                             ? 'bg-rose-100 border-rose-500 text-rose-800'
+                             : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                         }`}
+                       >
+                         {t}
+                       </button>
+                     ))}
+                   </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-slate-200">
+               <label className="block text-sm font-semibold text-slate-700 mb-3">Current Status</label>
+               <div className="flex space-x-4">
+                  {Object.values(Status).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => handleInputChange('status', s)}
+                      className={`flex-1 py-2 px-4 rounded-lg border text-sm font-semibold transition-all ${
+                        formData.status === s
+                          ? 'bg-blue-50 border-blue-500 text-blue-700 ring-1 ring-blue-500'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Optional Notes */}
+        {step === 3 && (
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex items-center mb-2">
+              <div className="bg-blue-100 p-2 rounded-lg mr-3">
+                <FileText className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">SOAP Notes <span className="text-slate-400 font-normal ml-2">(Optional)</span></h3>
+                <p className="text-sm text-slate-500">Provide detailed findings if available. You can skip this step.</p>
+              </div>
+            </div>
+
+            <InfoCard 
+              type="info" 
+              title="Optional Step" 
+              message="You can submit the form now if you don't have detailed notes to add." 
+            />
+
             <div className="space-y-6">
-              <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg text-sm text-blue-800 flex items-start">
-                <Info className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-                <p>
-                  <strong>Patient Demographics</strong> - Start by entering basic patient information.
-                </p>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Objective Findings</label>
+                <textarea
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[120px]"
+                  placeholder="ROM, strength, special tests, functional assessments..."
+                  value={formData.objectiveFindings}
+                  onChange={e => handleInputChange('objectiveFindings', e.target.value)}
+                />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Patient ID <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                    placeholder="e.g. P-10293"
-                    value={formData.patientId}
-                    onChange={e => handleInputChange('patientId', e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Patient Name <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                    placeholder="e.g. John Doe"
-                    value={formData.patientName}
-                    onChange={e => handleInputChange('patientName', e.target.value)}
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Assessment / Analysis</label>
+                <textarea
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[100px]"
+                  placeholder="Clinical impression, diagnosis, prognosis..."
+                  value={formData.assessment}
+                  onChange={e => handleInputChange('assessment', e.target.value)}
+                />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Date of Birth <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="date" 
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                    value={formData.dob}
-                    onChange={e => handleInputChange('dob', e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Treatment Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <input 
-                    type="date" 
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                    value={formData.start}
-                    onChange={e => handleInputChange('start', e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Treatment End Date (Optional)
-                  </label>
-                  <input 
-                    type="date" 
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                    value={formData.end}
-                    onChange={e => handleInputChange('end', e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Treatment Status
-                  </label>
-                  <select
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                    value={formData.status}
-                    onChange={e => handleInputChange('status', e.target.value as Status)}
-                  >
-                    <option value={Status.ONGOING}>Ongoing</option>
-                    <option value={Status.RESOLVED}>Resolved</option>
-                    <option value={Status.MANAGED}>Managed</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Plan of Care</label>
+                <textarea
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[100px]"
+                  placeholder="Treatment frequency, interventions, home program..."
+                  value={formData.plan}
+                  onChange={e => handleInputChange('plan', e.target.value)}
+                />
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Action Bar */}
+        <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-between items-center sticky bottom-0 z-10">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="text-slate-600 font-medium hover:text-slate-900 px-4 py-2"
+            >
+              Back
+            </button>
+          ) : (
+            <div></div> // Spacer
           )}
 
-          {/* STEP 2: Subjective & Objective */}
-          {step === 2 && (
-            <div className="space-y-8">
-              {/* SUBJECTIVE SECTION */}
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center pb-2 border-b-2 border-blue-200">
-                  <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-3">
-                    <span className="text-sm font-bold text-blue-600">S</span>
-                  </div>
-                  Subjective - History of Present Condition
-                </h3>
-                <p className="text-xs text-slate-500 mb-4 italic">
-                  Use full sentences and paragraph format. Do not use bullet points.
-                </p>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Treatment Plan & Interventions
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-mono text-sm"
-                      rows={4}
-                      placeholder="- Manual therapy to lumbar spine&#10;- Therapeutic exercises: core strengthening&#10;- Frequency: 2x/week for 4 weeks"
-                      value={formData.interventions}
-                      onChange={e => handleInputChange('interventions', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Exercises Performed
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-mono text-sm"
-                      rows={3}
-                      placeholder="- Pelvic tilts: 3 sets x 10 reps&#10;- Bird dog: 3 sets x 8 reps each side&#10;- Dead bug: 3 sets x 10 reps"
-                      value={formData.exercisesPerformed}
-                      onChange={e => handleInputChange('exercisesPerformed', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Patient Education/Counseling Provided
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-mono text-sm"
-                      rows={3}
-                      placeholder="- Proper lifting mechanics&#10;- Postural awareness during sitting&#10;- Home exercise program compliance"
-                      value={formData.patientEducationProvided}
-                      onChange={e => handleInputChange('patientEducationProvided', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                    <p className="text-sm text-emerald-900 italic">
-                      "Patient will continue to benefit from skilled physical therapy to address aforementioned impairments and limitations to return to their activities of choice."
-                    </p>
-                  </div>
-                </div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Primary Complaint <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      placeholder="e.g. Chronic lower back pain"
-                      value={formData.primaryComplaint}
-                      onChange={e => handleInputChange('primaryComplaint', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Detailed Description of Injury/Problem <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={3}
-                      placeholder="Provide a detailed narrative description of the primary injury, problem, or complaint..."
-                      value={formData.injuryDescription}
-                      onChange={e => handleInputChange('injuryDescription', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Mechanism of Injury (if applicable)
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="Describe how the injury occurred or how the complaint began..."
-                      value={formData.mechanismOfInjury}
-                      onChange={e => handleInputChange('mechanismOfInjury', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Symptom Progression
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="Describe the progression of the complaint and nature of symptoms..."
-                      value={formData.symptomProgression}
-                      onChange={e => handleInputChange('symptomProgression', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Patient Self-Report
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={3}
-                      placeholder="Detailed narrative of the patient's self-report of their current status, symptoms, reason for visit..."
-                      value={formData.patientSelfReport}
-                      onChange={e => handleInputChange('patientSelfReport', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Activity Level & Social History
-                      </label>
-                      <textarea
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                        rows={2}
-                        placeholder="Patient's activity level, disability status, social history..."
-                        value={formData.activityLevel}
-                        onChange={e => handleInputChange('activityLevel', e.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Goals & Prior Treatment Response
-                      </label>
-                      <textarea
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                        rows={2}
-                        placeholder="Patient goals and response to prior treatment interventions..."
-                        value={formData.treatmentGoals}
-                        onChange={e => handleInputChange('treatmentGoals', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* OBJECTIVE SECTION */}
-              <div className="pt-6 border-t-2 border-slate-200">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center pb-2 border-b-2 border-purple-200">
-                  <div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center mr-3">
-                    <span className="text-sm font-bold text-purple-600">O</span>
-                  </div>
-                  Objective Findings
-                </h3>
-                <p className="text-xs text-slate-500 mb-4 italic">
-                  Organize by category. Prioritize numerical measurements. Never repeat measures.
-                </p>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Postural Observations
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="Static postural observations with specific details..."
-                      value={formData.posturalObservations}
-                      onChange={e => handleInputChange('posturalObservations', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Range of Motion (Numerical)
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="e.g. Lumbar flexion: 45°, Extension: 15°, Left lateral flexion: 20°..."
-                      value={formData.rangeOfMotion}
-                      onChange={e => handleInputChange('rangeOfMotion', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Strength Testing
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="e.g. Hip flexors: 4/5, Quadriceps: 5/5..."
-                      value={formData.strengthTesting}
-                      onChange={e => handleInputChange('strengthTesting', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Functional Tests & Measurements
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="Specific tests and assessment findings by therapist..."
-                      value={formData.functionalTests}
-                      onChange={e => handleInputChange('functionalTests', e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Vital Signs (if mentioned)
-                      </label>
-                      <textarea
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                        rows={2}
-                        placeholder="BP, HR, etc. (only if explicitly mentioned)"
-                        value={formData.vitalSigns}
-                        onChange={e => handleInputChange('vitalSigns', e.target.value)}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Investigation Results
-                      </label>
-                      <textarea
-                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                        rows={2}
-                        placeholder="Imaging, lab results, etc..."
-                        value={formData.investigationResults}
-                        onChange={e => handleInputChange('investigationResults', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={handleNextStep}
+              className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-slate-800 transition-colors flex items-center shadow-lg shadow-slate-200"
+            >
+              Next Step <ArrowRight className="w-4 h-4 ml-2" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className={`flex items-center space-x-2 px-8 py-2.5 rounded-lg font-semibold text-white transition-all shadow-lg ${
+                isSubmitting 
+                  ? 'bg-emerald-400 cursor-wait' 
+                  : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                   <Loader2 className="w-5 h-5 animate-spin" />
+                   <span>Verifying...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-5 h-5" />
+                  <span>Submit Contribution</span>
+                </>
+              )}
+            </button>
           )}
-
-          {/* STEP 3: Assessment & Plan */}
-          {step === 3 && (
-            <div className="space-y-8">
-              {/* ASSESSMENT SECTION */}
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center pb-2 border-b-2 border-amber-200">
-                  <div className="w-8 h-8 bg-amber-100 rounded flex items-center justify-center mr-3">
-                    <span className="text-sm font-bold text-amber-600">A</span>
-                  </div>
-                  Assessment
-                </h3>
-                <p className="text-xs text-slate-500 mb-4 italic">
-                  Use full sentences and paragraph format. No bullet points.
-                </p>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Clinical Opinion <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={3}
-                      placeholder="Therapist's professional opinion based on subjective and objective findings..."
-                      value={formData.clinicalOpinion}
-                      onChange={e => handleInputChange('clinicalOpinion', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Progress & Changes in Measures
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="Progress or changes in objective or subjective measures..."
-                      value={formData.progressChanges}
-                      onChange={e => handleInputChange('progressChanges', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Factors Affecting Progress
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="Factors affecting progress and any need for modification in the plan..."
-                      value={formData.factorsAffectingProgress}
-                      onChange={e => handleInputChange('factorsAffectingProgress', e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Treatment Response & Education
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                      rows={2}
-                      placeholder="Response to treatment, exercises, and education strategies..."
-                      value={formData.treatmentResponse}
-                      onChange={e => handleInputChange('treatmentResponse', e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* PLAN SECTION */}
-              <div className="pt-6 border-t-2 border-slate-200">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center pb-2 border-b-2 border-emerald-200">
-                  <div className="w-8 h-8 bg-emerald-100 rounded flex items-center justify-center mr-3">
-                    <span className="text-sm font-bold text-emerald-600">P</span>
-                  </div>
-                  Plan - Charges & Exercises
-                </h3>
-                <p className="text-xs text-slate-500 mb-4 italic">
-                  Use bullet points for exercises and interventions.
-                </p>
-
-                <div className="space-y-4">
-                  <div>
+        </div>
+      </div>
+    </div>
+  );
+};
