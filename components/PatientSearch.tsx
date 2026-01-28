@@ -142,7 +142,7 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Search by patient name or ID..."
+            placeholder="Search by patient name or Patient ID (Medicare No.)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
@@ -215,7 +215,7 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">{selectedPatient.name}</h3>
-                    <p className="text-sm text-slate-500 font-mono mt-1">{selectedPatient.id}</p>
+                    <p className="text-sm text-slate-500 font-mono mt-1">Patient ID (Medicare No.): {selectedPatient.id}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
@@ -257,7 +257,7 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
                         }`}
                       >
                         <Unlock className="w-4 h-4" />
-                        <span>Unlock (1 Point)</span>
+                        <span>Unlock (1 Credit)</span>
                       </button>
                     )}
                   </div>
@@ -267,11 +267,11 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
                       <Lock className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                       <h4 className="font-semibold text-slate-900 mb-2">History Locked</h4>
                       <p className="text-sm text-slate-500 mb-4">
-                        Unlock this patient's treatment history for 1 Kinetic Point
+                        Unlock this patient's treatment history for 1 Kinetic Credit
                       </p>
                       {credits < 1 && (
                         <p className="text-sm text-red-600">
-                          Insufficient credits. Contribute data to earn more points.
+                          Insufficient credits. Contribute data to earn more credits.
                         </p>
                       )}
                     </div>

@@ -189,12 +189,12 @@ export const ClinicalSnapshotCard: React.FC<SnapshotCardProps> = ({
           >
             <Unlock className="w-5 h-5" />
             <span>Unlock Snapshot</span>
-            <span className="px-2 py-0.5 bg-white/20 rounded text-sm">1 Point</span>
+            <span className="px-2 py-0.5 bg-white/20 rounded text-sm">1 Credit</span>
           </button>
           
           {credits < 1 && (
             <p className="text-xs text-center text-red-600 mt-2">
-              Insufficient credits. Contribute patient data to earn points.
+              Insufficient credits. Contribute patient data to earn credits.
             </p>
           )}
         </div>

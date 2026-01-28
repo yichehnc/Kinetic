@@ -6,7 +6,7 @@ import { ContributionForm } from './components/ContributionForm';
 import { Referral } from './components/Referral';
 import { MOCK_PATIENTS, MOCK_HISTORY } from './constants';
 import { Patient, HistoryEntry, Status } from './types';
-import { CheckCircle, Shield } from 'lucide-react';
+import { CheckCircle, Shield, Users } from 'lucide-react';
 
 // Simple Alert Component for notifications
 const Notification = ({ message, onClose }: { message: string; onClose: () => void }) => (
@@ -203,6 +203,24 @@ const App: React.FC = () => {
           onSubmit={handleContribution} 
           onReturn={() => setActiveTab('intake')}
         />
+      )}
+
+      {activeTab === 'community' && (
+        <div className="max-w-2xl mx-auto text-center pt-16">
+          <div className="bg-indigo-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Users className="w-12 h-12 text-indigo-600" />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 mb-4">Community Features Coming Soon</h2>
+          <p className="text-slate-500 mb-8 max-w-lg mx-auto">
+            Connect with other clinicians, discuss cases, and see how your contributions are helping others.
+          </p>
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm max-w-md mx-auto">
+            <p className="text-sm font-medium text-slate-700 italic">
+              "1,200 clinicians viewed this contribution and found it useful"
+            </p>
+            <p className="text-xs text-slate-400 mt-2">— Example of future community feedback</p>
+          </div>
+        </div>
       )}
 
       {activeTab === 'referrals' && (

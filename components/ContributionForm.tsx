@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Info, Plus, X, ArrowRight, RefreshCcw, AlertCircle, Loader2, Save, FileText, ArrowLeft, Tag, Activity, Calendar } from 'lucide-react';
+import { Check, Info, Plus, X, ArrowRight, RefreshCcw, AlertCircle, Loader2, Save, FileText, ArrowLeft, Tag, Activity, Calendar, Upload, Sparkles } from 'lucide-react';
 import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
 import { InfoCard } from './ui/cards';
@@ -187,7 +187,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
           
           <div className="inline-flex items-center space-x-2 bg-white px-6 py-3 rounded-xl border border-emerald-200 shadow-sm mb-8">
             <span className="text-sm font-medium text-slate-500">Reward Earned:</span>
-            <span className="text-lg font-bold text-emerald-600">+1 Kinetic Point</span>
+            <span className="text-lg font-bold text-emerald-600">+1 Credit</span>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -228,7 +228,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Contribute History</h2>
-            <p className="text-slate-500 mt-1">Earn points by sharing structured clinical outcomes.</p>
+            <p className="text-slate-500 mt-1">Earn 1 Credit by sharing structured clinical outcomes.</p>
           </div>
           
           <div className="flex items-center space-x-3 text-sm">
@@ -283,11 +283,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Patient ID <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Patient ID (Medicare No.) <span className="text-red-500">*</span></label>
                 <input 
                   type="text" 
                   className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                  placeholder="e.g. PT-8821"
+                  placeholder="e.g. 1234 56789 1"
                   value={formData.patientId}
                   onChange={e => handleInputChange('patientId', e.target.value)}
                 />
@@ -476,13 +476,32 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
         {/* Step 3: Optional Notes */}
         {step === 3 && (
           <div className="p-6 md:p-8 space-y-6">
-            <div className="flex items-center mb-2">
-              <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                <FileText className="w-6 h-6 text-blue-600" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-2">
+              <div className="flex items-center">
+                <div className="bg-blue-100 p-2 rounded-lg mr-3">
+                  <FileText className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">SOAP Notes <span className="text-slate-400 font-normal ml-2">(Optional)</span></h3>
+                  <p className="text-sm text-slate-500">Provide detailed findings if available.</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">SOAP Notes <span className="text-slate-400 font-normal ml-2">(Optional)</span></h3>
-                <p className="text-sm text-slate-500">Provide detailed findings if available. You can skip this step.</p>
+              
+              <div className="flex space-x-2">
+                 {/* Demo-only Upload Button */}
+                 <button className="flex items-center px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload SOAP Report
+                 </button>
+                 
+                 {/* Demo-only AI Placeholder */}
+                 <div className="group relative flex items-center px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-sm font-medium text-indigo-400 cursor-not-allowed">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    AI Transcribe
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-slate-800 text-white text-xs rounded py-1 px-2 text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                       AI-assisted transcription (coming soon)
+                    </div>
+                 </div>
               </div>
             </div>
 

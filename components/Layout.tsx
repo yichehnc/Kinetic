@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, Plus, Share2, Settings, Award } from 'lucide-react';
+import { LayoutDashboard, Users, Plus, Share2, Settings, Award, MessageSquare } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +13,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'intake', label: 'Patient Intake', icon: Users },
     { id: 'contribute', label: 'Contribute', icon: Plus },
+    { id: 'community', label: 'Community (Soon)', icon: MessageSquare },
     { id: 'referrals', label: 'Referrals', icon: Share2 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -85,7 +86,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
       <footer className="bg-white border-t border-slate-200 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-            <p>© 2024 Kinetic Network. All rights reserved.</p>
+            <p>© 2026 Kinetic Network. All rights reserved.</p>
             <div className="flex flex-wrap items-center gap-4 justify-center">
               <a href="#" className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded">
                 Privacy Policy
