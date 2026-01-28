@@ -1,28 +1,29 @@
 # Kinetic
 
-Kinetic is a **B2B SaaS concept and interactive prototype** designed to solve a core incentive problem in physiotherapy care:  
+Kinetic is a **B2B SaaS platform** designed to solve a incentive problem in physiotherapy care:  
 patients increasingly see multiple physios across clinics, but clinical history is fragmented because clinics are reluctant to share.
 
-This project explores how **incentive design, anonymity, and system mechanics** — rather than policy enforcement — can move network opt-in from ~19% to 80%+.
+This project explores how **incentive design and credit-based system mechanics** can reduce friction and move network **opt-in from ~19% to 80%+**.
 
 ---
 
 ## Purpose
 
-The goal of Kinetic is to enable **patient-consented, privacy-safe continuity of care** across competing clinics by making information sharing a **selfish, rational decision**, not an altruistic one.
+The goal of Kinetic is to enable **continuity of care** across competing clinics by making patient history sharing a **selfish, rational decision**, low friction act.
 
 Key principles:
 - Remove fear of peer judgment
-- Prevent competitive leakage
-- Reduce clinician time cost
+- Prevent fear of competition
+- Reduce clinician time cost and manual labor
 - Align contribution with immediate benefit
 
 ---
 
 ## Core System Functions
 
-### 1. Continuity Snapshot (Not Full SOAP)
+### 1. Patient History Snapshot (Not Full SOAP)
 - Clinics contribute a **structured, anonymised snapshot** of care:
+  - Patient ID + information 
   - Body region
   - Diagnosis category
   - Rehab stage
@@ -31,16 +32,16 @@ Key principles:
 - No clinician names, clinic names, subjective notes, outcomes, or reasoning chains
 - Designed for **continuity**, not evaluation
 
-### 2. Kinetic Points (Incentive Mechanism)
-- Clinics earn **Kinetic Points** by contributing history
-- Points are spent to unlock patient history when patients arrive with prior care
-- Early adopters receive trial points to solve cold start
+### 2. Credits (Incentive Mechanism)
+- Clinics earn **Credits** by contributing history
+- Credits are spent to unlock patient history when patients arrive with prior care
+- Early adopters receive trial points to solve cold start problem
 - Unlock is one-time per patient per clinic
 
 ### 3. Three-Stage Adoption Model
-- **Stage 1 – Credits:** Early adopters + trial points
-- **Stage 2 – Continuity:** Patients increasingly arrive with history
-- **Stage 3 – Community:** Contribution becomes a standard of care signal
+- **Stage 1 – Credits:** Trial credits + Earn credits through contribution
+- **Stage 2 – Continuity:** Referral to grow credits in clinic network
+- **Stage 3 – Community:** Contribution and prior-care becomes a standard of care
 
 ### 4. Privacy & Anonymity by Design
 - Contributions are **clinic-level**, not individual
@@ -56,24 +57,6 @@ Responsive design for **desktop, tablet, and mobile**
 > Google account required
 
 https://ai.studio/apps/drive/1qvfc3ZqI0INFEAQDfAO3mRsvSWzIGBz8
-
----
-
-### 🎥 Walkthrough Recording
-Loom walkthrough explaining:
-- System behavior
-- Incentive mechanics
-- Opt-in logic
-- Demo flows
-
-> (Link to be added)
-
----
-
-### 💻 GitHub Repository
-Source code and demo logic for the Kinetic prototype
-
-https://github.com/yichehnc/Kinetic
 
 ---
 
@@ -122,15 +105,13 @@ Non-goals:
 - Real patient data
 - Full clinical validation
 
-The project is intended to demonstrate **how incentive design can unlock network effects in healthcare systems**.
+The project is intended to demonstrate through incentive design, how sharing becomes a selfish act that is not driven by fear, but by provding better, continuous care for the patient.
 
 ---
 
 ## Author
 
-Built by Yi  
-Background: architecture → UX → software engineering  
-Focus: systems design, incentives, and clinician-first workflows
+Built by Yichen Cao, 2026
 
 # Run and deploy your AI Studio app
 
