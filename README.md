@@ -9,7 +9,7 @@ This project explores how **incentive design and credit-based system mechanics**
 
 ## Purpose
 
-The goal of Kinetic is to enable **continuity of care** across competing clinics by making patient history sharing a **selfish, rational decision**, low friction act.
+The goal of Kinetic is to foster **continuity of care** across competing clinics by making patient history sharing a **selfish, rational decision** and a low friction act.
 
 Key principles:
 - Remove fear of peer judgment
@@ -61,11 +61,12 @@ https://ai.studio/apps/drive/1qvfc3ZqI0INFEAQDfAO3mRsvSWzIGBz8
 ---
 
 ### 📊 Pitch Deck (Google Slides)
-5-slide pitch covering:
+pitch covering:
 - Problem framing
 - Incentive design
 - Adoption strategy (19% → 80%)
 - Validation approach
+- AI Vibe Coding Workflow
 
 https://docs.google.com/presentation/d/1vnOLCnq-g8epqxYn9oXAZkPKBEMPnC-_/edit?usp=sharing&ouid=105749789515616551075&rtpof=true&sd=true
 
@@ -111,13 +112,8 @@ The project is intended to demonstrate through incentive design, how sharing bec
 
 ## Author
 
-Built by Yichen Cao, 2026
+Yichen Cao
 
-# Run and deploy your AI Studio app
-
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/drive/1qvfc3ZqI0INFEAQDfAO3mRsvSWzIGBz8
 
 ## Run Locally
 
