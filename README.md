@@ -113,6 +113,7 @@ The project is intended to demonstrate through incentive design, how sharing bec
 ## Author
 
 Yichen Cao
+https://www.linkedin.com/in/yichen-cao-87981a124/
 
 
 ## Run Locally
