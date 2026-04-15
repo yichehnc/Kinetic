@@ -8,6 +8,7 @@ interface PatientSearchProps {
   unlockedPatients: string[];
   credits: number;
   onUnlock: (patientId: string) => void;
+  isOptedIn?: boolean;
 }
 
 export const PatientSearch: React.FC<PatientSearchProps> = ({
@@ -15,7 +16,8 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   histories,
   unlockedPatients,
   credits,
-  onUnlock
+  onUnlock,
+  isOptedIn
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -131,9 +133,22 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-0">
-      <div className="mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Patient Intake</h2>
-        <p className="text-slate-500">Search for patient history across the network</p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Patient Intake</h2>
+          <p className="text-slate-500">Search for patient history across the network</p>
+        </div>
+        {isOptedIn && (
+          <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 font-bold text-xs">
+              CP
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Current Clinic</p>
+              <p className="text-sm font-bold text-slate-900">Cremorne Physio</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Search Bar */}

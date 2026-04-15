@@ -13,7 +13,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'intake', label: 'Patient Intake', icon: Users },
     { id: 'contribute', label: 'Contribute', icon: Plus },
-    { id: 'community', label: 'Community (Soon)', icon: MessageSquare },
+    { id: 'community', label: 'Community', icon: MessageSquare },
     { id: 'referrals', label: 'Referrals', icon: Share2 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
