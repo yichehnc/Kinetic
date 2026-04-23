@@ -172,10 +172,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {/* Patient Intake Card */}
         <div 
           onClick={() => isOptedIn && onNavigate('intake')}
-          className={`bg-white rounded-2xl p-6 border shadow-sm relative overflow-hidden group transition-all duration-500 ${
+          className={`bg-white rounded-2xl p-6 shadow-sm relative overflow-hidden group transition-all duration-500 ${
             isOptedIn 
-              ? 'border-slate-200 hover:shadow-2xl hover:scale-[1.015] cursor-pointer' 
-              : 'opacity-50 cursor-not-allowed border-slate-100'
+              ? 'hover:shadow-2xl hover:scale-[1.015] cursor-pointer' 
+              : 'opacity-50 cursor-not-allowed'
           }`}
         >
           <div className="absolute -bottom-6 -right-6 p-6 opacity-[0.03] group-hover:scale-110 transition-transform">
