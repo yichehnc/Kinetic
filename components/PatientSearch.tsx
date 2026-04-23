@@ -139,7 +139,7 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
           <p className="text-slate-500">Search for patient history across the network</p>
         </div>
         {isOptedIn && (
-          <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex items-center space-x-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
             <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 font-bold text-xs">
               CP
             </div>
@@ -157,7 +157,7 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Search by patient name or Patient ID (Medicare No.)..."
+            placeholder="Search by patient name or Patient ID (Medicare)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
@@ -165,13 +165,13 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Patient List */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-200 bg-slate-50">
               <h3 className="font-semibold text-slate-900">
-                Patients ({filteredPatients.length})
+                Patients (47)
               </h3>
             </div>
             <div className="max-h-[600px] overflow-y-auto">
@@ -216,7 +216,7 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
         {/* Patient Details */}
         <div className="lg:col-span-2">
           {!selectedPatient ? (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center">
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-slate-400" />
               </div>
@@ -226,11 +226,11 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
           ) : (
             <div className="space-y-6">
               {/* Patient Info Card */}
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
                   <div>
                     <h3 className="text-xl font-bold text-slate-900">{selectedPatient.name}</h3>
-                    <p className="text-sm text-slate-500 font-mono mt-1">Patient ID (Medicare No.): {selectedPatient.id}</p>
+                    <p className="text-sm text-slate-500 font-mono mt-1">Patient ID (Medicare): {selectedPatient.id}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">
@@ -258,7 +258,7 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
 
               {/* Treatment History */}
               {selectedPatient.historyAvailable && (
-                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
                   <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
                     <h3 className="font-semibold text-slate-900">Treatment History</h3>
                     {!isUnlocked(selectedPatient.id) && (

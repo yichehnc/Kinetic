@@ -1,16 +1,22 @@
 import { Patient, HistoryEntry, Status, TreatmentType, Appointment } from './types';
 
 export const MOCK_PATIENTS: Patient[] = [
-  { id: 'P001', name: 'Sarah Jenkins', dob: '1985-04-12', lastVisit: '2023-10-15', historyAvailable: true },
-  { id: 'P002', name: 'Michael Chen', dob: '1990-08-22', lastVisit: '2024-01-10', historyAvailable: true },
-  { id: 'P003', name: 'David Smith', dob: '1978-11-03', lastVisit: '2024-02-01', historyAvailable: false }, // New patient, no history
-  { id: 'P004', name: 'Emma Wilson', dob: '1995-02-14', lastVisit: '2023-12-05', historyAvailable: true },
+  { id: '3482 91024 1', name: 'Sarah Jenkins', dob: '1985-04-12', lastVisit: '2023-10-15', historyAvailable: true },
+  { id: '8291 03845 2', name: 'Michael Chen', dob: '1990-08-22', lastVisit: '2024-01-10', historyAvailable: true },
+  { id: '1092 58172 1', name: 'David Smith', dob: '1978-11-03', lastVisit: '2024-02-01', historyAvailable: false },
+  { id: '5521 90124 3', name: 'Emma Wilson', dob: '1995-02-14', lastVisit: '2023-12-05', historyAvailable: true },
+  { id: '2938 10045 1', name: 'Thomas Mueller', dob: '1982-06-30', lastVisit: '2024-03-20', historyAvailable: true },
+  { id: '2291 88471 1', name: 'Sophie Laurent', dob: '1992-12-05', lastVisit: '2024-04-15', historyAvailable: true },
+  { id: '9102 38475 2', name: 'James Anderson', dob: '1975-09-18', lastVisit: '2024-02-28', historyAvailable: false },
+  { id: '4432 10985 1', name: 'Olivia Taylor', dob: '1988-11-20', lastVisit: '2024-05-02', historyAvailable: true },
+  { id: '7721 03948 2', name: 'Lucas Rossi', dob: '1993-03-14', lastVisit: '2024-04-22', historyAvailable: true },
+  { id: '1182 93041 3', name: 'Isabella Garcia', dob: '1980-07-09', lastVisit: '2024-05-10', historyAvailable: false },
 ];
 
 export const MOCK_HISTORY: HistoryEntry[] = [
   {
     id: 'H001',
-    patientId: 'P001',
+    patientId: '3482 91024 1',
     condition: 'Chronic Lower Back Pain',
     timelineStart: '2023-01-10',
     timelineEnd: '2023-06-15',
@@ -23,7 +29,7 @@ export const MOCK_HISTORY: HistoryEntry[] = [
   },
   {
     id: 'H002',
-    patientId: 'P002',
+    patientId: '8291 03845 2',
     condition: 'Rotator Cuff Tendinopathy',
     timelineStart: '2023-11-01',
     status: Status.ONGOING,
@@ -35,7 +41,7 @@ export const MOCK_HISTORY: HistoryEntry[] = [
   },
   {
     id: 'H004',
-    patientId: 'P004',
+    patientId: '5521 90124 3',
     condition: 'Lateral Ankle Sprain (Grade II)',
     timelineStart: '2023-12-05',
     status: Status.PLATEAUED,
@@ -48,10 +54,10 @@ export const MOCK_HISTORY: HistoryEntry[] = [
 ];
 
 export const MOCK_SCHEDULE: Appointment[] = [
-  { id: 'APT01', time: '09:00 AM', patientId: 'P001', reason: 'LBP Maintenance', status: 'Completed' },
-  { id: 'APT02', time: '10:00 AM', patientId: 'P002', reason: 'Shoulder Assessment', status: 'Arrived' },
-  { id: 'APT03', time: '11:30 AM', patientId: 'P004', reason: 'Ankle Rehab', status: 'Scheduled' },
-  { id: 'APT04', time: '01:00 PM', patientId: 'P003', reason: 'Initial Consult', status: 'Scheduled' },
+  { id: 'APT01', time: '09:00 AM', patientId: '3482 91024 1', reason: 'LBP Maintenance', status: 'Completed' },
+  { id: 'APT02', time: '10:00 AM', patientId: '8291 03845 2', reason: 'Shoulder Assessment', status: 'Arrived' },
+  { id: 'APT03', time: '11:30 AM', patientId: '5521 90124 3', reason: 'Ankle Rehab', status: 'Scheduled' },
+  { id: 'APT04', time: '01:00 PM', patientId: '1092 58172 1', reason: 'Initial Consult', status: 'Scheduled' },
 ];
 
 export const TREATMENTS_LIST = Object.values(TreatmentType);

@@ -21,20 +21,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOptOut
 }) => {
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-0">
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="max-w-7xl mx-auto px-4 md:px-0 pb-12">
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Dashboard</h2>
-          <p className="text-slate-500">Welcome to the Kinetic Network</p>
+          <h2 className="text-2xl font-brand font-extrabold text-slate-900 tracking-tight mb-1">Dashboard</h2>
+          <p className="text-sm text-slate-500 font-medium">Welcome back to the Kinetic Network</p>
         </div>
         {isOptedIn && (
-          <div className="flex items-center space-x-3 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
-            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 font-bold text-xs">
+          <div className="flex items-center space-x-3 bg-white/60 backdrop-blur-md px-4 py-2 rounded-xl border border-white/50 shadow-sm ring-1 ring-black/[0.03]">
+            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-brand font-bold text-xs shadow-inner transform -rotate-2">
               CP
             </div>
             <div>
-              <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Current Clinic</p>
-              <p className="text-sm font-bold text-slate-900">Cremorne Physio</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 leading-none mb-1">Clinic Active</p>
+              <p className="text-xs font-brand font-bold text-slate-900">Cremorne Physio</p>
             </div>
           </div>
         )}
@@ -42,248 +42,273 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Opt-in/Opt-out Banner */}
       {!isOptedIn && (
-        <div className="mb-6 bg-amber-50 border-2 border-amber-200 rounded-xl p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="font-bold text-amber-900 mb-1 flex items-center">
-                <LogOut className="w-5 h-5 mr-2" />
-                Network Opted Out
-              </h3>
-              <p className="text-sm text-amber-700">
-                You are currently opted out of the Kinetic Network. Opt back in to access patient histories and earn credits.
-              </p>
+        <div className="mb-8 p-[1px] bg-gradient-to-r from-amber-200 via-amber-300 to-amber-200 rounded-2xl">
+          <div className="bg-white rounded-2xl p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <LogOut className="w-6 h-6 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="font-brand font-bold text-slate-900 mb-1">
+                    Network Connection Inactive
+                  </h3>
+                  <p className="text-sm text-slate-500 max-w-md">
+                    You are currently opted out. Reconnecting allows you to securely access shared patient histories and clinical insights.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onOptIn}
+                className="flex items-center px-6 py-3 bg-slate-900 text-white rounded-xl font-brand font-bold text-sm hover:bg-slate-800 transition-all shadow-lg active:scale-95"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Opt In to Network
+              </button>
             </div>
-            <button
-              onClick={onOptIn}
-              className="flex items-center px-6 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap"
-            >
-              <LogIn className="w-5 h-5 mr-2" />
-              Opt In to Network
-            </button>
           </div>
         </div>
       )}
 
-      {/* Stats Grid - BUG FIX #5: Responsive grid */}
+      {/* Stats Grid - Refined Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {/* Credits Card */}
-        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border-2 border-emerald-200 shadow-sm">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-sm font-medium text-emerald-700 mb-1">Available Credits</p>
-              <p className="text-4xl font-bold text-emerald-900">{credits}</p>
-              <p className="text-xs text-emerald-600 mt-2">
-                {isOptedIn ? 'Earn more by contributing' : 'Opt in to earn credits'}
+        <div className="bg-white/70 backdrop-blur-xl rounded-2xl p-5 border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white transition-all duration-500">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+          <div className="relative z-10 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
+                <Award className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div className="flex items-center space-x-1 text-[11px] font-bold text-emerald-600 uppercase tracking-[0.1em]">
+                <TrendingUp className="w-3 h-3" />
+                <span>Active Rank</span>
+              </div>
+            </div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-1">Available Credits</p>
+            <p className="text-4xl font-brand font-extrabold text-slate-900 mb-4">{credits}</p>
+            
+            <div className="mt-auto">
+              <p className="text-[11px] text-slate-400 pt-3 border-t border-slate-900/5 mb-3">
+                {isOptedIn ? 'Share clinical data to boost liquidity' : 'Connect to start earning'}
               </p>
+              <button 
+                className="text-xs font-bold font-brand text-emerald-600 hover:text-emerald-700 flex items-center group/btn"
+                onClick={() => {}}
+              >
+                Explore payment plan <ArrowRight className="w-3 h-3 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />
+              </button>
             </div>
-            <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-              <Award className="w-6 h-6 text-emerald-600" />
-            </div>
-          </div>
-          <div className="flex items-center text-sm text-emerald-700">
-            <TrendingUp className="w-4 h-4 mr-1" />
-            <span>+1 per contribution</span>
           </div>
         </div>
 
         {/* Contributions Card */}
-        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Total Contributions</p>
-              <p className="text-4xl font-bold text-slate-900">{contributionCount}</p>
-              <p className="text-xs text-slate-500 mt-2">Histories shared with network</p>
+        <div 
+          onClick={() => isOptedIn && onNavigate('contribute')}
+          className={`rounded-2xl p-5 border shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group transition-all duration-500 ${
+            isOptedIn 
+              ? 'bg-white/70 backdrop-blur-xl border-white/80 hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white cursor-pointer' 
+              : 'bg-white/40 border-white/20 opacity-75'
+          }`}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+          <div className="flex flex-col h-full relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-slate-100/50 rounded-xl flex items-center justify-center transition-colors group-hover:bg-blue-50/80 backdrop-blur-sm">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+              </div>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-blue-600" />
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-1">Total Contributions</p>
+            <p className="text-4xl font-brand font-extrabold text-slate-900 mb-4">{contributionCount}</p>
+            <div className="mt-auto">
+              <p className="text-[11px] text-slate-400 pt-3 border-t border-slate-900/5 mb-3">Protocols shared</p>
+              <button 
+                disabled={!isOptedIn}
+                className={`text-xs font-bold flex items-center font-brand tracking-tight transition-colors ${
+                  isOptedIn ? 'text-blue-600 group-hover:text-blue-700' : 'text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                Contribute <ArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-0.5 transition-transform" />
+              </button>
             </div>
           </div>
-          <button 
-            onClick={() => onNavigate('contribute')}
-            disabled={!isOptedIn}
-            className={`text-sm font-medium flex items-center ${
-              isOptedIn ? 'text-blue-600 hover:text-blue-700' : 'text-slate-400 cursor-not-allowed'
-            }`}
-          >
-            Contribute now <ArrowRight className="w-4 h-4 ml-1" />
-          </button>
         </div>
 
         {/* Unlocked Records Card */}
-        <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Unlocked Records</p>
-              <p className="text-4xl font-bold text-slate-900">{unlockedCount}</p>
-              <p className="text-xs text-slate-500 mt-2">Patient histories accessed</p>
+        <div 
+          onClick={() => isOptedIn && onNavigate('intake')}
+          className={`rounded-2xl p-5 border shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group transition-all duration-500 ${
+            isOptedIn 
+              ? 'bg-white/70 backdrop-blur-xl border-white/80 hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white cursor-pointer' 
+              : 'bg-white/40 border-white/20 opacity-75'
+          }`}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+          <div className="flex flex-col h-full relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-slate-100/50 rounded-xl flex items-center justify-center transition-colors group-hover:bg-purple-50/80 backdrop-blur-sm">
+                <Users className="w-5 h-5 text-purple-600" />
+              </div>
             </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Users className="w-6 h-6 text-purple-600" />
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-1">Unlocked Records</p>
+            <p className="text-4xl font-brand font-extrabold text-slate-900 mb-4">{unlockedCount}</p>
+            <div className="mt-auto">
+              <p className="text-[11px] text-slate-400 pt-3 border-t border-slate-900/5 mb-3">Histories accessed</p>
+              <button 
+                disabled={!isOptedIn}
+                className={`text-xs font-bold flex items-center font-brand tracking-tight transition-colors ${
+                  isOptedIn ? 'text-purple-600 group-hover:text-purple-700' : 'text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                Open Intake <ArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-0.5 transition-transform" />
+              </button>
             </div>
           </div>
-          <button 
-            onClick={() => onNavigate('intake')}
-            disabled={!isOptedIn}
-            className={`text-sm font-medium flex items-center ${
-              isOptedIn ? 'text-purple-600 hover:text-purple-700' : 'text-slate-400 cursor-not-allowed'
-            }`}
-          >
-            Search patients <ArrowRight className="w-4 h-4 ml-1" />
-          </button>
         </div>
       </div>
 
-      {/* Quick Actions - BUG FIX #5: Responsive grid */}
+      {/* Quick Actions - Bento style */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Patient Intake Card */}
         <div 
           onClick={() => isOptedIn && onNavigate('intake')}
-          className={`bg-white rounded-xl p-6 border border-slate-200 shadow-sm transition-all ${
+          className={`bg-white rounded-2xl p-6 border shadow-sm relative overflow-hidden group transition-all duration-500 ${
             isOptedIn 
-              ? 'hover:shadow-lg hover:border-slate-300 cursor-pointer group' 
-              : 'opacity-50 cursor-not-allowed'
+              ? 'border-slate-200 hover:shadow-2xl hover:scale-[1.015] cursor-pointer' 
+              : 'opacity-50 cursor-not-allowed border-slate-100'
           }`}
         >
-          <div className="flex items-start justify-between mb-4">
-            <div className={`w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center ${
-              isOptedIn && 'group-hover:scale-110'
-            } transition-transform`}>
-              <Search className="w-6 h-6 text-blue-600" />
-            </div>
-            {isOptedIn && (
-              <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-1 transition-all" />
-            )}
+          <div className="absolute -bottom-6 -right-6 p-6 opacity-[0.03] group-hover:scale-110 transition-transform">
+            <Search className="w-32 h-32 text-slate-900" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-2">Patient Intake</h3>
-          <p className="text-sm text-slate-500 mb-4">
-            Search for patient history and clinical snapshots across the network
-          </p>
-          {isOptedIn ? (
-            <div className="inline-flex items-center text-sm font-medium text-blue-600">
-              Search patients <ArrowRight className="w-4 h-4 ml-1" />
+          <div className="relative z-10 h-full flex flex-col">
+            <div className={`w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 border border-emerald-100`}>
+              <Search className="w-6 h-6 text-emerald-600" />
             </div>
-          ) : (
-            <div className="text-sm text-amber-600 font-medium">
-              Opt in to access
+            <h3 className="text-lg font-brand font-extrabold text-slate-900 mb-1">Patient Intake</h3>
+            <p className="text-xs text-slate-500 mb-6 max-w-xs leading-relaxed font-medium">
+              Securely query the network for longitudinal patient history.
+            </p>
+            <div className="mt-auto pt-4 border-t border-slate-100">
+              {isOptedIn ? (
+                <div className="inline-flex items-center text-xs font-bold text-emerald-600 font-brand tracking-tight">
+                  Begin search <ArrowRight className="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" />
+                </div>
+              ) : (
+                <div className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">
+                  Locked
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Contribute Data Card */}
         <div 
           onClick={() => isOptedIn && onNavigate('contribute')}
-          className={`rounded-xl p-6 border shadow-sm transition-all ${
+          className={`rounded-2xl p-6 border shadow-sm relative overflow-hidden group transition-all duration-500 ${
             isOptedIn
-              ? 'bg-gradient-to-br from-emerald-500 to-teal-500 border-emerald-600 hover:shadow-lg cursor-pointer group text-white'
-              : 'bg-slate-200 border-slate-300 opacity-50 cursor-not-allowed text-slate-500'
+              ? 'bg-slate-900 border-slate-800 hover:shadow-2xl hover:scale-[1.015] cursor-pointer text-white'
+              : 'bg-slate-50 border-slate-200 opacity-50 cursor-not-allowed text-slate-400'
           }`}
         >
-          <div className="flex items-start justify-between mb-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-              isOptedIn 
-                ? 'bg-white/20 group-hover:scale-110' 
-                : 'bg-slate-300'
-            } transition-transform`}>
-              <Plus className={`w-6 h-6 ${isOptedIn ? 'text-white' : 'text-slate-400'}`} />
-            </div>
-            {isOptedIn && (
-              <div className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
-                +1 Credit
-              </div>
-            )}
+          <div className="absolute -bottom-6 -right-6 p-6 opacity-10 group-hover:scale-110 transition-transform">
+            <Plus className="w-32 h-32 text-white" />
           </div>
-          <h3 className="text-lg font-bold mb-2">Contribute Data</h3>
-          <p className={`text-sm mb-4 ${isOptedIn ? 'text-emerald-50' : 'text-slate-400'}`}>
-            Share treatment outcomes and earn credits for network access
-          </p>
-          {isOptedIn ? (
-            <div className="inline-flex items-center text-sm font-medium">
-              Contribute now <ArrowRight className="w-4 h-4 ml-1" />
+          <div className="relative z-10 h-full flex flex-col">
+            <div className="flex items-start justify-between mb-4">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${
+                isOptedIn ? 'bg-white/10 shadow-lg' : 'bg-slate-100'
+              }`}>
+                <Plus className={`w-6 h-6 ${isOptedIn ? 'text-emerald-400' : 'text-slate-400'}`} />
+              </div>
+              {isOptedIn && (
+                <div className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-[9px] font-bold uppercase tracking-[0.1em] border border-emerald-500/30">
+                  +1 Credit
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="text-sm font-medium text-amber-600">
-              Opt in to contribute
+            <h3 className="text-lg font-brand font-extrabold mb-1">Contribute Evidence</h3>
+            <p className={`text-xs mb-6 max-w-xs leading-relaxed font-medium ${isOptedIn ? 'text-slate-300' : 'text-slate-400'}`}>
+              Deposit structured outcomes to earn network credits.
+            </p>
+            <div className="mt-auto pt-4 border-t border-white/10">
+              {isOptedIn ? (
+                <div className="inline-flex items-center text-xs font-bold font-brand tracking-tight text-white hover:text-emerald-400">
+                  Start contribution <ArrowRight className="w-3 h-3 ml-1 transition-transform group-hover:translate-x-1" />
+                </div>
+              ) : (
+                <div className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">
+                  Locked
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Network Info */}
-      <div className={`rounded-xl p-6 border ${
+      {/* Network Status - Minimal Strip */}
+      <div className={`rounded-2xl p-5 border flex items-center justify-between transition-colors ${
         isOptedIn 
-          ? 'bg-blue-50 border-blue-200' 
-          : 'bg-slate-100 border-slate-200'
+          ? 'bg-emerald-50/30 border-emerald-100' 
+          : 'bg-slate-50 border-slate-200'
       }`}>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-4">
+          <div className={`w-3 h-3 rounded-full ${
+            isOptedIn ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'
+          }`} />
           <div>
-            <h3 className={`font-semibold mb-1 ${isOptedIn ? 'text-blue-900' : 'text-slate-700'}`}>
-              Network Status
-            </h3>
-            <p className={`text-sm ${isOptedIn ? 'text-blue-700' : 'text-slate-500'}`}>
-              {isOptedIn 
-                ? 'You are connected to the Kinetic Network. Your data is encrypted and anonymized.'
-                : 'You are currently opted out. Your data is not being shared with the network.'}
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${
-              isOptedIn ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
-            }`}></div>
-            <span className={`text-sm font-medium ${isOptedIn ? 'text-blue-900' : 'text-slate-600'}`}>
-              {isOptedIn ? 'Active' : 'Inactive'}
+            <span className={`text-xs font-bold uppercase tracking-widest ${isOptedIn ? 'text-emerald-700' : 'text-slate-500'}`}>
+              Network Status: {isOptedIn ? 'Encrypted & Active' : 'Disconnected'}
             </span>
           </div>
         </div>
-        
         {isOptedIn && (
-          <div className="mt-4 pt-4 border-t border-blue-200">
-            <button
-              onClick={onOptOut}
-              className="flex items-center text-sm text-red-600 hover:text-red-700 font-medium"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Opt Out of Network (will remove all credits)
-            </button>
-          </div>
+          <button
+            onClick={onOptOut}
+            className="text-[10px] uppercase tracking-widest font-bold text-slate-400 hover:text-red-500 transition-colors"
+          >
+            Disconnect Network
+          </button>
         )}
       </div>
 
-      {/* Getting Started Guide - Responsive */}
-      <div className="mt-8 bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
-        <h3 className="text-lg font-bold text-slate-900 mb-4">Getting Started</h3>
+      {/* Getting Started Guide - compact */}
+      <div className="mt-8 bg-white/60 backdrop-blur-xl rounded-2xl p-5 border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <h3 className="text-sm font-brand font-extrabold text-slate-900 mb-4 tracking-tight">Getting Started</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex flex-col sm:flex-row md:flex-col items-start gap-3">
-            <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-emerald-600 font-bold">1</span>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0 border border-emerald-100">
+              <span className="text-emerald-600 font-bold text-xs">1</span>
             </div>
             <div>
-              <h4 className="font-semibold text-slate-900 mb-1">Contribute Patient Data</h4>
-              <p className="text-sm text-slate-500">
-                Share structured treatment outcomes to earn credits
+              <h4 className="text-xs font-brand font-bold text-slate-900 mb-0.5">Contribute Data</h4>
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Share outcomes to earn credits.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row md:flex-col items-start gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-blue-600 font-bold">2</span>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 border border-blue-100">
+              <span className="text-blue-600 font-bold text-xs">2</span>
             </div>
             <div>
-              <h4 className="font-semibold text-slate-900 mb-1">Search Network History</h4>
-              <p className="text-sm text-slate-500">
-                Look up patients to access their treatment history
+              <h4 className="text-xs font-brand font-bold text-slate-900 mb-0.5">Search History</h4>
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Look up patients in the network.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row md:flex-col items-start gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-purple-600 font-bold">3</span>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0 border border-purple-100">
+              <span className="text-purple-600 font-bold text-xs">3</span>
             </div>
             <div>
-              <h4 className="font-semibold text-slate-900 mb-1">Unlock with Credits</h4>
-              <p className="text-sm text-slate-500">
-                Use credits to unlock patient histories for continuity of care
+              <h4 className="text-xs font-brand font-bold text-slate-900 mb-0.5">Unlock Records</h4>
+              <p className="text-[11px] text-slate-500 leading-normal">
+                Use credits for patient safety.
               </p>
             </div>
           </div>

@@ -130,127 +130,127 @@ export const Community: React.FC = () => {
   const sortedClinics = [...CLINICS].sort((a, b) => b.contributions - a.contributions);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 md:px-0 space-y-8 pb-12">
+    <div className="max-w-4xl mx-auto space-y-10 pb-20">
       {/* Main Content - Feed First */}
       <div className="min-w-0">
-        <div className="flex gap-1 mb-6 border-b border-slate-200">
+        <div className="flex gap-4 sm:gap-8 mb-8 border-b border-slate-200">
           <button 
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === 'feed' ? 'text-emerald-600 border-emerald-600' : 'text-slate-500 border-transparent hover:text-slate-700'
+            className={`pb-4 text-sm font-brand font-bold transition-all border-b-2 -mb-px tracking-tight ${
+              activeTab === 'feed' ? 'text-slate-900 border-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600'
             }`}
             onClick={() => setActiveTab('feed')}
           >
-            Community Feed
+            Insights Feed
           </button>
           <button 
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === 'recs' ? 'text-emerald-600 border-emerald-600' : 'text-slate-500 border-transparent hover:text-slate-700'
+            className={`pb-4 text-sm font-brand font-bold transition-all border-b-2 -mb-px tracking-tight ${
+              activeTab === 'recs' ? 'text-slate-900 border-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600'
             }`}
             onClick={() => setActiveTab('recs')}
           >
-            Recommendations
+            Clinical Match
           </button>
         </div>
 
         {activeTab === 'feed' ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {posts.map(post => {
               const clinic = CLINICS.find(c => c.id === post.clinic)!;
               return (
-                <div key={post.id} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold ${clinic.color}`}>
+                <div key={post.id} className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white transition-all duration-500 group">
+                  <div className="flex items-center gap-4 mb-6 relative z-10">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xs font-brand font-bold shadow-sm transition-transform group-hover:scale-110 duration-500 ${clinic.color}`}>
                       {clinic.initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-bold text-slate-900">{clinic.name}</div>
-                      <div className="text-xs text-slate-500">{clinic.suburb}</div>
+                      <div className="text-sm font-brand font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">{clinic.name}</div>
+                      <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">{clinic.suburb}</div>
                     </div>
-                    <div className="text-xs text-slate-400 flex items-center gap-1">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center gap-1 bg-white/50 backdrop-blur-sm px-2 py-1 rounded-md border border-white/50">
                       <Clock className="w-3 h-3" />
                       {post.time}
                     </div>
                   </div>
-                  <h4 className="text-base font-bold text-slate-900 mb-2">{post.title}</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-4">{post.body}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <h4 className="text-xl font-brand font-extrabold text-slate-900 mb-3 tracking-tight relative z-10">{post.title}</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed mb-6 font-medium relative z-10">{post.body}</p>
+                  <div className="flex flex-wrap gap-2 mb-6 relative z-10">
                     {post.tags.map(tag => (
-                      <span key={tag} className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full">
+                      <span key={tag} className="px-3 py-1 bg-white/40 text-slate-600 text-[10px] font-bold rounded-lg border border-white/60 uppercase tracking-wider backdrop-blur-sm">
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                    <div className="flex items-center gap-6">
-                      <button 
-                        className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
-                          post.liked ? 'text-emerald-600' : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                        onClick={() => toggleLike(post.id)}
-                      >
-                        <Heart className={`w-4 h-4 ${post.liked ? 'fill-current' : ''}`} />
-                        {post.likes}
-                      </button>
-                      <button className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900">
-                        <MessageCircle className="w-4 h-4" />
-                        Reply
-                      </button>
-                      <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                        <Eye className="w-4 h-4" />
-                        {post.views} views
-                      </div>
-                    </div>
-                    <button 
-                      className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all"
-                      onClick={() => openDM(post.clinic)}
-                    >
-                      Contact Clinic
-                    </button>
-                  </div>
+                  <div className="flex items-center justify-between pt-6 border-t border-slate-900/5 relative z-10">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-8">
+              <button 
+                className={`flex items-center gap-2 text-xs font-bold transition-colors ${
+                  post.liked ? 'text-rose-500' : 'text-slate-400 hover:text-slate-900'
+                }`}
+                onClick={() => toggleLike(post.id)}
+              >
+                <Heart className={`w-4 h-4 ${post.liked ? 'fill-current' : ''}`} />
+                {post.likes}
+              </button>
+              <button className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-900">
+                <MessageSquare className="w-4 h-4" />
+                Reply
+              </button>
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                <Eye className="w-4 h-4" />
+                {post.views}
+              </div>
+            </div>
+            <button 
+              className="w-full sm:w-auto px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-brand font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95 mt-4 sm:mt-0"
+              onClick={() => openDM(post.clinic)}
+            >
+              Contact Clinic
+            </button>
+          </div>
                 </div>
               );
             })}
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="text-sm text-slate-500 mb-4">
-              Based on your contribution history — cases similar to your recent submissions.
+          <div className="space-y-6">
+            <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-6 py-2 px-4 bg-emerald-50 rounded-lg inline-block border border-emerald-100">
+              High-confidence matches based on your recent cases
             </div>
             {RECOMMENDATIONS.map((rec, i) => {
               const clinic = CLINICS.find(c => c.id === rec.clinic)!;
               return (
-                <div key={i} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold ${clinic.color}`}>
+                <div key={i} className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white transition-all duration-500 group">
+                  <div className="flex items-center gap-4 mb-6 relative z-10">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xs font-brand font-bold transition-transform group-hover:scale-110 duration-500 ${clinic.color}`}>
                       {clinic.initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-bold text-slate-900">{clinic.name}</div>
+                      <div className="text-sm font-brand font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{clinic.name}</div>
                     </div>
-                    <div className="px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full">
+                    <div className="px-3 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest shadow-md">
                       {rec.match}% match
                     </div>
                   </div>
-                  <h4 className="text-base font-bold text-slate-900 mb-2">{rec.title}</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-4">{rec.body}</p>
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                    <div className="flex items-center gap-6 text-xs text-slate-400">
-                      <div className="flex items-center gap-1.5">
-                        <Eye className="w-4 h-4" />
-                        {rec.views} views
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <TrendingUp className="w-4 h-4" />
-                        {rec.upvotes} upvotes
-                      </div>
-                    </div>
-                    <button 
-                      className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 hover:bg-white hover:border-slate-300 transition-all"
-                      onClick={() => openDM(rec.clinic)}
-                    >
-                      Contact Clinic
-                    </button>
-                  </div>
+                  <h4 className="text-xl font-brand font-extrabold text-slate-900 mb-3 tracking-tight relative z-10">{rec.title}</h4>
+                  <p className="text-sm text-slate-600 leading-relaxed mb-6 font-medium relative z-10">{rec.body}</p>
+                  <div className="flex items-center justify-between pt-6 border-t border-slate-900/5 relative z-10">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-xs font-bold text-slate-400">
+            <div className="flex items-center gap-2 hover:text-slate-900 transition-colors">
+              <Eye className="w-4 h-4" />
+              {rec.views}
+            </div>
+            <div className="flex items-center gap-2 hover:text-slate-900 transition-colors">
+              <TrendingUp className="w-4 h-4" />
+              {rec.upvotes}
+            </div>
+          </div>
+          <button 
+            className="w-full sm:w-auto px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-brand font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95 mt-4 sm:mt-0"
+            onClick={() => openDM(rec.clinic)}
+          >
+            Contact Clinic
+          </button>
+        </div>
                 </div>
               );
             })}
@@ -258,56 +258,61 @@ export const Community: React.FC = () => {
         )}
       </div>
 
-      {/* Stats Section - Below Feed */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-6">Network Performance Stats</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
-            <div className="text-2xl font-bold text-slate-900">38</div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold mt-1">Active Clinics</div>
-          </div>
-          <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
-            <div className="text-2xl font-bold text-slate-900">412</div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold mt-1">Contributions</div>
-          </div>
-          <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
-            <div className="text-2xl font-bold text-slate-900">91</div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold mt-1">Unlocks (7d)</div>
-          </div>
-          <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-100">
-            <div className="text-2xl font-bold text-slate-900">5.2k</div>
-            <div className="text-[10px] text-slate-500 uppercase font-bold mt-1">Total Reach</div>
+      {/* Stats Section - Refined Glass Dark */}
+      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden group hover:scale-[1.005] transition-all duration-700">
+        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-1000">
+          <TrendingUp className="w-32 h-32 text-white" />
+        </div>
+        <div className="relative z-10">
+          <h3 className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em] mb-10">Network Growth Metrics</h3>
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-4 sm:gap-8">
+            <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
+              <div className="text-2xl sm:text-3xl font-brand font-extrabold text-white">38</div>
+              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Verified Units</div>
+            </div>
+            <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
+              <div className="text-2xl sm:text-3xl font-brand font-extrabold text-white">412</div>
+              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Safe Deposits</div>
+            </div>
+            <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
+              <div className="text-2xl sm:text-3xl font-brand font-extrabold text-white">91</div>
+              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Active Unlocks</div>
+            </div>
+            <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
+              <div className="text-2xl sm:text-3xl font-brand font-extrabold text-emerald-400">5.2k</div>
+              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Global Reach</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Top Clinics Section - Nuanced Representation */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Clinic Spotlight Section */}
+      <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
-            <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Clinic Spotlight</h3>
-            <span className="text-[10px] text-slate-400 italic">Updated daily based on network impact</span>
+            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Clinic Spotlight</h3>
+            <span className="text-[10px] text-slate-400 italic">Leaderboard reflecting clinical impact score</span>
           </div>
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="relative w-full sm:w-80 group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
             <input 
               type="text"
-              placeholder="Search clinics..."
+              placeholder="Search by clinic or locality..."
               value={clinicSearch}
               onChange={(e) => setClinicSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 outline-none transition-all shadow-sm"
             />
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sortedClinics
             .filter(c => c.name.toLowerCase().includes(clinicSearch.toLowerCase()) || c.suburb.toLowerCase().includes(clinicSearch.toLowerCase()))
             .slice(0, 4).map((clinic, i) => {
             const badges = [
-              { label: 'Data Pioneer', color: 'bg-amber-50 text-amber-700 border-amber-100' },
+              { label: 'Network Alpha', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
               { label: 'High Impact', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-              { label: 'Top Contributor', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+              { label: 'Top Contributor', color: 'bg-slate-900 text-white border-slate-800' },
               { label: 'Quality Leader', color: 'bg-purple-50 text-purple-700 border-purple-100' },
             ];
             const badge = badges[i % badges.length];
@@ -315,34 +320,45 @@ export const Community: React.FC = () => {
             return (
               <div 
                 key={clinic.id} 
-                className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-emerald-300 transition-all cursor-pointer group"
+                className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 cursor-pointer group hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white"
                 onClick={() => openDM(clinic.id)}
               >
-                <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${clinic.color}`}>
+                <div className="flex items-start gap-5 relative z-10">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-sm font-brand font-bold flex-shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500 ${clinic.color}`}>
                     {clinic.initials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="text-sm font-bold text-slate-900 truncate group-hover:text-emerald-600 transition-colors">{clinic.name}</div>
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${badge.color}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-base font-brand font-extrabold text-slate-900 truncate group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{clinic.name}</div>
+                    </div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{clinic.suburb}</span>
+                      <span className="text-slate-200">•</span>
+                      <span className={`text-[8px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-widest transition-colors ${badge.color}`}>
                         {badge.label}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500 mb-3">{clinic.suburb}</div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="text-center p-1.5 bg-slate-50 rounded-lg">
-                        <div className="text-xs font-bold text-slate-700">{clinic.contributions}</div>
-                        <div className="text-[8px] text-slate-400 uppercase">Contribs</div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center py-2 bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm group-hover:bg-white/60 transition-colors">
+                        <div className="text-sm font-brand font-bold text-slate-900">{clinic.contributions}</div>
+                        <div className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">Deposits</div>
                       </div>
-                      <div className="text-center p-1.5 bg-slate-50 rounded-lg">
-                        <div className="text-xs font-bold text-slate-700">{clinic.upvotes}</div>
-                        <div className="text-[8px] text-slate-400 uppercase">Upvotes</div>
+                      <div className="text-center py-2 bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm group-hover:bg-white/60 transition-colors">
+                        <div className="text-sm font-brand font-bold text-slate-900">{clinic.upvotes}</div>
+                        <div className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">Upvotes</div>
                       </div>
-                      <div className="text-center p-1.5 bg-slate-50 rounded-lg">
-                        <div className="text-xs font-bold text-slate-700">{(clinic.views / 100).toFixed(1)}k</div>
-                        <div className="text-[8px] text-slate-400 uppercase">Reach</div>
+                      <div className="text-center py-2 bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm group-hover:bg-white/60 transition-colors">
+                        <div className="text-sm font-brand font-bold text-slate-900">{(clinic.views / 100).toFixed(1)}k</div>
+                        <div className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">Impact</div>
                       </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-slate-900/5">
+                      <button 
+                        className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-bold hover:bg-slate-800 transition-all uppercase tracking-widest shadow-lg active:scale-95"
+                        onClick={() => openDM(clinic.id)}
+                      >
+                        Contact Clinic
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -351,8 +367,8 @@ export const Community: React.FC = () => {
           })}
         </div>
         
-        <button className="w-full py-3 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
-          View All Clinics
+        <button className="w-full py-6 text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.3em] font-brand">
+          Browse Full Directory
         </button>
       </div>
 

@@ -26,21 +26,23 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 gap-4">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-lg">K</span>
+              <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg transform rotate-3">
+                <span className="text-white font-brand font-bold text-xl">K</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-slate-900">Kinetic Network</h1>
-                <p className="text-xs text-slate-500">Continuity through collaboration</p>
+                <h1 className="text-xl font-brand font-extrabold text-slate-900 tracking-tight">Kinetic Network</h1>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-emerald-600">Continuity through collaboration</p>
               </div>
             </div>
 
             {/* Credits Badge */}
-            <div className="flex items-center space-x-2 bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-200">
-              <Award className="w-5 h-5 text-emerald-600" />
+            <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+              <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <Award className="w-4 h-4 text-emerald-600" />
+              </div>
               <div>
-                <p className="text-xs text-emerald-600 font-medium">Credits</p>
-                <p className="text-lg font-bold text-emerald-900">{credits}</p>
+                <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider leading-none">Available Credits</p>
+                <p className="text-base font-brand font-bold text-slate-900">{credits}</p>
               </div>
             </div>
           </div>
@@ -86,7 +88,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
       <footer className="bg-white border-t border-slate-200 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-            <p>© 2026 Kinetic Network. All rights reserved.</p>
+            <p>© 2026 Kinetic Network. All rights reserved. <a href="http://linkedin.com/in/ycaoc" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors underline decoration-slate-200 underline-offset-4">Yichen Cao</a></p>
             <div className="flex flex-wrap items-center gap-4 justify-center">
               <a href="#" className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded">
                 Privacy Policy
