@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { PatientSearch } from './components/PatientSearch';
@@ -312,6 +313,7 @@ const App: React.FC = () => {
       {notification && (
         <Notification message={notification} onClose={() => setNotification(null)} />
       )}
+      <Analytics />
     </Layout>
   );
 };
