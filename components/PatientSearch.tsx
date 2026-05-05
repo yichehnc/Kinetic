@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Lock, Unlock, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Download, Upload, Eye, FileText } from 'lucide-react';
+import { Search, Lock, Unlock, Clock, CheckCircle, AlertCircle, ChevronDown, ChevronUp, Download, Upload, Eye, FileText, Activity, User } from 'lucide-react';
 import { Patient, HistoryEntry } from '../types';
 
 interface PatientSearchProps {
@@ -20,6 +20,7 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   isOptedIn
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchMode, setSearchMode] = useState<'patient' | 'condition'>('patient');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
   const [clinicianNotes, setClinicianNotes] = useState<{ [key: string]: string }>({});
@@ -75,12 +76,12 @@ Timeline: ${history.timelineStart} ${history.timelineEnd ? `to ${history.timelin
 OBJECTIVE
 ---------
 Successful Treatments:
-${history.successfulTreatments}
+${history.successfulTreatments?.length ? history.successfulTreatments.join(', ') : 'None listed'}
 
 Unsuccessful Treatments:
-${history.unsuccessfulTreatments}
+${history.unsuccessfulTreatments?.length ? history.unsuccessfulTreatments.join(', ') : 'None listed'}
 
-${history.contraindications ? `Contraindications:\n${history.contraindications}\n` : ''}
+${history.contraindications?.length ? `Contraindications:\n${history.contraindications.join(', ')}\n` : ''}
 
 ASSESSMENT
 ----------
@@ -151,13 +152,35 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
         )}
       </div>
 
+      {/* Search Mode Toggle */}
+      <div className="mb-4 inline-flex bg-slate-100 p-1 rounded-lg">
+        <button
+          onClick={() => { setSearchMode('patient'); setSearchTerm(''); }}
+          className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            searchMode === 'patient' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <User className="w-4 h-4 mr-2" /> By Patient
+        </button>
+        <button
+          onClick={() => { setSearchMode('condition'); setSearchTerm(''); setSelectedPatient(null); }}
+          className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            searchMode === 'condition' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          <Activity className="w-4 h-4 mr-2" /> By Condition
+        </button>
+      </div>
+
       {/* Search Bar */}
       <div className="mb-6">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
           <input
             type="text"
-            placeholder="Search by patient name or Patient ID (Medicare)..."
+            placeholder={searchMode === 'patient'
+              ? 'Search by patient name or Patient ID (Medicare)...'
+              : 'Search by condition, body region, or rehab stage (e.g. "knee", "chronic", "ACL")...'}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
@@ -165,6 +188,17 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
         </div>
       </div>
 
+      {searchMode === 'condition' && (
+        <ConditionResults
+          searchTerm={searchTerm}
+          patients={patients}
+          histories={histories}
+          unlockedPatients={unlockedPatients}
+          onSelectPatient={(p) => { setSelectedPatient(p); setSearchTerm(''); setSearchMode('patient'); }}
+        />
+      )}
+
+      {searchMode === 'patient' && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Patient List */}
         <div className="lg:col-span-1">
@@ -309,9 +343,9 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
                                 <div className="flex flex-wrap items-center gap-2 mb-2">
                                   <h4 className="font-semibold text-slate-900">{history.condition}</h4>
                                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    history.status === 'resolved' 
+                                    history.status === 'Resolved'
                                       ? 'bg-emerald-100 text-emerald-700'
-                                      : history.status === 'ongoing'
+                                      : history.status === 'Ongoing'
                                       ? 'bg-blue-100 text-blue-700'
                                       : 'bg-amber-100 text-amber-700'
                                   }`}>
@@ -338,7 +372,17 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
                                     <CheckCircle className="w-4 h-4 text-emerald-500 mr-2" />
                                     <h5 className="text-sm font-semibold text-slate-700">Successful Treatments</h5>
                                   </div>
-                                  <p className="text-sm text-slate-600 pl-6">{history.successfulTreatments}</p>
+                                  <div className="pl-6 flex flex-wrap gap-2">
+                                    {history.successfulTreatments?.length ? (
+                                      history.successfulTreatments.map(t => (
+                                        <span key={t} className="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-full text-xs font-medium">
+                                          {t}
+                                        </span>
+                                      ))
+                                    ) : (
+                                      <span className="text-sm text-slate-400 italic">None listed</span>
+                                    )}
+                                  </div>
                                 </div>
                                 
                                 <div>
@@ -346,16 +390,32 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
                                     <AlertCircle className="w-4 h-4 text-rose-500 mr-2" />
                                     <h5 className="text-sm font-semibold text-slate-700">Unsuccessful Treatments</h5>
                                   </div>
-                                  <p className="text-sm text-slate-600 pl-6">{history.unsuccessfulTreatments}</p>
+                                  <div className="pl-6 flex flex-wrap gap-2">
+                                    {history.unsuccessfulTreatments?.length ? (
+                                      history.unsuccessfulTreatments.map(t => (
+                                        <span key={t} className="px-2.5 py-1 bg-rose-100 text-rose-800 border border-rose-200 rounded-full text-xs font-medium">
+                                          {t}
+                                        </span>
+                                      ))
+                                    ) : (
+                                      <span className="text-sm text-slate-400 italic">None listed</span>
+                                    )}
+                                  </div>
                                 </div>
 
-                                {history.contraindications && (
+                                {history.contraindications?.length > 0 && (
                                   <div>
                                     <div className="flex items-center mb-2">
                                       <AlertCircle className="w-4 h-4 text-amber-500 mr-2" />
                                       <h5 className="text-sm font-semibold text-slate-700">Contraindications</h5>
                                     </div>
-                                    <p className="text-sm text-slate-600 pl-6">{history.contraindications}</p>
+                                    <div className="pl-6 flex flex-wrap gap-2">
+                                      {history.contraindications.map(c => (
+                                        <span key={c} className="px-2.5 py-1 bg-amber-100 text-amber-800 border border-amber-200 rounded-full text-xs font-medium">
+                                          {c}
+                                        </span>
+                                      ))}
+                                    </div>
                                   </div>
                                 )}
 
@@ -429,6 +489,7 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
           )}
         </div>
       </div>
+      )}
 
       {/* SOAP Report Modal */}
       {viewingSOAP && (
@@ -471,6 +532,105 @@ Created: ${new Date(history.createdAt).toLocaleDateString()}
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+};
+
+// ============================================================================
+// CONDITION RESULTS — Network-wide search across all histories by keyword
+// ============================================================================
+interface ConditionResultsProps {
+  searchTerm: string;
+  patients: Patient[];
+  histories: HistoryEntry[];
+  unlockedPatients: string[];
+  onSelectPatient: (p: Patient) => void;
+}
+
+const ConditionResults: React.FC<ConditionResultsProps> = ({
+  searchTerm, patients, histories, unlockedPatients, onSelectPatient
+}) => {
+  const term = searchTerm.trim().toLowerCase();
+
+  const matches = histories.filter(h => {
+    if (!term) return true;
+    const haystack = [
+      h.condition,
+      h.status,
+      ...(h.successfulTreatments || []),
+      ...(h.unsuccessfulTreatments || []),
+      ...(h.contraindications || [])
+    ].join(' ').toLowerCase();
+    return haystack.includes(term);
+  });
+
+  const patientById = (id: string) => patients.find(p => p.id === id);
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="p-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <h3 className="font-semibold text-slate-900">
+          Network Cases <span className="text-slate-400 font-normal">({matches.length})</span>
+        </h3>
+        {!term && (
+          <span className="text-xs text-slate-500">Showing all — type to filter</span>
+        )}
+      </div>
+
+      {matches.length === 0 ? (
+        <div className="p-12 text-center text-slate-500">
+          <Activity className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+          <p className="font-medium">No matching cases</p>
+          <p className="text-sm mt-1">Try a broader term like "knee", "chronic", or a treatment name.</p>
+        </div>
+      ) : (
+        <ul className="divide-y divide-slate-100 max-h-[700px] overflow-y-auto">
+          {matches.map(h => {
+            const patient = patientById(h.patientId);
+            const unlocked = unlockedPatients.includes(h.patientId);
+            return (
+              <li key={h.id} className="p-4 hover:bg-slate-50 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-slate-900">{h.condition}</h4>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        h.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700'
+                        : h.status === 'Ongoing' ? 'bg-blue-100 text-blue-700'
+                        : 'bg-amber-100 text-amber-700'
+                      }`}>{h.status}</span>
+                    </div>
+                    <div className="flex items-center text-xs text-slate-500 mb-2">
+                      <Clock className="w-3 h-3 mr-1" />
+                      {h.timelineStart}{h.timelineEnd ? ` → ${h.timelineEnd}` : ''}
+                      <span className="mx-2">•</span>
+                      <span className="font-mono">{h.sourceClinicHash}</span>
+                    </div>
+                    {h.successfulTreatments?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {h.successfulTreatments.slice(0, 4).map(t => (
+                          <span key={t} className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-xs">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {patient && (
+                    <button
+                      onClick={() => onSelectPatient(patient)}
+                      className="flex-shrink-0 self-start flex items-center px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-medium hover:bg-slate-800 transition-colors"
+                    >
+                      {unlocked ? <Eye className="w-3 h-3 mr-1.5" /> : <Lock className="w-3 h-3 mr-1.5" />}
+                      Open patient
+                    </button>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );
