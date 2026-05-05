@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Info, Plus, X, ArrowRight, RefreshCcw, AlertCircle, Loader2, Save, FileText, ArrowLeft, Tag, Activity, Calendar, Upload, Sparkles } from 'lucide-react';
+import { Check, Plus, X, ArrowRight, Loader2, FileText, ArrowLeft, Tag } from 'lucide-react';
 import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
 import { InfoCard } from './ui/cards';
@@ -38,11 +38,6 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     successful: [] as string[],
     unsuccessful: [] as string[],
     contraindications: [] as string[],
-
-    // Step 3: Optional SOAP (Simplified)
-    objectiveFindings: '',
-    assessment: '',
-    plan: ''
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -65,7 +60,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
   // Auto-save draft
   useEffect(() => {
     if (!isLoaded) return;
-    if (step === 4) return; // Don't save on success screen
+    if (step === 3) return; // Don't save on success screen
 
     setIsSaving(true);
     const handler = setTimeout(() => {
@@ -157,7 +152,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
       });
       
       localStorage.removeItem(STORAGE_KEY);
-      setStep(4);
+      setStep(3);
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -173,7 +168,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
   };
 
   // Success Screen
-  if (step === 4) {
+  if (step === 3) {
     return (
       <div className="max-w-2xl mx-auto mt-12 text-center px-4">
         <div className="bg-emerald-50 rounded-3xl p-8 md:p-12 border border-emerald-100 shadow-sm animate-fade-in-up">
@@ -247,12 +242,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
         <div className="h-0.5 w-12 bg-slate-200"></div>
         <div className={`flex items-center ${step >= 2 ? 'text-emerald-600' : 'text-slate-400'}`}>
           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${step >= 2 ? 'bg-emerald-100' : 'bg-slate-100'}`}>2</div>
-          <span className="hidden sm:inline font-medium">Key Data</span>
-        </div>
-        <div className="h-0.5 w-12 bg-slate-200"></div>
-        <div className={`flex items-center ${step >= 3 ? 'text-blue-600' : 'text-slate-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${step >= 3 ? 'bg-blue-100' : 'bg-slate-100'}`}>3</div>
-          <span className="hidden sm:inline font-medium">Notes (Optional)</span>
+          <span className="hidden sm:inline font-medium">Snapshot Data</span>
         </div>
       </div>
 
@@ -473,78 +463,6 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
           </div>
         )}
 
-        {/* Step 3: Optional Notes */}
-        {step === 3 && (
-          <div className="p-6 md:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-2">
-              <div className="flex items-center">
-                <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                  <FileText className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">SOAP Notes <span className="text-slate-400 font-normal ml-2">(Optional)</span></h3>
-                  <p className="text-sm text-slate-500">Provide detailed findings if available.</p>
-                </div>
-              </div>
-              
-              <div className="flex space-x-2">
-                 {/* Demo-only Upload Button */}
-                 <button className="flex items-center px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload SOAP Report
-                 </button>
-                 
-                 {/* Demo-only AI Placeholder */}
-                 <div className="group relative flex items-center px-3 py-2 bg-indigo-50 border border-indigo-100 rounded-lg text-sm font-medium text-indigo-400 cursor-not-allowed">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    AI Transcribe
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-slate-800 text-white text-xs rounded py-1 px-2 text-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                       AI-assisted transcription (coming soon)
-                    </div>
-                 </div>
-              </div>
-            </div>
-
-            <InfoCard 
-              type="info" 
-              title="Optional Step" 
-              message="You can submit the form now if you don't have detailed notes to add." 
-            />
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Objective Findings</label>
-                <textarea
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[120px]"
-                  placeholder="ROM, strength, special tests, functional assessments..."
-                  value={formData.objectiveFindings}
-                  onChange={e => handleInputChange('objectiveFindings', e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Assessment / Analysis</label>
-                <textarea
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[100px]"
-                  placeholder="Clinical impression, diagnosis, prognosis..."
-                  value={formData.assessment}
-                  onChange={e => handleInputChange('assessment', e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">Plan of Care</label>
-                <textarea
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[100px]"
-                  placeholder="Treatment frequency, interventions, home program..."
-                  value={formData.plan}
-                  onChange={e => handleInputChange('plan', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Action Bar */}
         <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-between items-center sticky bottom-0 z-10">
           {step > 1 ? (
@@ -559,7 +477,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
             <div></div> // Spacer
           )}
 
-          {step < 3 ? (
+          {step < 2 ? (
             <button
               type="button"
               onClick={handleNextStep}
