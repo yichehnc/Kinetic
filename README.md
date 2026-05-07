@@ -120,7 +120,7 @@ App runs at `http://localhost:5173`
 
 ## Project Status
 
-This is a **conceptual, demo-first prototype** built for pitch and validation purposes.
+This is a **demo-first MVP** built for pitch and validation purposes.
 
 **Non-goals:**
 - Production-grade security or authentication
@@ -135,7 +135,6 @@ The intent is to demonstrate — through system design and working UI — how sh
 
 | Asset | Link |
 |---|---|
-| Interactive Prototype (Google AI Studio) | [Open](https://ai.studio/apps/drive/1qvfc3ZqI0INFEAQDfAO3mRsvSWzIGBz8) |
 | Pitch Deck (Google Slides) | [Open](https://docs.google.com/presentation/d/1vnOLCnq-g8epqxYn9oXAZkPKBEMPnC-_/edit?usp=sharing) |
 
 ---
@@ -147,6 +146,7 @@ Built using an AI-augmented product and engineering workflow:
 - **Claude Code** — engineering, debugging, refactoring, EHR redesign
 - **Google AI Studio** — rapid vibe-coding and core logic iteration
 - **ChatGPT / Gemini** — systems reasoning and incentive design
+- **Claude Design** — UI redesign
 - **Stitch** — early UI ideation
 - **Manus AI / Canva** — pitch deck and narrative
 
