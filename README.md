@@ -155,7 +155,7 @@ Built using an AI-augmented product and engineering workflow:
 ## License
 
 Copyright © 2026 Yichen Cao. Non-commercial use only. See [LICENSE](./LICENSE).  
-Commercial licensing enquiries: sam@mlai.au
+Commercial licensing enquiries: yichenc2017@gmail.com
 
 ---
 
