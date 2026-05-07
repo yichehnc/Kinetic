@@ -25,7 +25,7 @@ const App: React.FC = () => {
   // App State
   const [activeTab, setActiveTab] = useState('dashboard');
   const [credits, setCredits] = useState(0); // Start with 0
-  const [unlockedPatients, setUnlockedPatients] = useState<string[]>([]);
+  const [unlockedPatients, setUnlockedPatients] = useState<string[]>(['3482 91024 1']);
   const [contributionCount, setContributionCount] = useState(12);
   const [localHistory, setLocalHistory] = useState<HistoryEntry[]>(MOCK_HISTORY);
   const [localPatients, setLocalPatients] = useState<Patient[]>(MOCK_PATIENTS);
