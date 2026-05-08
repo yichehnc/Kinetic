@@ -4,6 +4,14 @@ import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
 import { InfoCard } from './ui/cards';
 import { Tooltip } from './ui/tooltip';
+import {
+  validateStep1,
+  validateStep2,
+  isStepValid,
+  buildCompositeCondition,
+  parseDraft,
+  type FieldError,
+} from '../lib/contributionValidation';
 
 interface ContributionFormProps {
   onSubmit: (data: any) => void;
@@ -15,10 +23,6 @@ type EBProps = { onReturn?: () => void; children: ReactNode };
 type EBState = { hasError: boolean; message: string };
 
 class ContributionErrorBoundary extends Component<EBProps, EBState> {
-  declare props: EBProps;
-  declare state: EBState;
-  declare setState: (s: Partial<EBState> | EBState) => void;
-
   constructor(props: EBProps) {
     super(props);
     this.state = { hasError: false, message: '' };
@@ -69,17 +73,7 @@ const BODY_REGIONS = ['Cervical Spine', 'Thoracic Spine', 'Lumbar Spine', 'Shoul
 const COMPLAINT_TYPES = ['Pain', 'Stiffness', 'Instability', 'Weakness', 'Post-Operative', 'Mobility Deficit'];
 const REHAB_STAGES = ['Acute', 'Sub-Acute', 'Chronic', 'Return to Sport', 'Maintenance'];
 
-// Friendly, plain-English validation copy keyed by field
-type FieldError = { field: string; message: string };
-
-const friendlyMessages: Record<string, string> = {
-  patientId: "Add a Patient ID (Medicare number) so records can link across clinics.",
-  patientName: "We need the patient's full name to create the record.",
-  dob: "Date of birth is required — it helps anonymise without losing demographic context.",
-  bodyRegion: "Pick the body region this contribution covers.",
-  complaintType: "Choose the complaint type so other clinicians can find this case.",
-  rehabStage: "Select the rehab stage at the time of contribution.",
-};
+// Validation copy & functions live in lib/contributionValidation.ts
 
 // AI Import CTA — demo-only. Triggers a fake "parsing" state then a friendly toast.
 const AIImportCTA: React.FC = () => {
@@ -228,17 +222,28 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
     try {
       const savedData = localStorage.getItem(STORAGE_KEY);
       if (savedData) {
-        try {
-          const parsed = JSON.parse(savedData);
-          if (parsed && typeof parsed === 'object') {
-            setFormData(prev => ({ ...prev, ...parsed }));
-            setLastSaved(new Date());
-            setDraftRecovered(true);
-          } else {
-            throw new Error("Invalid draft shape");
-          }
-        } catch (parseErr) {
-          console.error("Draft was corrupt, starting fresh", parseErr);
+        const parsed = parseDraft(savedData);
+        if (parsed) {
+          // Sanitize untrusted fields. status must be a known Status enum value;
+          // anything else falls back to ONGOING.
+          const validStatuses = Object.values(Status) as string[];
+          const safeStatus =
+            parsed.status && validStatuses.includes(parsed.status)
+              ? (parsed.status as Status)
+              : Status.ONGOING;
+          setFormData(prev => ({
+            ...prev,
+            ...parsed,
+            status: safeStatus,
+            successful: Array.isArray(parsed.successful) ? parsed.successful : [],
+            unsuccessful: Array.isArray(parsed.unsuccessful) ? parsed.unsuccessful : [],
+            contraindications: Array.isArray(parsed.contraindications) ? parsed.contraindications : [],
+          }));
+          setLastSaved(new Date());
+          setDraftRecovered(true);
+        } else {
+          // parseDraft returned null — corrupt or invalid shape
+          console.error("Draft was corrupt, starting fresh");
           setDraftCorrupt(true);
           try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
         }
@@ -292,25 +297,19 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
     });
   };
 
-  // Per-field validation — returns list of errors with friendly messages
-  const step1Errors: FieldError[] = useMemo(() => {
-    const errs: FieldError[] = [];
-    if (!formData.patientId.trim()) errs.push({ field: 'patientId', message: friendlyMessages.patientId });
-    if (!formData.patientName.trim()) errs.push({ field: 'patientName', message: friendlyMessages.patientName });
-    if (!formData.dob) errs.push({ field: 'dob', message: friendlyMessages.dob });
-    return errs;
-  }, [formData.patientId, formData.patientName, formData.dob]);
+  // Per-field validation — pure functions in lib/contributionValidation.ts
+  const step1Errors: FieldError[] = useMemo(
+    () => validateStep1(formData),
+    [formData.patientId, formData.patientName, formData.dob]
+  );
 
-  const step2Errors: FieldError[] = useMemo(() => {
-    const errs: FieldError[] = [];
-    if (!formData.bodyRegion) errs.push({ field: 'bodyRegion', message: friendlyMessages.bodyRegion });
-    if (!formData.complaintType) errs.push({ field: 'complaintType', message: friendlyMessages.complaintType });
-    if (!formData.rehabStage) errs.push({ field: 'rehabStage', message: friendlyMessages.rehabStage });
-    return errs;
-  }, [formData.bodyRegion, formData.complaintType, formData.rehabStage]);
+  const step2Errors: FieldError[] = useMemo(
+    () => validateStep2(formData),
+    [formData.bodyRegion, formData.complaintType, formData.rehabStage]
+  );
 
-  const isStep1Valid = step1Errors.length === 0;
-  const isStep2Valid = step2Errors.length === 0;
+  const isStep1Valid = isStepValid(step1Errors);
+  const isStep2Valid = isStepValid(step2Errors);
   const currentStepValid = step === 1 ? isStep1Valid : isStep2Valid;
 
   const errorFor = (field: string): string | null => {
@@ -366,12 +365,10 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const compositeCondition = `${formData.bodyRegion} - ${formData.complaintType}`;
-
       // onSubmit may throw — let it bubble into our catch
       onSubmit({
         ...formData,
-        condition: compositeCondition
+        condition: buildCompositeCondition(formData)
       });
 
       try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
