@@ -123,9 +123,9 @@ const AIImportCTA: React.FC = () => {
               <Tooltip
                 content="Powered by Kinetic AI — extracts structured fields from referrals and reports"
                 side="bottom"
-                wrap
+                className="hidden sm:inline-block"
               >
-                <span tabIndex={0} className="text-[10px] font-bold uppercase tracking-wide bg-violet-600 text-white px-2 py-0.5 rounded-full cursor-help focus:outline-none focus:ring-2 focus:ring-violet-400">AI</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide bg-violet-600 text-white px-2 py-0.5 rounded-full sm:cursor-help">AI</span>
               </Tooltip>
             </div>
             <p className="text-xs text-slate-600 mt-1 max-w-md">
