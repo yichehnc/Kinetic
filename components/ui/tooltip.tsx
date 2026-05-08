@@ -10,6 +10,8 @@ interface TooltipProps {
   disabled?: boolean;
   /** Optional className for the tooltip bubble itself. */
   className?: string;
+  /** Allow tooltip text to wrap (use for longer copy on small screens). Default: false (single-line). */
+  wrap?: boolean;
 }
 
 const sidePositionClasses: Record<Side, string> = {
@@ -43,15 +45,22 @@ export const Tooltip: React.FC<TooltipProps> = ({
   side = 'top',
   disabled = false,
   className = '',
+  wrap = false,
 }) => {
   if (disabled || !content) return children;
+
+  // Single-line by default; if `wrap`, allow wrapping with a viewport-aware max-width
+  // and switch to leading-snug for legibility.
+  const widthClass = wrap
+    ? 'whitespace-normal max-w-[min(18rem,calc(100vw-2rem))] leading-snug text-left'
+    : 'whitespace-nowrap';
 
   return (
     <span className="group relative inline-flex">
       {children}
       <span
         role="tooltip"
-        className={`pointer-events-none absolute z-50 whitespace-nowrap rounded-md bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 ${sidePositionClasses[side]} ${className}`}
+        className={`pointer-events-none absolute z-50 ${widthClass} rounded-md bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 ${sidePositionClasses[side]} ${className}`}
       >
         {content}
         <span

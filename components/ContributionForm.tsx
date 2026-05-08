@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Component, type ErrorInfo, type ReactNode } from 'react';
 import { Check, Plus, X, ArrowRight, Loader2, FileText, ArrowLeft, Tag, Upload, Wand2 } from 'lucide-react';
 import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
@@ -8,6 +8,59 @@ import { Tooltip } from './ui/tooltip';
 interface ContributionFormProps {
   onSubmit: (data: any) => void;
   onReturn?: () => void;
+}
+
+// Local ErrorBoundary — prevents a render error in the form from blanking the page.
+type EBProps = { onReturn?: () => void; children: ReactNode };
+type EBState = { hasError: boolean; message: string };
+
+class ContributionErrorBoundary extends Component<EBProps, EBState> {
+  declare props: EBProps;
+  declare state: EBState;
+  declare setState: (s: Partial<EBState> | EBState) => void;
+
+  constructor(props: EBProps) {
+    super(props);
+    this.state = { hasError: false, message: '' };
+  }
+  static getDerivedStateFromError(err: Error): EBState {
+    return { hasError: true, message: err.message || 'Unexpected error' };
+  }
+  componentDidCatch(err: Error, info: ErrorInfo) {
+    console.error('ContributionForm crashed', err, info);
+  }
+  reset = () => this.setState({ hasError: false, message: '' });
+  render() {
+    if (!this.state.hasError) return this.props.children;
+    return (
+      <div className="max-w-2xl mx-auto mt-12 px-4">
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-8 text-center">
+          <div className="w-14 h-14 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-rose-600 text-2xl font-bold">!</span>
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Something broke on this page</h2>
+          <p className="text-slate-600 mb-2">The Contribute form ran into an unexpected error. Your last saved draft is still safe.</p>
+          <p className="text-xs text-slate-400 mb-6 font-mono">{this.state.message}</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <button
+              onClick={this.reset}
+              className="px-5 py-2.5 bg-slate-900 text-white rounded-lg font-semibold hover:bg-slate-800 transition-colors"
+            >
+              Reload the form
+            </button>
+            {this.props.onReturn && (
+              <button
+                onClick={this.props.onReturn}
+                className="px-5 py-2.5 bg-white text-slate-700 border border-slate-300 rounded-lg font-semibold hover:bg-slate-50 transition-colors"
+              >
+                Back to dashboard
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
 const STORAGE_KEY = 'kinetic_contribution_draft_v2';
@@ -67,7 +120,11 @@ const AIImportCTA: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h4 className="text-sm font-bold text-slate-900">Import from medical report</h4>
-              <Tooltip content="Powered by Kinetic AI — extracts structured fields from referrals and reports">
+              <Tooltip
+                content="Powered by Kinetic AI — extracts structured fields from referrals and reports"
+                side="bottom"
+                wrap
+              >
                 <span tabIndex={0} className="text-[10px] font-bold uppercase tracking-wide bg-violet-600 text-white px-2 py-0.5 rounded-full cursor-help focus:outline-none focus:ring-2 focus:ring-violet-400">AI</span>
               </Tooltip>
             </div>
@@ -130,12 +187,16 @@ const AIImportCTA: React.FC = () => {
   );
 };
 
-export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onReturn }) => {
+const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onReturn }) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [draftRecovered, setDraftRecovered] = useState(false);
+  const [draftCorrupt, setDraftCorrupt] = useState(false);
+  const [storageBlocked, setStorageBlocked] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward');
@@ -162,34 +223,56 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
   const [formData, setFormData] = useState(initialFormState);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load draft on mount
+  // Load draft on mount — handle blocked localStorage and corrupt JSON gracefully
   useEffect(() => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-      try {
-        setFormData(JSON.parse(savedData));
-        setLastSaved(new Date());
-      } catch (e) {
-        console.error("Failed to parse draft", e);
+    try {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        try {
+          const parsed = JSON.parse(savedData);
+          if (parsed && typeof parsed === 'object') {
+            setFormData(prev => ({ ...prev, ...parsed }));
+            setLastSaved(new Date());
+            setDraftRecovered(true);
+          } else {
+            throw new Error("Invalid draft shape");
+          }
+        } catch (parseErr) {
+          console.error("Draft was corrupt, starting fresh", parseErr);
+          setDraftCorrupt(true);
+          try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+        }
       }
+    } catch (storageErr) {
+      // localStorage blocked (private browsing, disabled cookies, etc.)
+      console.warn("localStorage unavailable, drafts will not persist", storageErr);
+      setStorageBlocked(true);
     }
     setIsLoaded(true);
   }, []);
 
-  // Auto-save draft
+  // Auto-save draft — tolerate quota / disabled storage
   useEffect(() => {
     if (!isLoaded) return;
     if (step === 3) return; // Don't save on success screen
+    if (storageBlocked) return; // Don't keep retrying if storage is unavailable
 
     setIsSaving(true);
     const handler = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-      setLastSaved(new Date());
-      setIsSaving(false);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+        setLastSaved(new Date());
+      } catch (e) {
+        // QuotaExceededError or storage disabled mid-session
+        console.warn("Could not save draft", e);
+        setStorageBlocked(true);
+      } finally {
+        setIsSaving(false);
+      }
     }, 1000);
 
     return () => clearTimeout(handler);
-  }, [formData, isLoaded, step]);
+  }, [formData, isLoaded, step, storageBlocked]);
 
   const handleInputChange = (field: string, value: any) => {
     setError(null);
@@ -268,8 +351,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
 
     if (!isStep1Valid || !isStep2Valid) {
       setShowAllErrors(true);
@@ -278,23 +361,30 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
       return;
     }
 
+    setSubmitError(null);
     setIsSubmitting(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       const compositeCondition = `${formData.bodyRegion} - ${formData.complaintType}`;
 
+      // onSubmit may throw — let it bubble into our catch
       onSubmit({
         ...formData,
         condition: compositeCondition
       });
 
-      localStorage.removeItem(STORAGE_KEY);
+      try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       setStepDirection('forward');
       setAnimKey(k => k + 1);
       setStep(3);
     } catch (err: any) {
-      setError(err.message || "Something went wrong on our end — please try again.");
+      const message =
+        err?.message ||
+        (typeof err === 'string' ? err : null) ||
+        "Something went wrong on our end. Your work is safe — please try submitting again.";
+      setSubmitError(message);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSubmitting(false);
     }
@@ -418,6 +508,65 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
           <span className="hidden sm:inline font-medium">Snapshot data</span>
         </div>
       </div>
+
+      {/* Submit failure — most prominent, with a retry CTA */}
+      {submitError && (
+        <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-4 flex items-start gap-3">
+          <div className="flex-shrink-0 mt-0.5 text-rose-600 font-bold text-lg leading-none">!</div>
+          <div className="flex-1">
+            <h4 className="font-semibold text-rose-900 mb-1 text-sm">Couldn't submit your contribution</h4>
+            <p className="text-sm text-rose-900 opacity-80 mb-3">{submitError}</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => handleSubmit()}
+                disabled={isSubmitting}
+                className="inline-flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                Try again
+              </button>
+              <button
+                type="button"
+                onClick={() => setSubmitError(null)}
+                className="text-xs font-medium text-rose-700 hover:text-rose-900 px-3 py-1.5"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Draft recovery notice — friendly, dismissible */}
+      {draftRecovered && (
+        <InfoCard
+          type="info"
+          title="Draft restored"
+          message="We found a saved draft from your last session and brought it back. Pick up where you left off."
+          onDismiss={() => setDraftRecovered(false)}
+        />
+      )}
+
+      {/* Corrupt draft notice */}
+      {draftCorrupt && (
+        <InfoCard
+          type="warning"
+          title="Couldn't restore your draft"
+          message="Your saved draft was unreadable, so we cleared it. You can start fresh — sorry about that."
+          onDismiss={() => setDraftCorrupt(false)}
+        />
+      )}
+
+      {/* Storage unavailable notice */}
+      {storageBlocked && (
+        <InfoCard
+          type="warning"
+          title="Drafts won't be saved"
+          message="Browser storage is blocked or full. Your form will work, but progress won't persist if you reload — submit before closing the tab."
+          onDismiss={() => setStorageBlocked(false)}
+        />
+      )}
 
       {error && (
         <InfoCard
@@ -751,3 +900,10 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     </div>
   );
 };
+
+// Public export — wraps the form in an ErrorBoundary so render crashes don't blank the page.
+export const ContributionForm: React.FC<ContributionFormProps> = (props) => (
+  <ContributionErrorBoundary onReturn={props.onReturn}>
+    <ContributionFormInner {...props} />
+  </ContributionErrorBoundary>
+);
