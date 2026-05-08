@@ -3,6 +3,7 @@ import { Check, Plus, X, ArrowRight, Loader2, FileText, ArrowLeft, Tag, Upload, 
 import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
 import { InfoCard } from './ui/cards';
+import { Tooltip } from './ui/tooltip';
 
 interface ContributionFormProps {
   onSubmit: (data: any) => void;
@@ -66,8 +67,9 @@ const AIImportCTA: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h4 className="text-sm font-bold text-slate-900">Import from medical report</h4>
-              <span className="text-[10px] font-bold uppercase tracking-wide bg-violet-600 text-white px-2 py-0.5 rounded-full">AI</span>
-              <span className="text-[10px] font-medium uppercase tracking-wide bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Beta</span>
+              <Tooltip content="Powered by Kinetic AI — extracts structured fields from referrals and reports">
+                <span tabIndex={0} className="text-[10px] font-bold uppercase tracking-wide bg-violet-600 text-white px-2 py-0.5 rounded-full cursor-help focus:outline-none focus:ring-2 focus:ring-violet-400">AI</span>
+              </Tooltip>
             </div>
             <p className="text-xs text-slate-600 mt-1 max-w-md">
               Upload a PDF, DOCX, or scanned referral. Kinetic AI extracts patient details, body region, and treatment history — you review and submit.
@@ -664,45 +666,73 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
           )}
 
           {step < 2 ? (
-            <button
-              type="button"
-              onClick={handleNextStep}
-              disabled={!currentStepValid}
-              title={!currentStepValid ? "Fill in the required fields to continue" : undefined}
-              className={`px-6 py-2.5 rounded-lg font-semibold flex items-center transition-all shadow-lg ${
-                currentStepValid
-                  ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-200'
-                  : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-              }`}
-            >
-              Next step <ArrowRight className="w-4 h-4 ml-2" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting || !isStep2Valid || !isStep1Valid}
-              title={!isStep2Valid || !isStep1Valid ? "Fill in the required fields to submit" : undefined}
-              className={`flex items-center space-x-2 px-8 py-2.5 rounded-lg font-semibold text-white transition-all shadow-lg ${
-                isSubmitting
-                  ? 'bg-emerald-400 cursor-wait'
-                  : (!isStep2Valid || !isStep1Valid)
-                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-                    : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
-              }`}
-            >
-              {isSubmitting ? (
-                <>
-                   <Loader2 className="w-5 h-5 animate-spin" />
-                   <span>Verifying…</span>
-                </>
-              ) : (
-                <>
-                  <Check className="w-5 h-5" />
-                  <span>Submit contribution</span>
-                </>
+            <div className="flex flex-col items-end gap-1.5">
+              <Tooltip
+                content="Fill in the required fields to continue"
+                disabled={currentStepValid}
+                side="top"
+                className="hidden sm:inline-block"
+              >
+                <button
+                  type="button"
+                  onClick={handleNextStep}
+                  disabled={!currentStepValid}
+                  aria-disabled={!currentStepValid}
+                  className={`px-5 sm:px-6 py-2.5 rounded-lg font-semibold flex items-center transition-all shadow-lg text-sm sm:text-base ${
+                    currentStepValid
+                      ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-200'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                  }`}
+                >
+                  Next step <ArrowRight className="w-4 h-4 ml-2" />
+                </button>
+              </Tooltip>
+              {!currentStepValid && (
+                <p className="sm:hidden text-[11px] text-slate-500 text-right max-w-[200px]">
+                  Fill in the required fields to continue
+                </p>
               )}
-            </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-end gap-1.5">
+              <Tooltip
+                content="Fill in the required fields to submit"
+                disabled={isStep1Valid && isStep2Valid}
+                side="top"
+                className="hidden sm:inline-block"
+              >
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || !isStep2Valid || !isStep1Valid}
+                  aria-disabled={isSubmitting || !isStep2Valid || !isStep1Valid}
+                  className={`flex items-center space-x-2 px-6 sm:px-8 py-2.5 rounded-lg font-semibold text-white transition-all shadow-lg text-sm sm:text-base ${
+                    isSubmitting
+                      ? 'bg-emerald-400 cursor-wait'
+                      : (!isStep2Valid || !isStep1Valid)
+                        ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                        : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <>
+                       <Loader2 className="w-5 h-5 animate-spin" />
+                       <span>Verifying…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5" />
+                      <span>Submit contribution</span>
+                    </>
+                  )}
+                </button>
+              </Tooltip>
+              {(!isStep1Valid || !isStep2Valid) && !isSubmitting && (
+                <p className="sm:hidden text-[11px] text-slate-500 text-right max-w-[200px]">
+                  Fill in the required fields to submit
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>
