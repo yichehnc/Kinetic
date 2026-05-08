@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Check, Plus, X, ArrowRight, Loader2, FileText, ArrowLeft, Tag } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Check, Plus, X, ArrowRight, Loader2, FileText, ArrowLeft, Tag, Upload, Wand2 } from 'lucide-react';
 import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
 import { InfoCard } from './ui/cards';
@@ -15,13 +15,130 @@ const BODY_REGIONS = ['Cervical Spine', 'Thoracic Spine', 'Lumbar Spine', 'Shoul
 const COMPLAINT_TYPES = ['Pain', 'Stiffness', 'Instability', 'Weakness', 'Post-Operative', 'Mobility Deficit'];
 const REHAB_STAGES = ['Acute', 'Sub-Acute', 'Chronic', 'Return to Sport', 'Maintenance'];
 
+// Friendly, plain-English validation copy keyed by field
+type FieldError = { field: string; message: string };
+
+const friendlyMessages: Record<string, string> = {
+  patientId: "Add a Patient ID (Medicare number) so records can link across clinics.",
+  patientName: "We need the patient's full name to create the record.",
+  dob: "Date of birth is required — it helps anonymise without losing demographic context.",
+  bodyRegion: "Pick the body region this contribution covers.",
+  complaintType: "Choose the complaint type so other clinicians can find this case.",
+  rehabStage: "Select the rehab stage at the time of contribution.",
+};
+
+// AI Import CTA — demo-only. Triggers a fake "parsing" state then a friendly toast.
+const AIImportCTA: React.FC = () => {
+  const [state, setState] = useState<'idle' | 'parsing' | 'done'>('idle');
+  const [fileName, setFileName] = useState<string | null>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFile = (file: File | null) => {
+    if (!file) return;
+    setFileName(file.name);
+    setState('parsing');
+    // Demo only — fake the AI extraction delay
+    setTimeout(() => setState('done'), 1800);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    handleFile(e.dataTransfer.files?.[0] ?? null);
+  };
+
+  const reset = () => {
+    setState('idle');
+    setFileName(null);
+    if (inputRef.current) inputRef.current.value = '';
+  };
+
+  return (
+    <div
+      onDragOver={e => e.preventDefault()}
+      onDrop={handleDrop}
+      className="relative rounded-2xl border-2 border-dashed border-violet-300 bg-gradient-to-br from-violet-50 via-white to-indigo-50 p-5 md:p-6 transition-colors hover:border-violet-400"
+    >
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="bg-white p-2 rounded-lg shadow-sm border border-violet-100 shrink-0">
+            <Wand2 className="w-5 h-5 text-violet-600" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-bold text-slate-900">Import from medical report</h4>
+              <span className="text-[10px] font-bold uppercase tracking-wide bg-violet-600 text-white px-2 py-0.5 rounded-full">AI</span>
+              <span className="text-[10px] font-medium uppercase tracking-wide bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Beta</span>
+            </div>
+            <p className="text-xs text-slate-600 mt-1 max-w-md">
+              Upload a PDF, DOCX, or scanned referral. Kinetic AI extracts patient details, body region, and treatment history — you review and submit.
+            </p>
+          </div>
+        </div>
+
+        <div className="shrink-0">
+          {state === 'idle' && (
+            <>
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-violet-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-violet-700 transition-colors shadow-sm shadow-violet-200"
+              >
+                <Upload className="w-4 h-4" />
+                Upload report
+              </button>
+              <input
+                ref={inputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                className="hidden"
+                onChange={e => handleFile(e.target.files?.[0] ?? null)}
+              />
+            </>
+          )}
+
+          {state === 'parsing' && (
+            <div className="inline-flex items-center gap-2 bg-white border border-violet-200 px-4 py-2.5 rounded-lg text-sm font-medium text-violet-700">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Extracting from {fileName}…</span>
+            </div>
+          )}
+
+          {state === 'done' && (
+            <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-lg text-sm font-semibold text-emerald-700">
+                <Check className="w-4 h-4" />
+                <span>Fields prefilled — review below</span>
+              </div>
+              <button
+                type="button"
+                onClick={reset}
+                className="text-xs text-slate-500 hover:text-slate-800 underline"
+              >
+                Undo
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-slate-400 mt-3">
+        Or drag a file onto this card. Supports PDF, DOC, DOCX, and image scans up to 10 MB.
+      </p>
+    </div>
+  );
+};
+
 export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, onReturn }) => {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [showAllErrors, setShowAllErrors] = useState(false);
+  const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward');
+  const [animKey, setAnimKey] = useState(0);
+
   const initialFormState = {
     // Step 1: Patient Info
     patientId: '',
@@ -29,7 +146,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     dob: '',
     start: '',
     end: '',
-    
+
     // Step 2: Keywords & Structure
     bodyRegion: '',
     complaintType: '',
@@ -74,6 +191,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
 
   const handleInputChange = (field: string, value: any) => {
     setError(null);
+    setTouched(prev => ({ ...prev, [field]: true }));
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -89,72 +207,92 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
     });
   };
 
-  // Validation Logic
-  const validateStep1 = () => {
-    if (!formData.patientId.trim()) return "Patient ID is required.";
-    if (!formData.patientName.trim()) return "Patient Name is required.";
-    if (!formData.dob) return "Date of Birth is required.";
+  // Per-field validation — returns list of errors with friendly messages
+  const step1Errors: FieldError[] = useMemo(() => {
+    const errs: FieldError[] = [];
+    if (!formData.patientId.trim()) errs.push({ field: 'patientId', message: friendlyMessages.patientId });
+    if (!formData.patientName.trim()) errs.push({ field: 'patientName', message: friendlyMessages.patientName });
+    if (!formData.dob) errs.push({ field: 'dob', message: friendlyMessages.dob });
+    return errs;
+  }, [formData.patientId, formData.patientName, formData.dob]);
+
+  const step2Errors: FieldError[] = useMemo(() => {
+    const errs: FieldError[] = [];
+    if (!formData.bodyRegion) errs.push({ field: 'bodyRegion', message: friendlyMessages.bodyRegion });
+    if (!formData.complaintType) errs.push({ field: 'complaintType', message: friendlyMessages.complaintType });
+    if (!formData.rehabStage) errs.push({ field: 'rehabStage', message: friendlyMessages.rehabStage });
+    return errs;
+  }, [formData.bodyRegion, formData.complaintType, formData.rehabStage]);
+
+  const isStep1Valid = step1Errors.length === 0;
+  const isStep2Valid = step2Errors.length === 0;
+  const currentStepValid = step === 1 ? isStep1Valid : isStep2Valid;
+
+  const errorFor = (field: string): string | null => {
+    const list = step === 1 ? step1Errors : step2Errors;
+    const entry = list.find(e => e.field === field);
+    if (!entry) return null;
+    if (showAllErrors || touched[field]) return entry.message;
     return null;
   };
 
-  const validateStep2 = () => {
-    if (!formData.bodyRegion) return "Please select a Body Region.";
-    if (!formData.complaintType) return "Please select a Complaint Type.";
-    if (!formData.rehabStage) return "Please select a Rehab Stage.";
-    return null;
-  };
+  const fieldRing = (field: string) =>
+    errorFor(field)
+      ? 'border-rose-400 focus:ring-rose-400'
+      : 'border-slate-300 focus:ring-emerald-500';
 
   const handleNextStep = () => {
-    let validationError = null;
-    if (step === 1) validationError = validateStep1();
-    if (step === 2) validationError = validateStep2();
-    
-    if (validationError) {
-      setError(validationError);
-      window.scrollTo(0, 0);
+    if (!currentStepValid) {
+      setShowAllErrors(true);
+      setError("A couple of fields still need your attention before we can continue.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    
+
     setError(null);
+    setShowAllErrors(false);
+    setStepDirection('forward');
+    setAnimKey(k => k + 1);
     setStep(prev => prev + 1);
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBack = () => {
+    setStepDirection('backward');
+    setAnimKey(k => k + 1);
     setStep(prev => prev - 1);
     setError(null);
-    window.scrollTo(0, 0);
+    setShowAllErrors(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Final check
-    const err1 = validateStep1();
-    const err2 = validateStep2();
 
-    if (err1 || err2) {
-      setError(err1 || err2);
-      setStep(err1 ? 1 : 2);
+    if (!isStep1Valid || !isStep2Valid) {
+      setShowAllErrors(true);
+      setError("A couple of fields still need your attention before submitting.");
+      setStep(!isStep1Valid ? 1 : 2);
       return;
     }
 
     setIsSubmitting(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Construct the composite condition string for the legacy type definition
+
       const compositeCondition = `${formData.bodyRegion} - ${formData.complaintType}`;
-      
+
       onSubmit({
         ...formData,
         condition: compositeCondition
       });
-      
+
       localStorage.removeItem(STORAGE_KEY);
+      setStepDirection('forward');
+      setAnimKey(k => k + 1);
       setStep(3);
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      setError(err.message || "Something went wrong on our end — please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -162,51 +300,84 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
 
   const handleReset = () => {
     setFormData(initialFormState);
+    setTouched({});
+    setShowAllErrors(false);
     localStorage.removeItem(STORAGE_KEY);
+    setStepDirection('backward');
+    setAnimKey(k => k + 1);
     setStep(1);
     setError(null);
+  };
+
+  // Inline error helper component
+  const FieldHelp: React.FC<{ field: string }> = ({ field }) => {
+    const msg = errorFor(field);
+    if (!msg) return null;
+    return (
+      <p className="mt-1.5 text-xs text-rose-600 flex items-start gap-1">
+        <X className="w-3 h-3 mt-0.5 shrink-0" />
+        <span>{msg}</span>
+      </p>
+    );
   };
 
   // Success Screen
   if (step === 3) {
     return (
       <div className="max-w-2xl mx-auto mt-12 text-center px-4">
-        <div className="bg-emerald-50 rounded-3xl p-8 md:p-12 border border-emerald-100 shadow-sm animate-fade-in-up">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="bg-emerald-50 rounded-3xl p-8 md:p-12 border border-emerald-100 shadow-sm animate-fade-in-up relative overflow-hidden">
+          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-emerald-50 animate-[scaleIn_0.4s_ease-out]">
             <Check className="w-10 h-10 text-emerald-600" />
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Contribution Verified</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Contribution verified</h2>
           <p className="text-slate-600 mb-8 max-w-md mx-auto">
-            Your structured clinical data has been successfully added to the Kinetic Network.
+            Your structured snapshot is now part of the Kinetic Network. Other clinicians treating this patient will see continuity-of-care data. Never your name or notes.
           </p>
-          
-          <div className="inline-flex items-center space-x-2 bg-white px-6 py-3 rounded-xl border border-emerald-200 shadow-sm mb-8">
-            <span className="text-sm font-medium text-slate-500">Reward Earned:</span>
+
+          <div
+            className="inline-flex items-center space-x-2 bg-white px-6 py-3 rounded-xl border border-emerald-200 shadow-sm mb-8 animate-[creditPop_0.6s_ease-out_0.2s_both]"
+          >
+            <span className="text-sm font-medium text-slate-500">Reward earned:</span>
             <span className="text-lg font-bold text-emerald-600">+1 Credit</span>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button 
+            <button
               onClick={handleReset}
               className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-slate-900 text-white rounded-lg font-semibold hover:bg-slate-800 transition-all"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Contribute Another
+              Contribute another
             </button>
             {onReturn && (
-              <button 
+              <button
                 onClick={onReturn}
                 className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white text-slate-700 border border-slate-300 rounded-lg font-semibold hover:bg-slate-50 transition-all"
               >
                 <FileText className="w-4 h-4 mr-2" />
-                Return to Intake
+                Return to intake
               </button>
             )}
           </div>
         </div>
+
+        {/* Local keyframes for the success animations */}
+        <style>{`
+          @keyframes scaleIn { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+          @keyframes creditPop {
+            0% { transform: translateY(8px) scale(0.95); opacity: 0; }
+            60% { transform: translateY(-2px) scale(1.04); opacity: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+          }
+        `}</style>
       </div>
     );
   }
+
+  const transitionClass =
+    stepDirection === 'forward'
+      ? 'animate-[stepInRight_0.28s_ease-out]'
+      : 'animate-[stepInLeft_0.28s_ease-out]';
 
   return (
     <div className="max-w-4xl mx-auto px-4 pb-24">
@@ -222,51 +393,54 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Contribute History</h2>
-            <p className="text-slate-500 mt-1">Earn 1 Credit by sharing structured clinical outcomes.</p>
+            <h2 className="text-2xl font-bold text-slate-900">Contribute history</h2>
+            <p className="text-slate-500 mt-1">Earn 1 Credit by sharing a structured clinical outcome.</p>
           </div>
-          
+
           <div className="flex items-center space-x-3 text-sm">
-             {isSaving && <span className="text-slate-400 flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin"/> Saving draft...</span>}
-             {!isSaving && lastSaved && <span className="text-slate-400 flex items-center"><Check className="w-3 h-3 mr-1"/> Saved</span>}
+             {isSaving && <span className="text-slate-400 flex items-center"><Loader2 className="w-3 h-3 mr-1 animate-spin"/> Saving draft…</span>}
+             {!isSaving && lastSaved && <span className="text-slate-400 flex items-center"><Check className="w-3 h-3 mr-1"/> Draft saved</span>}
           </div>
         </div>
       </div>
 
       {/* Progress Stepper */}
       <div className="mb-8 bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-center justify-between">
-        <div className={`flex items-center ${step >= 1 ? 'text-emerald-600' : 'text-slate-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${step >= 1 ? 'bg-emerald-100' : 'bg-slate-100'}`}>1</div>
-          <span className="hidden sm:inline font-medium">Patient Info</span>
+        <div className={`flex items-center transition-colors ${step >= 1 ? 'text-emerald-600' : 'text-slate-400'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 transition-colors ${step >= 1 ? 'bg-emerald-100' : 'bg-slate-100'}`}>1</div>
+          <span className="hidden sm:inline font-medium">Patient info</span>
         </div>
-        <div className="h-0.5 w-12 bg-slate-200"></div>
-        <div className={`flex items-center ${step >= 2 ? 'text-emerald-600' : 'text-slate-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 ${step >= 2 ? 'bg-emerald-100' : 'bg-slate-100'}`}>2</div>
-          <span className="hidden sm:inline font-medium">Snapshot Data</span>
+        <div className={`h-0.5 w-12 transition-colors ${step >= 2 ? 'bg-emerald-300' : 'bg-slate-200'}`}></div>
+        <div className={`flex items-center transition-colors ${step >= 2 ? 'text-emerald-600' : 'text-slate-400'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold mr-3 transition-colors ${step >= 2 ? 'bg-emerald-100' : 'bg-slate-100'}`}>2</div>
+          <span className="hidden sm:inline font-medium">Snapshot data</span>
         </div>
       </div>
 
       {error && (
-        <InfoCard 
-          type="error" 
-          title="Validation Error" 
-          message={error} 
-          onDismiss={() => setError(null)} 
+        <InfoCard
+          type="error"
+          title="Almost there"
+          message={error}
+          onDismiss={() => setError(null)}
         />
       )}
 
       {/* Form Steps */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        
+
         {/* Step 1: Demographics */}
         {step === 1 && (
-          <div className="p-6 md:p-8 space-y-6">
+          <div key={animKey} className={`p-6 md:p-8 space-y-6 ${transitionClass}`}>
+            {/* AI Import CTA — demo only */}
+            <AIImportCTA />
+
             <div className="flex items-center mb-4">
               <div className="bg-emerald-100 p-2 rounded-lg mr-3">
                 <FileText className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Patient Identification</h3>
+                <h3 className="text-lg font-bold text-slate-900">Patient identification</h3>
                 <p className="text-sm text-slate-500">Basic demographic information required for record linkage.</p>
               </div>
             </div>
@@ -274,38 +448,47 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Patient ID (Medicare No.) <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                <input
+                  type="text"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors ${fieldRing('patientId')}`}
                   placeholder="e.g. 1234 56789 1"
                   value={formData.patientId}
                   onChange={e => handleInputChange('patientId', e.target.value)}
+                  onBlur={() => setTouched(p => ({ ...p, patientId: true }))}
+                  aria-invalid={!!errorFor('patientId')}
                 />
+                <FieldHelp field="patientId" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Full Name <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Full name <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors ${fieldRing('patientName')}`}
                   placeholder="e.g. Jane Doe"
                   value={formData.patientName}
                   onChange={e => handleInputChange('patientName', e.target.value)}
+                  onBlur={() => setTouched(p => ({ ...p, patientName: true }))}
+                  aria-invalid={!!errorFor('patientName')}
                 />
+                <FieldHelp field="patientName" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Date of Birth <span className="text-red-500">*</span></label>
-                <input 
-                  type="date" 
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Date of birth <span className="text-red-500">*</span></label>
+                <input
+                  type="date"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors ${fieldRing('dob')}`}
                   value={formData.dob}
                   onChange={e => handleInputChange('dob', e.target.value)}
+                  onBlur={() => setTouched(p => ({ ...p, dob: true }))}
+                  aria-invalid={!!errorFor('dob')}
                 />
+                <FieldHelp field="dob" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Treatment Start Date</label>
-                <input 
-                  type="date" 
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Treatment start date <span className="text-slate-400 font-normal">(optional)</span></label>
+                <input
+                  type="date"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-colors"
                   value={formData.start}
                   onChange={e => handleInputChange('start', e.target.value)}
                 />
@@ -316,21 +499,21 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
 
         {/* Step 2: Keywords */}
         {step === 2 && (
-          <div className="p-6 md:p-8 space-y-8">
+          <div key={animKey} className={`p-6 md:p-8 space-y-8 ${transitionClass}`}>
             <div className="flex items-center mb-4">
               <div className="bg-emerald-100 p-2 rounded-lg mr-3">
                 <Tag className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Clinical Classification</h3>
-                <p className="text-sm text-slate-500">Select structured keywords to categorize the case.</p>
+                <h3 className="text-lg font-bold text-slate-900">Clinical classification</h3>
+                <p className="text-sm text-slate-500">Pick the structured keywords that describe this case.</p>
               </div>
             </div>
 
             {/* Keyword Selection Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-3">Body Region <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Body region <span className="text-red-500">*</span></label>
                 <div className="space-y-2">
                   {BODY_REGIONS.map(region => (
                     <button
@@ -338,8 +521,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                       type="button"
                       onClick={() => handleInputChange('bodyRegion', region)}
                       className={`w-full text-left px-4 py-2 rounded-lg text-sm border transition-all ${
-                        formData.bodyRegion === region 
-                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm' 
+                        formData.bodyRegion === region
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm'
                           : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
@@ -347,10 +530,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                     </button>
                   ))}
                 </div>
+                <FieldHelp field="bodyRegion" />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-3">Complaint Type <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Complaint type <span className="text-red-500">*</span></label>
                 <div className="space-y-2">
                   {COMPLAINT_TYPES.map(type => (
                     <button
@@ -358,8 +542,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                       type="button"
                       onClick={() => handleInputChange('complaintType', type)}
                       className={`w-full text-left px-4 py-2 rounded-lg text-sm border transition-all ${
-                        formData.complaintType === type 
-                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm' 
+                        formData.complaintType === type
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm'
                           : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
@@ -367,10 +551,11 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                     </button>
                   ))}
                 </div>
+                <FieldHelp field="complaintType" />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-3">Rehab Stage <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-3">Rehab stage <span className="text-red-500">*</span></label>
                 <div className="space-y-2">
                   {REHAB_STAGES.map(stage => (
                     <button
@@ -378,8 +563,8 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                       type="button"
                       onClick={() => handleInputChange('rehabStage', stage)}
                       className={`w-full text-left px-4 py-2 rounded-lg text-sm border transition-all ${
-                        formData.rehabStage === stage 
-                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm' 
+                        formData.rehabStage === stage
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-medium shadow-sm'
                           : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
@@ -387,6 +572,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                     </button>
                   ))}
                 </div>
+                <FieldHelp field="rehabStage" />
               </div>
             </div>
 
@@ -396,7 +582,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                 <div>
                    <label className="block text-sm font-semibold text-slate-700 mb-3 flex items-center">
                      <Check className="w-4 h-4 text-emerald-500 mr-2" />
-                     Effective Interventions
+                     Effective interventions
                    </label>
                    <div className="flex flex-wrap gap-2">
                      {TREATMENTS_LIST.map(t => (
@@ -419,7 +605,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
                 <div>
                    <label className="block text-sm font-semibold text-slate-700 mb-3 flex items-center">
                      <X className="w-4 h-4 text-rose-500 mr-2" />
-                     Ineffective Interventions
+                     Ineffective interventions
                    </label>
                    <div className="flex flex-wrap gap-2">
                      {TREATMENTS_LIST.map(t => (
@@ -442,7 +628,7 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
             </div>
 
             <div className="pt-6 border-t border-slate-200">
-               <label className="block text-sm font-semibold text-slate-700 mb-3">Current Status</label>
+               <label className="block text-sm font-semibold text-slate-700 mb-3">Current status</label>
                <div className="flex space-x-4">
                   {Object.values(Status).map((s) => (
                     <button
@@ -469,48 +655,69 @@ export const ContributionForm: React.FC<ContributionFormProps> = ({ onSubmit, on
             <button
               type="button"
               onClick={handleBack}
-              className="text-slate-600 font-medium hover:text-slate-900 px-4 py-2"
+              className="text-slate-600 font-medium hover:text-slate-900 px-4 py-2 transition-colors"
             >
               Back
             </button>
           ) : (
-            <div></div> // Spacer
+            <div></div>
           )}
 
           {step < 2 ? (
             <button
               type="button"
               onClick={handleNextStep}
-              className="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-slate-800 transition-colors flex items-center shadow-lg shadow-slate-200"
+              disabled={!currentStepValid}
+              title={!currentStepValid ? "Fill in the required fields to continue" : undefined}
+              className={`px-6 py-2.5 rounded-lg font-semibold flex items-center transition-all shadow-lg ${
+                currentStepValid
+                  ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-200'
+                  : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+              }`}
             >
-              Next Step <ArrowRight className="w-4 h-4 ml-2" />
+              Next step <ArrowRight className="w-4 h-4 ml-2" />
             </button>
           ) : (
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isStep2Valid || !isStep1Valid}
+              title={!isStep2Valid || !isStep1Valid ? "Fill in the required fields to submit" : undefined}
               className={`flex items-center space-x-2 px-8 py-2.5 rounded-lg font-semibold text-white transition-all shadow-lg ${
-                isSubmitting 
-                  ? 'bg-emerald-400 cursor-wait' 
-                  : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
+                isSubmitting
+                  ? 'bg-emerald-400 cursor-wait'
+                  : (!isStep2Valid || !isStep1Valid)
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
               }`}
             >
               {isSubmitting ? (
                 <>
                    <Loader2 className="w-5 h-5 animate-spin" />
-                   <span>Verifying...</span>
+                   <span>Verifying…</span>
                 </>
               ) : (
                 <>
                   <Check className="w-5 h-5" />
-                  <span>Submit Contribution</span>
+                  <span>Submit contribution</span>
                 </>
               )}
             </button>
           )}
         </div>
       </div>
+
+      {/* Step transition keyframes */}
+      <style>{`
+        @keyframes stepInRight {
+          0% { transform: translateX(16px); opacity: 0; }
+          100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes stepInLeft {
+          0% { transform: translateX(-16px); opacity: 0; }
+          100% { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };
