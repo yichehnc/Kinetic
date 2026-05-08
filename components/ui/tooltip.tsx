@@ -49,10 +49,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
 }) => {
   if (disabled || !content) return children;
 
-  // Single-line by default; if `wrap`, allow wrapping with a viewport-aware max-width
-  // and switch to leading-snug for legibility.
+  // Single-line by default. With `wrap`, wrap only on mobile and stay single-line
+  // on desktop — keeps long copy readable on small screens without breaking layout
+  // on wider viewports.
   const widthClass = wrap
-    ? 'whitespace-normal max-w-[min(18rem,calc(100vw-2rem))] leading-snug text-left'
+    ? 'whitespace-normal sm:whitespace-nowrap max-w-[min(18rem,calc(100vw-2rem))] sm:max-w-none leading-snug text-left'
     : 'whitespace-nowrap';
 
   return (

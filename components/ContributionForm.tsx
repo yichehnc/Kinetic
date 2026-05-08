@@ -578,7 +578,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
       )}
 
       {/* Form Steps */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
 
         {/* Step 1: Demographics */}
         {step === 1 && (
@@ -801,7 +801,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
         )}
 
         {/* Action Bar */}
-        <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-between items-center sticky bottom-0 z-10">
+        <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 rounded-b-xl flex justify-between items-center sticky bottom-0 z-10">
           {step > 1 ? (
             <button
               type="button"
