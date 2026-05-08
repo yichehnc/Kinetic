@@ -583,9 +583,6 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
         {/* Step 1: Demographics */}
         {step === 1 && (
           <div key={animKey} className={`p-6 md:p-8 space-y-6 ${transitionClass}`}>
-            {/* AI Import CTA — demo only */}
-            <AIImportCTA />
-
             <div className="flex items-center mb-4">
               <div className="bg-emerald-100 p-2 rounded-lg mr-3">
                 <FileText className="w-6 h-6 text-emerald-600" />
@@ -645,6 +642,9 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
                 />
               </div>
             </div>
+
+            {/* AI Import CTA — below the manual fields */}
+            <AIImportCTA />
           </div>
         )}
 
