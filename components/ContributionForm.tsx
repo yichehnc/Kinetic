@@ -75,8 +75,14 @@ const REHAB_STAGES = ['Acute', 'Sub-Acute', 'Chronic', 'Return to Sport', 'Maint
 
 // Validation copy & functions live in lib/contributionValidation.ts
 
-// AI Import CTA — demo-only. Triggers a fake "parsing" state then a friendly toast.
-const AIImportCTA: React.FC = () => {
+// AI Import CTA — demo-only. Triggers a fake "parsing" state, then prefills the
+// parent form with believable mock data so the recruiter sees the AI value prop end-to-end.
+interface AIImportCTAProps {
+  onPrefill: () => void;
+  onReset: () => void;
+}
+
+const AIImportCTA: React.FC<AIImportCTAProps> = ({ onPrefill, onReset }) => {
   const [state, setState] = useState<'idle' | 'parsing' | 'done'>('idle');
   const [fileName, setFileName] = useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -85,8 +91,11 @@ const AIImportCTA: React.FC = () => {
     if (!file) return;
     setFileName(file.name);
     setState('parsing');
-    // Demo only — fake the AI extraction delay
-    setTimeout(() => setState('done'), 1800);
+    // Demo only — fake the AI extraction delay, then prefill the form.
+    setTimeout(() => {
+      setState('done');
+      onPrefill();
+    }, 1800);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -98,6 +107,7 @@ const AIImportCTA: React.FC = () => {
     setState('idle');
     setFileName(null);
     if (inputRef.current) inputRef.current.value = '';
+    onReset();
   };
 
   return (
@@ -119,7 +129,13 @@ const AIImportCTA: React.FC = () => {
                 side="bottom"
                 className="hidden sm:inline-block"
               >
-                <span className="text-[10px] font-bold uppercase tracking-wide bg-violet-600 text-white px-2 py-0.5 rounded-full sm:cursor-help">AI</span>
+                <span
+                  tabIndex={0}
+                  aria-label="Powered by Kinetic AI"
+                  className="text-[10px] font-bold uppercase tracking-wide bg-violet-600 text-white px-2 py-0.5 rounded-full sm:cursor-help outline-none sm:focus:ring-2 sm:focus:ring-violet-400 sm:focus:ring-offset-1"
+                >
+                  AI
+                </span>
               </Tooltip>
             </div>
             <p className="text-xs text-slate-600 mt-1 max-w-md">
@@ -216,6 +232,44 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
 
   const [formData, setFormData] = useState(initialFormState);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [aiPrefilled, setAiPrefilled] = useState(false);
+
+  // Mock AI extraction payload — believable values for the demo walkthrough.
+  // Patient is intentionally NOT in MOCK_PATIENTS so it looks like a fresh extract.
+  const AI_DEMO_PREFILL = {
+    patientId: '6748 21503 1',
+    patientName: 'Daniel Reyes',
+    dob: '1989-07-22',
+    start: '2026-04-12',
+    bodyRegion: 'Lumbar Spine',
+    complaintType: 'Pain',
+    rehabStage: 'Sub-Acute',
+    status: Status.ONGOING,
+    successful: ['Manual Therapy', 'Exercise Rehab'],
+    unsuccessful: ['Ultrasound'],
+    contraindications: [] as string[],
+  };
+
+  const handleAIPrefill = () => {
+    setFormData(prev => ({ ...prev, ...AI_DEMO_PREFILL }));
+    // Mark every required field as touched so any subsequent edit shows errors immediately
+    setTouched({
+      patientId: true,
+      patientName: true,
+      dob: true,
+      bodyRegion: true,
+      complaintType: true,
+      rehabStage: true,
+    });
+    setAiPrefilled(true);
+    setError(null);
+  };
+
+  const handleAIReset = () => {
+    setFormData(initialFormState);
+    setTouched({});
+    setAiPrefilled(false);
+  };
 
   // Load draft on mount — handle blocked localStorage and corrupt JSON gracefully
   useEffect(() => {
@@ -239,6 +293,16 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
             unsuccessful: Array.isArray(parsed.unsuccessful) ? parsed.unsuccessful : [],
             contraindications: Array.isArray(parsed.contraindications) ? parsed.contraindications : [],
           }));
+          // KIN-207: mark all required fields touched so subsequent edits show
+          // inline errors immediately instead of waiting for blur.
+          setTouched({
+            patientId: true,
+            patientName: true,
+            dob: true,
+            bodyRegion: true,
+            complaintType: true,
+            rehabStage: true,
+          });
           setLastSaved(new Date());
           setDraftRecovered(true);
         } else {
@@ -641,7 +705,17 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
             </div>
 
             {/* AI Import CTA — below the manual fields */}
-            <AIImportCTA />
+            <AIImportCTA onPrefill={handleAIPrefill} onReset={handleAIReset} />
+
+            {aiPrefilled && (
+              <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-800 flex items-start gap-2">
+                <Check className="w-4 h-4 mt-0.5 shrink-0 text-emerald-600" />
+                <div className="flex-1">
+                  <strong className="font-semibold">AI prefilled the form.</strong>{' '}
+                  Review the extracted values above and on the next step, edit anything that looks off, then submit.
+                </div>
+              </div>
+            )}
           </div>
         )}
 

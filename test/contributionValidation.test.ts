@@ -114,6 +114,31 @@ describe('buildCompositeCondition', () => {
   });
 });
 
+// Round-trip: prefilled mock data should pass step 1 + 2 validation cleanly.
+// Guards against the AI demo payload drifting out of sync with field requirements.
+describe('AI demo prefill round-trip', () => {
+  const aiPrefill = {
+    patientId: '6748 21503 1',
+    patientName: 'Daniel Reyes',
+    dob: '1989-07-22',
+    bodyRegion: 'Lumbar Spine',
+    complaintType: 'Pain',
+    rehabStage: 'Sub-Acute',
+  };
+
+  it('passes step 1 validation', () => {
+    expect(validateStep1(aiPrefill)).toHaveLength(0);
+  });
+
+  it('passes step 2 validation', () => {
+    expect(validateStep2(aiPrefill)).toHaveLength(0);
+  });
+
+  it('produces a non-empty composite condition', () => {
+    expect(buildCompositeCondition(aiPrefill)).toBe('Lumbar Spine - Pain');
+  });
+});
+
 describe('parseDraft', () => {
   it('returns null for null input', () => {
     expect(parseDraft(null)).toBeNull();
