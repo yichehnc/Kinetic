@@ -131,7 +131,7 @@ export const ClinicalSnapshotCard: React.FC<SnapshotCardProps> = ({
 
   if (!isUnlocked) {
     return (
-      <div className="bg-gradient-to-br from-slate-50 to-emerald-50/20 border border-slate-200 rounded-2xl p-8 relative overflow-hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+      <div className="bg-gradient-to-br from-slate-50 to-emerald-50/20 border border-slate-200 rounded-2xl p-8 relative overflow-hidden shadow-sm transition-shadow duration-300 hover:shadow-xl">
         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full -mr-16 -mt-16 opacity-50"></div>
         
         <div className="relative">
@@ -203,7 +203,7 @@ export const ClinicalSnapshotCard: React.FC<SnapshotCardProps> = ({
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden animate-fade-in hover:shadow-xl transition-all duration-300">
+    <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-4">
         <div className="flex items-center justify-between text-white">
           <div className="flex items-center space-x-3">

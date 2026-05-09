@@ -27,6 +27,7 @@ const App: React.FC = () => {
   const [credits, setCredits] = useState(0); // Start with 0
   const [unlockedPatients, setUnlockedPatients] = useState<string[]>(['3482 91024 1']);
   const [contributionCount, setContributionCount] = useState(12);
+  const [lockedAttempts, setLockedAttempts] = useState(0);
   const [localHistory, setLocalHistory] = useState<HistoryEntry[]>(MOCK_HISTORY);
   const [localPatients, setLocalPatients] = useState<Patient[]>(MOCK_PATIENTS);
   const [notification, setNotification] = useState<string | null>(null);
@@ -80,6 +81,10 @@ const App: React.FC = () => {
       setCredits(prev => prev - 1);
       setUnlockedPatients(prev => [...prev, patientId]);
       setNotification(`Unlocked history. Balance: ${credits - 1}`);
+      setTimeout(() => setNotification(null), 3000);
+    } else {
+      setLockedAttempts(prev => prev + 1);
+      setNotification('Not enough credits — contribute to unlock this history.');
       setTimeout(() => setNotification(null), 3000);
     }
   };
@@ -178,10 +183,11 @@ const App: React.FC = () => {
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab} credits={credits}>
       {activeTab === 'dashboard' && (
-        <Dashboard 
-          credits={credits} 
-          contributionCount={contributionCount} 
+        <Dashboard
+          credits={credits}
+          contributionCount={contributionCount}
           unlockedCount={unlockedPatients.length}
+          lockedAttempts={lockedAttempts}
           onNavigate={setActiveTab}
           isOptedIn={isOptedIn}
           onOptIn={handleOptIn}

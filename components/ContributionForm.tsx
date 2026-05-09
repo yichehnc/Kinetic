@@ -286,15 +286,6 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
 
   const handleAIPrefill = () => {
     setFormData(prev => ({ ...prev, ...AI_DEMO_PREFILL }));
-    // Mark every required field as touched so any subsequent edit shows errors immediately
-    setTouched({
-      patientId: true,
-      patientName: true,
-      dob: true,
-      bodyRegion: true,
-      complaintType: true,
-      rehabStage: true,
-    });
     setAiPrefilled(true);
     setError(null);
   };
@@ -327,16 +318,6 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
             unsuccessful: Array.isArray(parsed.unsuccessful) ? parsed.unsuccessful : [],
             contraindications: Array.isArray(parsed.contraindications) ? parsed.contraindications : [],
           }));
-          // KIN-207: mark all required fields touched so subsequent edits show
-          // inline errors immediately instead of waiting for blur.
-          setTouched({
-            patientId: true,
-            patientName: true,
-            dob: true,
-            bodyRegion: true,
-            complaintType: true,
-            rehabStage: true,
-          });
           setLastSaved(new Date());
           setDraftRecovered(true);
         } else {
@@ -561,10 +542,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
     );
   }
 
-  const transitionClass =
-    stepDirection === 'forward'
-      ? 'motion-safe:animate-[stepInRight_0.28s_ease-out]'
-      : 'motion-safe:animate-[stepInLeft_0.28s_ease-out]';
+  const transitionClass = '';
 
   return (
     <div className="max-w-4xl mx-auto px-4 pb-24">

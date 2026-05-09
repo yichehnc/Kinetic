@@ -1,10 +1,12 @@
-import React from 'react';
-import { Award, TrendingUp, Users, Plus, Search, ArrowRight, LogOut, LogIn } from 'lucide-react';
+import React, { useState } from 'react';
+import { Award, TrendingUp, Users, Plus, Search, ArrowRight, LogOut, LogIn, Shield } from 'lucide-react';
+import { PrivacyExplainer } from './PrivacyExplainer';
 
 interface DashboardProps {
   credits: number;
   contributionCount: number;
   unlockedCount: number;
+  lockedAttempts?: number;
   onNavigate: (tab: string) => void;
   isOptedIn: boolean;
   onOptIn: () => void;
@@ -15,11 +17,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
   credits,
   contributionCount,
   unlockedCount,
+  lockedAttempts = 0,
   onNavigate,
   isOptedIn,
   onOptIn,
   onOptOut
 }) => {
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const earned = contributionCount;
+  const spent = unlockedCount;
+  const loopMax = Math.max(earned, spent, 1);
+  const earnedPct = Math.round((earned / loopMax) * 100);
+  const spentPct = Math.round((spent / loopMax) * 100);
+
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-0 pb-12">
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -65,6 +75,39 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <LogIn className="w-4 h-4 mr-2" />
                 Opt In to Network
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Credit Loop — earned vs spent progress bars */}
+      {isOptedIn && (
+        <div className="mb-6 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Credit Loop</p>
+            <button
+              onClick={() => setPrivacyOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-600 tracking-tight transition-colors"
+            >
+              <Shield className="w-3.5 h-3.5 text-emerald-500" />
+              How privacy works
+            </button>
+          </div>
+
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-600 w-14">Earned</span>
+              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${earnedPct}%` }} />
+              </div>
+              <span className="text-[10px] font-mono text-slate-500 w-8 text-right">{earned}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-blue-600 w-14">Spent</span>
+              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-500 rounded-full transition-all duration-700" style={{ width: `${spentPct}%` }} />
+              </div>
+              <span className="text-[10px] font-mono text-slate-500 w-8 text-right">{spent}</span>
             </div>
           </div>
         </div>
@@ -314,6 +357,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
+
+      <PrivacyExplainer open={privacyOpen} onClose={() => setPrivacyOpen(false)} />
     </div>
   );
 };

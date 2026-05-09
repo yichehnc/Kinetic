@@ -267,28 +267,6 @@ const SummaryTab: React.FC<{
         ))}
       </div>
 
-      {/* Unlock gate */}
-      {!unlocked && patient.historyAvailable && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Lock className="w-5 h-5 text-amber-500 shrink-0" />
-            <div>
-              <p className="font-semibold text-amber-900 text-sm">Network history locked</p>
-              <p className="text-xs text-amber-700">Unlock for 1 credit to view the full clinical chart</p>
-            </div>
-          </div>
-          <button
-            onClick={() => onUnlock(patient.id)}
-            disabled={credits < 1}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 ${
-              credits >= 1 ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-            }`}
-          >
-            <Unlock className="w-3.5 h-3.5" /> Unlock (1 Credit)
-          </button>
-        </div>
-      )}
-
       {/* Clinical synopsis + flags */}
       {(unlocked || !patient.historyAvailable) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -368,14 +346,8 @@ const EpisodesTab: React.FC<{
       <div className="flex items-center justify-center h-48">
         <div className="text-center">
           <Lock className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="font-semibold text-slate-600 mb-3">Unlock to view episodes</p>
-          <button
-            onClick={() => onUnlock(patient.id)}
-            disabled={credits < 1}
-            className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 transition-colors"
-          >
-            Unlock (1 Credit)
-          </button>
+          <p className="font-semibold text-slate-600 mb-1">Episodes locked</p>
+          <p className="text-xs text-slate-400">Use the unlock button in the patient list</p>
         </div>
       </div>
     );
@@ -850,22 +822,22 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex relative h-[calc(100vh-220px)] min-h-[560px]">
 
       {/* ── LEFT: Patient List ────────────────────────────────────────────── */}
-      <div className={`w-full md:w-56 lg:w-60 shrink-0 border-r border-slate-200 bg-white flex-col ${mobileView === 'list' ? 'flex' : 'hidden md:flex'}`}>
-        <div className="px-3 py-2.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+      <div className={`w-full md:w-64 lg:w-72 shrink-0 border-r border-slate-200 bg-white flex-col ${mobileView === 'list' ? 'flex' : 'hidden md:flex'}`}>
+        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Patients · 47
           </span>
-          <Filter className="w-3.5 h-3.5 text-slate-400" />
+          <Filter className="w-4 h-4 text-slate-400" />
         </div>
-        <div className="p-2 border-b border-slate-200">
+        <div className="p-3 border-b border-slate-200">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search patients..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-8 pr-2 py-1.5 text-xs border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500"
             />
           </div>
         </div>
@@ -876,33 +848,46 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
             const unlocked = unlockedPatients.includes(patient.id);
             const isActive = selectedPatient?.id === patient.id;
             return (
-              <button
+              <div
                 key={patient.id}
-                onClick={() => handleSelect(patient)}
-                className={`w-full p-3 text-left transition-colors ${
+                className={`w-full px-4 py-3 text-left transition-colors ${
                   isActive ? 'bg-emerald-50 border-l-2 border-l-emerald-500' : 'hover:bg-slate-50'
                 }`}
               >
-                <div className="flex items-start justify-between gap-1.5">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      {patient.historyAvailable && (
-                        <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${unlocked ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                <button
+                  onClick={() => handleSelect(patient)}
+                  className="w-full text-left"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        {patient.historyAvailable && (
+                          <div className={`w-2 h-2 rounded-full shrink-0 ${unlocked ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                        )}
+                        <p className="text-sm font-semibold text-slate-900 truncate">{patient.name}</p>
+                      </div>
+                      <p className="text-xs text-slate-400 font-mono mt-1">{patient.id}</p>
+                      {latestH && (
+                        <p className="text-xs text-slate-500 truncate mt-0.5">{latestH.condition}</p>
                       )}
-                      <p className="text-xs font-semibold text-slate-900 truncate">{patient.name}</p>
                     </div>
-                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">{patient.id}</p>
-                    {latestH && (
-                      <p className="text-[10px] text-slate-500 truncate mt-0.5">{latestH.condition}</p>
+                    {patient.historyAvailable && unlocked && (
+                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded shrink-0">ACTIVE</span>
                     )}
                   </div>
-                  {patient.historyAvailable ? (
-                    unlocked
-                      ? <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded shrink-0">ACTIVE</span>
-                      : <Lock className="w-3 h-3 text-slate-400 shrink-0 mt-0.5" />
-                  ) : null}
-                </div>
-              </button>
+                </button>
+                {patient.historyAvailable && !unlocked && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleSelect(patient); onUnlock(patient.id); }}
+                    disabled={credits < 1}
+                    className={`mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                      credits >= 1 ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <Unlock className="w-3 h-3" /> Unlock (1 Credit)
+                  </button>
+                )}
+              </div>
             );
           })}
         </div>
