@@ -803,6 +803,9 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   };
 
   const exerciseProgramCount = (MOCK_EXERCISE_PROGRAMS[selectedPatient?.id ?? ''] ?? []).length;
+  const isSelectedUnlocked = selectedPatient ? unlockedPatients.includes(selectedPatient.id) : false;
+  const isSelectedLocked = selectedPatient?.historyAvailable && !isSelectedUnlocked;
+
   const tabDefs: { id: ChartTab; label: string; count?: number }[] = [
     { id: 'summary',    label: 'Summary' },
     { id: 'episodes',   label: 'Episodes',  count: patientHistories.length },
@@ -955,7 +958,7 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
           </div>
 
           {/* Patient header */}
-          <div className="px-3 sm:px-5 pt-4 pb-0 bg-white border-b border-slate-200 shrink-0">
+          <div className={`px-3 sm:px-5 pt-4 pb-0 border-b border-slate-200 shrink-0 ${isSelectedLocked ? 'bg-slate-50' : 'bg-white'}`}>
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 sm:w-11 sm:h-11 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                 {initials(selectedPatient.name)}
@@ -981,7 +984,7 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
             </div>
 
             {/* Chart tabs */}
-            <div className="flex overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0">
+            <div className={`flex overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 ${isSelectedLocked ? 'opacity-40 pointer-events-none' : ''}`}>
               {tabDefs.map(tab => (
                 <button
                   key={tab.id}
@@ -1006,7 +1009,7 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto p-3 sm:p-5 bg-slate-50">
+          <div className={`flex-1 overflow-y-auto p-3 sm:p-5 bg-slate-50 ${isSelectedLocked ? 'opacity-40 pointer-events-none' : ''}`}>
             {activeTab === 'summary' && (
               <SummaryTab patient={selectedPatient} histories={patientHistories} unlockedPatients={unlockedPatients} onUnlock={onUnlock} credits={credits} />
             )}
