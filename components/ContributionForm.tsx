@@ -87,8 +87,30 @@ const AIImportCTA: React.FC<AIImportCTAProps> = ({ onPrefill, onReset }) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  const ALLOWED_TYPES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/png',
+    'image/jpeg',
+  ];
+  const MAX_SIZE_MB = 25;
+
   const handleFile = (file: File | null) => {
     if (!file) return;
+    setFileError(null);
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setFileError('Unsupported file type. Please upload a PDF, DOCX, or image.');
+      return;
+    }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setFileError(`File is too large (max ${MAX_SIZE_MB} MB).`);
+      return;
+    }
+
     setFileName(file.name);
     setState('parsing');
     // Demo only — fake the AI extraction delay, then prefill the form.
@@ -190,8 +212,14 @@ const AIImportCTA: React.FC<AIImportCTAProps> = ({ onPrefill, onReset }) => {
         </div>
       </div>
 
+      {fileError && (
+        <p className="mt-3 text-xs text-rose-600 flex items-start gap-1">
+          <X className="w-3 h-3 mt-0.5 shrink-0" />
+          <span>{fileError}</span>
+        </p>
+      )}
       <p className="text-[11px] text-slate-400 mt-3">
-        Or drag a file onto this card. Supports PDF, DOC, DOCX, and image scans up to 10 MB.
+        Or drag a file onto this card. Supports PDF, DOC, DOCX, and image scans up to {MAX_SIZE_MB} MB.
       </p>
     </div>
   );
@@ -211,6 +239,12 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward');
   const [animKey, setAnimKey] = useState(0);
+
+  /** Scroll to top, honoring prefers-reduced-motion. */
+  const scrollToTop = () => {
+    const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+  };
 
   const initialFormState = {
     // Step 1: Patient Info
@@ -393,7 +427,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
     if (!currentStepValid) {
       setShowAllErrors(true);
       setError("A couple of fields still need your attention before we can continue.");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTop();
       return;
     }
 
@@ -402,7 +436,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
     setStepDirection('forward');
     setAnimKey(k => k + 1);
     setStep(prev => prev + 1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   };
 
   const handleBack = () => {
@@ -411,7 +445,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
     setStep(prev => prev - 1);
     setError(null);
     setShowAllErrors(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollToTop();
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -445,7 +479,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
         (typeof err === 'string' ? err : null) ||
         "Something went wrong on our end. Your work is safe — please try submitting again.";
       setSubmitError(message);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      scrollToTop();
     } finally {
       setIsSubmitting(false);
     }
@@ -478,8 +512,8 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
   if (step === 3) {
     return (
       <div className="max-w-2xl mx-auto mt-12 text-center px-4">
-        <div className="bg-emerald-50 rounded-3xl p-8 md:p-12 border border-emerald-100 shadow-sm animate-fade-in-up relative overflow-hidden">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-emerald-50 animate-[scaleIn_0.4s_ease-out]">
+        <div className="bg-emerald-50 rounded-3xl p-8 md:p-12 border border-emerald-100 shadow-sm motion-safe:animate-fade-in-up relative overflow-hidden">
+          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-emerald-50 motion-safe:animate-[scaleIn_0.4s_ease-out]">
             <Check className="w-10 h-10 text-emerald-600" />
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">Contribution verified</h2>
@@ -488,7 +522,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
           </p>
 
           <div
-            className="inline-flex items-center space-x-2 bg-white px-6 py-3 rounded-xl border border-emerald-200 shadow-sm mb-8 animate-[creditPop_0.6s_ease-out_0.2s_both]"
+            className="inline-flex items-center space-x-2 bg-white px-6 py-3 rounded-xl border border-emerald-200 shadow-sm mb-8 motion-safe:animate-[creditPop_0.6s_ease-out_0.2s_both]"
           >
             <span className="text-sm font-medium text-slate-500">Reward earned:</span>
             <span className="text-lg font-bold text-emerald-600">+1 Credit</span>
@@ -529,8 +563,8 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
 
   const transitionClass =
     stepDirection === 'forward'
-      ? 'animate-[stepInRight_0.28s_ease-out]'
-      : 'animate-[stepInLeft_0.28s_ease-out]';
+      ? 'motion-safe:animate-[stepInRight_0.28s_ease-out]'
+      : 'motion-safe:animate-[stepInLeft_0.28s_ease-out]';
 
   return (
     <div className="max-w-4xl mx-auto px-4 pb-24">

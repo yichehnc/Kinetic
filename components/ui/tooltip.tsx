@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 type Side = 'top' | 'bottom' | 'left' | 'right';
 
@@ -47,6 +47,8 @@ export const Tooltip: React.FC<TooltipProps> = ({
   className = '',
   wrap = false,
 }) => {
+  const tooltipId = useId();
+
   if (disabled || !content) return children;
 
   // Single-line by default. With `wrap`, wrap only on mobile and stay single-line
@@ -57,9 +59,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
     : 'whitespace-nowrap';
 
   return (
-    <span className="group relative inline-flex">
+    <span className="group relative inline-flex" aria-describedby={tooltipId}>
       {children}
       <span
+        id={tooltipId}
         role="tooltip"
         className={`pointer-events-none absolute z-50 ${widthClass} rounded-md bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg opacity-0 scale-95 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100 ${sidePositionClasses[side]} ${className}`}
       >

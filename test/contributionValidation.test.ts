@@ -107,10 +107,16 @@ describe('buildCompositeCondition', () => {
     expect(buildCompositeCondition({ bodyRegion: 'Knee', complaintType: 'Pain' })).toBe('Knee - Pain');
   });
 
-  // BUG GUARD: empty parts shouldn't produce nonsense like " - " or "Knee - "
-  // — but we WILL produce that, which is a bug. This test documents current behaviour.
-  it('produces " - " when both fields are empty (KNOWN: not guarded against)', () => {
-    expect(buildCompositeCondition({ bodyRegion: '', complaintType: '' })).toBe(' - ');
+  it('returns empty string when both fields are empty', () => {
+    expect(buildCompositeCondition({ bodyRegion: '', complaintType: '' })).toBe('');
+  });
+
+  it('returns only region when complaintType is empty', () => {
+    expect(buildCompositeCondition({ bodyRegion: 'Knee', complaintType: '' })).toBe('Knee');
+  });
+
+  it('returns only complaint when bodyRegion is empty', () => {
+    expect(buildCompositeCondition({ bodyRegion: '', complaintType: 'Pain' })).toBe('Pain');
   });
 });
 

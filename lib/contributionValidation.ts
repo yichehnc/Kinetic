@@ -58,7 +58,12 @@ export function isStepValid(errors: FieldError[]): boolean {
 export function buildCompositeCondition(
   formData: Pick<ContributionFormData, 'bodyRegion' | 'complaintType'>
 ): string {
-  return `${formData.bodyRegion} - ${formData.complaintType}`;
+  const region = formData.bodyRegion?.trim() ?? '';
+  const complaint = formData.complaintType?.trim() ?? '';
+  if (!region && !complaint) return '';
+  if (!region) return complaint;
+  if (!complaint) return region;
+  return `${region} - ${complaint}`;
 }
 
 /**
