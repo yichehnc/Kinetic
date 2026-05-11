@@ -46,9 +46,12 @@ A three-column longitudinal clinical record:
 - Live sync indicator, Prescribe and Open-in-platform actions
 
 ### Contribute Evidence
-- Two-step structured contribution form
+- Two-step structured contribution form with inline validation and friendly copy
+- AI Import CTA — upload a medical report (PDF/DOCX/image) and Kinetic AI extracts structured fields (demo)
+- Draft auto-save to localStorage with corruption and quota guards
 - Anonymised snapshot: condition, body region, rehab stage, treatment categories
 - No clinician names, clinic names, or subjective clinical notes
+- Error boundary prevents form crashes from blanking the page
 
 ### Credit System
 - Earn credits by contributing patient history
@@ -90,6 +93,12 @@ No clinician names, subjective notes, outcomes, or reasoning chains. Designed fo
 - Contributions are clinic-level, not individual clinician
 - No attribution, no subjective content
 - Removes fear of treatment being judged by peers
+- Referral path shows anonymised clinic hashes — no identifying information
+
+### 5. Accessibility & Motion
+- Tooltip accessibility via `aria-describedby`
+- Decorative animations gated behind `motion-safe:` (prefers-reduced-motion)
+- Smooth scroll respects user motion preferences
 
 ---
 
@@ -97,9 +106,12 @@ No clinician names, subjective notes, outcomes, or reasoning chains. Designed fo
 
 | Layer | Tech |
 |---|---|
-| Framework | React + TypeScript (Vite) |
-| Styling | Tailwind CSS |
+| Framework | React 19 + TypeScript (Vite 6) |
+| Styling | Tailwind CSS (CDN) |
 | Icons | Lucide React |
+| Testing | Vitest + React Testing Library + jsdom |
+| CI | GitHub Actions (lint + test on push) |
+| Deploy | Vercel (auto-deploy from main) |
 | Routing | Single-page (tab-based state) |
 | Data | Mock — no backend in this prototype |
 
@@ -115,6 +127,14 @@ npm run dev
 ```
 
 App runs at `http://localhost:3000`
+
+### Run Tests
+
+```bash
+npm test
+```
+
+36 unit tests covering validation logic, tooltip rendering, and draft persistence.
 
 ---
 
