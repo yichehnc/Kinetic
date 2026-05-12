@@ -1,6 +1,30 @@
 import React, { useState } from 'react';
-import { Award, TrendingUp, Users, Plus, Search, ArrowRight, LogOut, LogIn, Shield } from 'lucide-react';
+import { Award, TrendingUp, Users, Plus, Search, ArrowRight, LogOut, LogIn, Shield, BarChart2, Zap, Trophy } from 'lucide-react';
 import { PrivacyExplainer } from './PrivacyExplainer';
+
+// ─── Mock network intelligence data ──────────────────────────────────────────
+
+const TOP_CONDITIONS = [
+  { name: 'Lower Back Pain',          pct: 28 },
+  { name: 'Rotator Cuff Tendinopathy', pct: 19 },
+  { name: 'Ankle / Foot Sprains',     pct: 14 },
+  { name: 'Knee OA / Post-op Rehab',  pct: 12 },
+  { name: 'Cervical Radiculopathy',   pct: 9  },
+];
+
+const TOP_PROTOCOLS = [
+  { name: 'McKenzie + Progressive Loading', rate: 84, n: 47 },
+  { name: 'Dry Needling + Eccentric Load',  rate: 79, n: 31 },
+  { name: 'Manual Therapy + HEP',           rate: 76, n: 89 },
+];
+
+const CLINIC_STATS = {
+  avgSessions:    { you: 8.2,  network: 11.4 },
+  resolutionRate: { you: 74,   network: 61   },
+  rank:           'Top 12%',
+  networkSize:    847,
+  totalEpisodes:  24312,
+};
 
 interface DashboardProps {
   credits: number;
@@ -286,6 +310,131 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Network Intelligence */}
+      <div className="mb-8 relative">
+        {/* Blurred overlay when opted out */}
+        {!isOptedIn && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm border border-slate-200">
+            <div className="text-center px-6">
+              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Zap className="w-5 h-5 text-slate-400" />
+              </div>
+              <p className="font-brand font-bold text-slate-900 mb-1">Network insights locked</p>
+              <p className="text-xs text-slate-500 mb-4 max-w-xs">Opt in to see how your clinic compares against 847 practices in the network.</p>
+              <button
+                onClick={onOptIn}
+                className="px-5 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors"
+              >
+                Opt in to unlock
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className={!isOptedIn ? 'blur-sm pointer-events-none select-none' : ''}>
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="w-4 h-4 text-amber-500" />
+            <h3 className="text-sm font-brand font-extrabold text-slate-900 tracking-tight">Network Intelligence</h3>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-1">Sydney CBD · {CLINIC_STATS.networkSize} clinics · {CLINIC_STATS.totalEpisodes.toLocaleString()} episodes</span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            {/* Your clinic vs network */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Trophy className="w-4 h-4 text-amber-500" />
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Your clinic vs network</p>
+              </div>
+              <div className="space-y-4">
+                {/* Sessions to resolution */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-slate-600 font-medium">Avg sessions to resolution</span>
+                    <span className="font-bold text-emerald-600">{CLINIC_STATS.avgSessions.you} <span className="font-normal text-slate-400">vs {CLINIC_STATS.avgSessions.network} avg</span></span>
+                  </div>
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden relative">
+                    <div className="absolute h-full bg-slate-200 rounded-full" style={{ width: '100%' }} />
+                    <div className="absolute h-full bg-slate-300 rounded-full" style={{ width: `${(CLINIC_STATS.avgSessions.network / 15) * 100}%` }} />
+                    <div className="absolute h-full bg-emerald-500 rounded-full" style={{ width: `${(CLINIC_STATS.avgSessions.you / 15) * 100}%` }} />
+                  </div>
+                  <p className="text-[10px] text-emerald-600 mt-1 font-medium">28% faster than average</p>
+                </div>
+                {/* Resolution rate */}
+                <div>
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-slate-600 font-medium">Episode resolution rate</span>
+                    <span className="font-bold text-emerald-600">{CLINIC_STATS.resolutionRate.you}% <span className="font-normal text-slate-400">vs {CLINIC_STATS.resolutionRate.network}% avg</span></span>
+                  </div>
+                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden relative">
+                    <div className="absolute h-full bg-slate-300 rounded-full" style={{ width: `${CLINIC_STATS.resolutionRate.network}%` }} />
+                    <div className="absolute h-full bg-emerald-500 rounded-full" style={{ width: `${CLINIC_STATS.resolutionRate.you}%` }} />
+                  </div>
+                  <p className="text-[10px] text-emerald-600 mt-1 font-medium">13 pts above average</p>
+                </div>
+              </div>
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Contribution rank</p>
+                <span className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">{CLINIC_STATS.rank}</span>
+              </div>
+            </div>
+
+            {/* Top conditions in region */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart2 className="w-4 h-4 text-blue-500" />
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Top conditions · region</p>
+              </div>
+              <div className="space-y-2.5">
+                {TOP_CONDITIONS.map(c => (
+                  <div key={c.name}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-slate-700 font-medium truncate pr-2">{c.name}</span>
+                      <span className="text-slate-400 shrink-0">{c.pct}%</span>
+                    </div>
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-400 rounded-full" style={{ width: `${c.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-slate-400 mt-4">Based on contributed episodes in Sydney CBD, last 90 days.</p>
+            </div>
+
+            {/* Top protocols */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Top protocols · this month</p>
+              </div>
+              <div className="space-y-3">
+                {TOP_PROTOCOLS.map((p, i) => (
+                  <div key={p.name} className="flex items-start gap-3">
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 ${
+                      i === 0 ? 'bg-amber-100 text-amber-700' :
+                      i === 1 ? 'bg-slate-100 text-slate-600' :
+                                'bg-orange-50 text-orange-600'
+                    }`}>{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-slate-800 leading-snug">{p.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${p.rate}%` }} />
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-600 shrink-0">{p.rate}%</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-0.5">n={p.n} episodes</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-slate-400 mt-4">Resolution rate across contributing clinics. All data anonymised.</p>
+            </div>
+
           </div>
         </div>
       </div>
