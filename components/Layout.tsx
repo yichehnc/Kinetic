@@ -92,14 +92,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
             <div className="flex flex-wrap items-center gap-4 justify-center">
               <button
                 onClick={() => onTabChange('privacy')}
-                className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
+                className="py-2 hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
               >
                 Privacy Policy
               </button>
               <span className="hidden sm:inline" aria-hidden="true">•</span>
               <button
                 onClick={() => onTabChange('terms')}
-                className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
+                className="py-2 hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
               >
                 Terms of Service
               </button>
