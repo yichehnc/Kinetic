@@ -63,6 +63,11 @@ A three-column longitudinal clinical record:
 - Treatment efficacy signals from aggregate network data
 - Audit trail (access log) meeting Australian Privacy Act APP 11 requirements
 
+### Privacy Policy & Terms of Service
+- Full Privacy Policy page — APP 11 compliance language, SHA-256 hashing details, NDB scheme reference, data retention and your-rights sections
+- Full Terms of Service page — eligibility, credit rules, prohibited use, disclaimers, NSW governing law
+- Accessible from footer links throughout the app; Back button returns to Dashboard
+
 ---
 
 ## Core System Design

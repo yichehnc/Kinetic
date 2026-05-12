@@ -5,6 +5,8 @@ import { PatientSearch } from './components/PatientSearch';
 import { ContributionForm } from './components/ContributionForm';
 import { Referral } from './components/Referral';
 import { Community } from './components/Community';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { TermsOfService } from './components/TermsOfService';
 import { MOCK_PATIENTS, MOCK_HISTORY } from './constants';
 import { Patient, HistoryEntry } from './types';
 import { CheckCircle, Shield } from 'lucide-react';
@@ -219,6 +221,14 @@ const App: React.FC = () => {
 
       {activeTab === 'referrals' && (
         <Referral />
+      )}
+
+      {activeTab === 'privacy' && (
+        <PrivacyPolicy onBack={() => setActiveTab('dashboard')} />
+      )}
+
+      {activeTab === 'terms' && (
+        <TermsOfService onBack={() => setActiveTab('dashboard')} />
       )}
 
       {activeTab === 'settings' && (

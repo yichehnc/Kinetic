@@ -90,15 +90,26 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
             <p>© 2026 Kinetic Network. All rights reserved. <a href="http://linkedin.com/in/ycaoc" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors underline decoration-slate-200 underline-offset-4">Yichen Cao</a></p>
             <div className="flex flex-wrap items-center gap-4 justify-center">
-              <a href="#" className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded">
+              <button
+                onClick={() => onTabChange('privacy')}
+                className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
+              >
                 Privacy Policy
-              </a>
+              </button>
               <span className="hidden sm:inline" aria-hidden="true">•</span>
-              <a href="#" className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded">
+              <button
+                onClick={() => onTabChange('terms')}
+                className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
+              >
                 Terms of Service
-              </a>
+              </button>
               <span className="hidden sm:inline" aria-hidden="true">•</span>
-              <a href="#" className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded">
+              <a
+                href="https://github.com/yichenc/kinetic#readme"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
+              >
                 Documentation
               </a>
             </div>
