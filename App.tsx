@@ -6,8 +6,8 @@ import { ContributionForm } from './components/ContributionForm';
 import { Referral } from './components/Referral';
 import { Community } from './components/Community';
 import { MOCK_PATIENTS, MOCK_HISTORY } from './constants';
-import { Patient, HistoryEntry, Status } from './types';
-import { CheckCircle, Shield, Users } from 'lucide-react';
+import { Patient, HistoryEntry } from './types';
+import { CheckCircle, Shield } from 'lucide-react';
 
 // Simple Alert Component for notifications
 const Notification = ({ message, onClose }: { message: string; onClose: () => void }) => (

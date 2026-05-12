@@ -37,18 +37,3 @@ export interface HistoryEntry {
   reportFile?: string; // SOAP Report filename or URL
 }
 
-export interface Appointment {
-  id: string;
-  time: string;
-  patientId: string;
-  reason: string;
-  status: 'Arrived' | 'Scheduled' | 'Completed' | 'Late';
-}
-
-export interface ClinicState {
-  name: string;
-  credits: number;
-  optedIn: boolean;
-  unlockedPatients: string[]; // List of patient IDs where history is unlocked
-  contributionCount: number;
-}
