@@ -7,6 +7,7 @@ import { Referral } from './components/Referral';
 import { Community } from './components/Community';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { TermsOfService } from './components/TermsOfService';
+import { OnboardingTour } from './components/OnboardingTour';
 import { MOCK_PATIENTS, MOCK_HISTORY } from './constants';
 import { Patient, HistoryEntry } from './types';
 import { CheckCircle, Shield } from 'lucide-react';
@@ -37,6 +38,7 @@ const App: React.FC = () => {
   // Track if initial credits were awarded (only once ever)
   const [hasReceivedInitialCredits, setHasReceivedInitialCredits] = useState(false);
   const [isOptedIn, setIsOptedIn] = useState(false); // Default to false - user must opt in
+  const [showTour, setShowTour] = useState(() => !localStorage.getItem('kinetic_onboarding_done'));
 
   // Load initial credits flag and opt-in status from storage on mount
   useEffect(() => {
@@ -182,6 +184,11 @@ const App: React.FC = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const handleTourComplete = () => {
+    localStorage.setItem('kinetic_onboarding_done', 'true');
+    setShowTour(false);
+  };
+
   return (
     <Layout activeTab={activeTab} onTabChange={setActiveTab} credits={credits}>
       {activeTab === 'dashboard' && (
@@ -198,12 +205,13 @@ const App: React.FC = () => {
       )}
       
       {activeTab === 'intake' && (
-        <PatientSearch 
+        <PatientSearch
           patients={localPatients}
           histories={localHistory}
           unlockedPatients={unlockedPatients}
           credits={credits}
           onUnlock={handleUnlockPatient}
+          onNavigateContribute={() => setActiveTab('contribute')}
           isOptedIn={isOptedIn}
         />
       )}
@@ -328,6 +336,8 @@ const App: React.FC = () => {
       {notification && (
         <Notification message={notification} onClose={() => setNotification(null)} />
       )}
+
+      {showTour && <OnboardingTour onComplete={handleTourComplete} />}
     </Layout>
   );
 };

@@ -14,6 +14,7 @@ interface PatientSearchProps {
   unlockedPatients: string[];
   credits: number;
   onUnlock: (patientId: string) => void;
+  onNavigateContribute: () => void;
   isOptedIn?: boolean;
 }
 
@@ -782,12 +783,122 @@ const SOAPModal: React.FC<{
   );
 };
 
+// ─── Locked Preview ──────────────────────────────────────────────────────────
+
+const LockedPreview: React.FC<{
+  patient: Patient;
+  histories: HistoryEntry[];
+  credits: number;
+  onUnlock: (id: string) => void;
+  onNavigateContribute: () => void;
+}> = ({ patient, histories, credits, onUnlock, onNavigateContribute }) => {
+  const episodeCount  = histories.length || 1;
+  const referralPath  = MOCK_REFERRAL_PATH[patient.id];
+  const priorClinics  = referralPath ? referralPath.filter(s => !s.isCurrent).length : 1;
+  const lastVisitYear = patient.lastVisit ? patient.lastVisit.slice(0, 4) : 'recently';
+  const sessions      = MOCK_SESSIONS[patient.id] ?? 0;
+
+  const stats = [
+    { label: 'Episodes',      value: episodeCount },
+    { label: 'Prior clinics', value: priorClinics },
+    { label: 'Sessions',      value: sessions || '–' },
+    { label: 'Last visit',    value: lastVisitYear },
+  ];
+
+  const REDACTED_ROWS = [
+    { width: 'w-40', label: 'Condition' },
+    { width: 'w-28', label: 'Treatment' },
+    { width: 'w-36', label: 'Treatment' },
+    { width: 'w-24', label: 'Flag' },
+  ];
+
+  return (
+    <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-50 flex flex-col gap-6">
+
+      {/* Stats row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {stats.map(s => (
+          <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-4 text-center">
+            <p className="text-2xl font-bold text-slate-900">{s.value}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Redacted content teaser */}
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5" /> Record preview
+          </p>
+          <span className="text-[10px] text-slate-400">Unlock to view full details</span>
+        </div>
+        <div className="p-5 space-y-3" aria-hidden="true">
+          {REDACTED_ROWS.map((row, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 w-16 shrink-0">{row.label}</span>
+              <div className={`${row.width} h-3.5 bg-slate-100 rounded-full blur-[3px]`} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* What you'll unlock */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">What you'll unlock</p>
+        <ul className="space-y-2.5">
+          {[
+            'Full episode history with conditions and outcomes',
+            'Effective and ineffective treatments for this patient',
+            'Contraindications and clinical flags',
+            'Longitudinal timeline across all contributing clinics',
+          ].map(item => (
+            <li key={item} className="flex items-start gap-2.5 text-sm text-slate-700">
+              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* CTA */}
+      <div className="flex flex-col sm:flex-row items-center gap-3">
+        <button
+          onClick={() => onUnlock(patient.id)}
+          disabled={credits < 1}
+          className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-semibold transition-colors ${
+            credits >= 1
+              ? 'bg-slate-900 text-white hover:bg-slate-700'
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+          }`}
+        >
+          <Unlock className="w-4 h-4" />
+          Unlock record · 1 Credit
+        </button>
+        {credits < 1 && (
+          <button
+            onClick={onNavigateContribute}
+            className="text-sm text-emerald-700 font-medium hover:text-emerald-900 underline underline-offset-4"
+          >
+            No credits? Contribute to earn →
+          </button>
+        )}
+      </div>
+      {credits >= 1 && (
+        <p className="text-xs text-slate-400 -mt-3">
+          You have {credits} credit{credits !== 1 ? 's' : ''}. Balance after unlock: {credits - 1}.
+        </p>
+      )}
+    </div>
+  );
+};
+
 // ─── Main Export ──────────────────────────────────────────────────────────────
 
 type ChartTab = 'summary' | 'episodes' | 'treatments' | 'exercises' | 'documents' | 'audit';
 
 export const PatientSearch: React.FC<PatientSearchProps> = ({
-  patients, histories, unlockedPatients, credits, onUnlock,
+  patients, histories, unlockedPatients, credits, onUnlock, onNavigateContribute,
 }) => {
   const [searchTerm,      setSearchTerm]      = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -980,8 +1091,8 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
               </div>
             </div>
 
-            {/* Chart tabs */}
-            <div className={`flex overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 ${isSelectedLocked ? 'opacity-40 pointer-events-none' : ''}`}>
+            {/* Chart tabs — hidden for locked patients */}
+            <div className={`flex overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 ${isSelectedLocked ? 'hidden' : ''}`}>
               {tabDefs.map(tab => (
                 <button
                   key={tab.id}
@@ -1005,27 +1116,37 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
             </div>
           </div>
 
-          {/* Tab content */}
-          <div className={`flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50 ${isSelectedLocked ? 'opacity-40 pointer-events-none' : ''}`}>
-            {activeTab === 'summary' && (
-              <SummaryTab patient={selectedPatient} histories={patientHistories} unlockedPatients={unlockedPatients} onUnlock={onUnlock} credits={credits} />
-            )}
-            {activeTab === 'episodes' && (
-              <EpisodesTab histories={patientHistories} patient={selectedPatient} unlockedPatients={unlockedPatients} onUnlock={onUnlock} credits={credits} />
-            )}
-            {activeTab === 'treatments' && (
-              <TreatmentsTab histories={patientHistories} />
-            )}
-            {activeTab === 'exercises' && (
-              <ExercisesTab patient={selectedPatient} />
-            )}
-            {activeTab === 'documents' && (
-              <DocumentsTab patient={selectedPatient} />
-            )}
-            {activeTab === 'audit' && (
-              <AuditTab patient={selectedPatient} />
-            )}
-          </div>
+          {/* Tab content — or locked preview */}
+          {isSelectedLocked ? (
+            <LockedPreview
+              patient={selectedPatient}
+              histories={patientHistories}
+              credits={credits}
+              onUnlock={onUnlock}
+              onNavigateContribute={onNavigateContribute}
+            />
+          ) : (
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50">
+              {activeTab === 'summary' && (
+                <SummaryTab patient={selectedPatient} histories={patientHistories} unlockedPatients={unlockedPatients} onUnlock={onUnlock} credits={credits} />
+              )}
+              {activeTab === 'episodes' && (
+                <EpisodesTab histories={patientHistories} patient={selectedPatient} unlockedPatients={unlockedPatients} onUnlock={onUnlock} credits={credits} />
+              )}
+              {activeTab === 'treatments' && (
+                <TreatmentsTab histories={patientHistories} />
+              )}
+              {activeTab === 'exercises' && (
+                <ExercisesTab patient={selectedPatient} />
+              )}
+              {activeTab === 'documents' && (
+                <DocumentsTab patient={selectedPatient} />
+              )}
+              {activeTab === 'audit' && (
+                <AuditTab patient={selectedPatient} />
+              )}
+            </div>
+          )}
         </div>
       )}
 
