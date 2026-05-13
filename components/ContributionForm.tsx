@@ -167,48 +167,11 @@ const AIImportCTA: React.FC<AIImportCTAProps> = ({ onPrefill, onReset }) => {
         </div>
 
         <div className="shrink-0">
-          {state === 'idle' && (
-            <>
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-violet-600 text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-violet-700 transition-colors shadow-sm shadow-violet-200"
-              >
-                <Upload className="w-4 h-4" />
-                Upload report
-              </button>
-              <input
-                ref={inputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
-                className="hidden"
-                onChange={e => handleFile(e.target.files?.[0] ?? null)}
-              />
-            </>
-          )}
-
-          {state === 'parsing' && (
-            <div className="inline-flex items-center gap-2 bg-white border border-violet-200 px-4 py-2.5 rounded-lg text-sm font-medium text-violet-700">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Extracting from {fileName}…</span>
-            </div>
-          )}
-
-          {state === 'done' && (
-            <div className="flex items-center gap-2">
-              <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-lg text-sm font-semibold text-emerald-700">
-                <Check className="w-4 h-4" />
-                <span>Fields prefilled — review below</span>
-              </div>
-              <button
-                type="button"
-                onClick={reset}
-                className="text-xs text-slate-500 hover:text-slate-800 underline"
-              >
-                Undo
-              </button>
-            </div>
-          )}
+          <div className="inline-flex items-center gap-2 bg-white border border-violet-200 px-4 py-2.5 rounded-lg text-sm font-medium text-slate-400 cursor-not-allowed select-none">
+            <Upload className="w-4 h-4 text-violet-300" />
+            <span>Upload report</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-violet-100 text-violet-500 px-1.5 py-0.5 rounded">Coming soon</span>
+          </div>
         </div>
       </div>
 
@@ -219,7 +182,7 @@ const AIImportCTA: React.FC<AIImportCTAProps> = ({ onPrefill, onReset }) => {
         </p>
       )}
       <p className="text-[11px] text-slate-400 mt-3">
-        Or drag a file onto this card. Supports PDF, DOC, DOCX, and image scans up to {MAX_SIZE_MB} MB.
+        AI extraction from PDF, DOCX, and image scans — launching soon.
       </p>
     </div>
   );
