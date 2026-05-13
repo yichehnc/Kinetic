@@ -901,6 +901,7 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   patients, histories, unlockedPatients, credits, onUnlock, onNavigateContribute,
 }) => {
   const [searchTerm,      setSearchTerm]      = useState('');
+  const [searchIdError,   setSearchIdError]   = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [activeTab,       setActiveTab]       = useState<ChartTab>('summary');
   const [viewingSOAP,     setViewingSOAP]     = useState<HistoryEntry | null>(null);
@@ -908,6 +909,24 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   const [mobileView,      setMobileView]      = useState<'list' | 'detail'>('list');
   // infoOpen: drives the right-panel slide-over below xl breakpoint
   const [infoOpen,        setInfoOpen]        = useState(false);
+
+  // If the search contains a digit we're in ID mode — only digits and spaces allowed.
+  const handleSearch = (raw: string) => {
+    const hasDigit = /\d/.test(raw);
+    if (hasDigit) {
+      const cleaned = raw.replace(/[^\d\s]/g, '');
+      if (cleaned !== raw) {
+        setSearchIdError(true);
+        setTimeout(() => setSearchIdError(false), 2500);
+      }
+      setSearchTerm(cleaned);
+    } else {
+      setSearchIdError(false);
+      setSearchTerm(raw);
+    }
+  };
+
+  const isIdSearch = /\d/.test(searchTerm);
 
   const filtered = patients.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -955,17 +974,32 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
           </span>
           <Filter className="w-4 h-4 text-slate-400" />
         </div>
-        <div className="p-3 border-b border-slate-200">
+        <div className="p-3 border-b border-slate-200 space-y-1.5">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search patients..."
+              inputMode={isIdSearch ? 'numeric' : 'text'}
+              placeholder="Name or patient ID…"
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500"
+              onChange={e => handleSearch(e.target.value)}
+              aria-describedby={searchIdError ? 'search-id-error' : undefined}
+              className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg outline-none focus:ring-1 transition-colors ${
+                searchIdError
+                  ? 'border-red-400 focus:ring-red-400 bg-red-50'
+                  : 'border-slate-200 focus:ring-emerald-500'
+              }`}
             />
           </div>
+          {searchIdError && (
+            <p id="search-id-error" role="alert" className="text-xs text-red-500 flex items-center gap-1 px-1">
+              <AlertCircle className="w-3 h-3 shrink-0" />
+              Patient IDs contain numbers only
+            </p>
+          )}
+          {isIdSearch && !searchIdError && (
+            <p className="text-[10px] text-slate-400 px-1">Searching by patient ID</p>
+          )}
         </div>
         <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
           {filtered.map(patient => {
