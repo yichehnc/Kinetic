@@ -31,6 +31,8 @@ export function validateStep1(formData: Pick<ContributionFormData, 'patientId' |
   const errs: FieldError[] = [];
   if (!formData.patientId || !formData.patientId.trim()) {
     errs.push({ field: 'patientId', message: friendlyMessages.patientId });
+  } else if (/[^\d\s]/.test(formData.patientId)) {
+    errs.push({ field: 'patientId', message: 'Patient IDs contain numbers only — please remove any letters or symbols.' });
   }
   if (!formData.patientName || !formData.patientName.trim()) {
     errs.push({ field: 'patientName', message: friendlyMessages.patientName });

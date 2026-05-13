@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, Component, type ErrorInfo, type ReactNode } from 'react';
-import { Check, Plus, X, ArrowRight, Loader2, FileText, ArrowLeft, Tag, Upload, Wand2 } from 'lucide-react';
+import { Check, Plus, X, ArrowRight, Loader2, FileText, ArrowLeft, Tag, Upload, Wand2, AlertCircle } from 'lucide-react';
 import { Status } from '../types';
 import { TREATMENTS_LIST, CONTRAINDICATIONS_LIST } from '../constants';
 import { InfoCard } from './ui/cards';
@@ -236,6 +236,7 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
   const [draftCorrupt, setDraftCorrupt] = useState(false);
   const [storageBlocked, setStorageBlocked] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [patientIdCharError, setPatientIdCharError] = useState(false);
   const [showAllErrors, setShowAllErrors] = useState(false);
   const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward');
   const [animKey, setAnimKey] = useState(0);
@@ -357,6 +358,16 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
 
     return () => clearTimeout(handler);
   }, [formData, isLoaded, step, storageBlocked]);
+
+  // Patient ID — digits and spaces only (Medicare format: "XXXX XXXXX X")
+  const handlePatientIdChange = (raw: string) => {
+    const cleaned = raw.replace(/[^\d\s]/g, '');
+    if (cleaned !== raw) {
+      setPatientIdCharError(true);
+      setTimeout(() => setPatientIdCharError(false), 2500);
+    }
+    handleInputChange('patientId', cleaned);
+  };
 
   const handleInputChange = (field: string, value: any) => {
     setError(null);
@@ -668,17 +679,29 @@ const ContributionFormInner: React.FC<ContributionFormProps> = ({ onSubmit, onRe
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Patient ID (Medicare No.) <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  Patient ID (Medicare No.) <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors ${fieldRing('patientId')}`}
+                  inputMode="numeric"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 outline-none transition-colors ${
+                    patientIdCharError ? 'border-red-400 focus:ring-red-400 bg-red-50' : fieldRing('patientId')
+                  }`}
                   placeholder="e.g. 1234 56789 1"
                   value={formData.patientId}
-                  onChange={e => handleInputChange('patientId', e.target.value)}
+                  onChange={e => handlePatientIdChange(e.target.value)}
                   onBlur={() => setTouched(p => ({ ...p, patientId: true }))}
-                  aria-invalid={!!errorFor('patientId')}
+                  aria-invalid={patientIdCharError || !!errorFor('patientId')}
+                  aria-describedby={patientIdCharError ? 'pid-char-error' : undefined}
                 />
-                <FieldHelp field="patientId" />
+                {patientIdCharError && (
+                  <p id="pid-char-error" role="alert" className="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    Patient IDs contain numbers only
+                  </p>
+                )}
+                {!patientIdCharError && <FieldHelp field="patientId" />}
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Full name <span className="text-red-500">*</span></label>
