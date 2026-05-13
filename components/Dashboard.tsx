@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, TrendingUp, Users, Plus, Search, ArrowRight, LogOut, LogIn, Shield, BarChart2, Zap, Trophy } from 'lucide-react';
+import { Award, TrendingUp, Users, Plus, Search, ArrowRight, LogOut, LogIn, Shield, BarChart2, Zap } from 'lucide-react';
 import { PrivacyExplainer } from './PrivacyExplainer';
 
 // ─── Mock network intelligence data ──────────────────────────────────────────
@@ -18,13 +18,26 @@ const TOP_PROTOCOLS = [
   { name: 'Manual Therapy + HEP',           rate: 76, n: 89 },
 ];
 
-const CLINIC_STATS = {
-  avgSessions:    { you: 8.2,  network: 11.4 },
-  resolutionRate: { you: 74,   network: 61   },
-  rank:           'Top 12%',
-  networkSize:    847,
-  totalEpisodes:  24312,
-};
+const NETWORK_META = { networkSize: 847, totalEpisodes: 24312 };
+
+const NETWORK_SIGNALS = [
+  {
+    label: 'Rotator cuff presentations up 22% in Sydney CBD this month',
+    tag: 'Trending', tagColor: 'bg-rose-50 text-rose-600 border-rose-100',
+  },
+  {
+    label: 'McKenzie + progressive loading shows strongest LBP outcomes at 90 days',
+    tag: 'Insight', tagColor: 'bg-blue-50 text-blue-600 border-blue-100',
+  },
+  {
+    label: 'Average patient visits 2.4 clinics before full resolution — continuity matters',
+    tag: 'Pattern', tagColor: 'bg-purple-50 text-purple-600 border-purple-100',
+  },
+  {
+    label: 'Post-op ACL now the fastest-growing knee contribution category',
+    tag: 'New', tagColor: 'bg-amber-50 text-amber-600 border-amber-100',
+  },
+];
 
 interface DashboardProps {
   credits: number;
@@ -324,7 +337,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <Zap className="w-5 h-5 text-slate-400" />
               </div>
               <p className="font-brand font-bold text-slate-900 mb-1">Network insights locked</p>
-              <p className="text-xs text-slate-500 mb-4 max-w-xs">Opt in to see how your clinic compares against 847 practices in the network.</p>
+              <p className="text-xs text-slate-500 mb-4 max-w-xs">Opt in to access aggregate clinical signals from {NETWORK_META.networkSize} practices across the network.</p>
               <button
                 onClick={onOptIn}
                 className="px-5 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors"
@@ -339,48 +352,30 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center gap-2 mb-4">
             <Zap className="w-4 h-4 text-amber-500" />
             <h3 className="text-sm font-brand font-extrabold text-slate-900 tracking-tight">Network Intelligence</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-1">Sydney CBD · {CLINIC_STATS.networkSize} clinics · {CLINIC_STATS.totalEpisodes.toLocaleString()} episodes</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-1">Sydney CBD · {NETWORK_META.networkSize} clinics · {NETWORK_META.totalEpisodes.toLocaleString()} episodes</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-            {/* Your clinic vs network */}
+            {/* Network Signals */}
             <div className="bg-white rounded-2xl border border-slate-200 p-5">
               <div className="flex items-center gap-2 mb-4">
-                <Trophy className="w-4 h-4 text-amber-500" />
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Your clinic vs network</p>
+                <Zap className="w-4 h-4 text-amber-500" />
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Network signals</p>
               </div>
-              <div className="space-y-4">
-                {/* Sessions to resolution */}
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-slate-600 font-medium">Avg sessions to resolution</span>
-                    <span className="font-bold text-emerald-600">{CLINIC_STATS.avgSessions.you} <span className="font-normal text-slate-400">vs {CLINIC_STATS.avgSessions.network} avg</span></span>
+              <div className="space-y-3">
+                {NETWORK_SIGNALS.map((signal) => (
+                  <div key={signal.label} className="flex items-start gap-3">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 mt-0.5 ${signal.tagColor}`}>
+                      {signal.tag}
+                    </span>
+                    <p className="text-xs text-slate-700 leading-snug font-medium">{signal.label}</p>
                   </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden relative">
-                    <div className="absolute h-full bg-slate-200 rounded-full" style={{ width: '100%' }} />
-                    <div className="absolute h-full bg-slate-300 rounded-full" style={{ width: `${(CLINIC_STATS.avgSessions.network / 15) * 100}%` }} />
-                    <div className="absolute h-full bg-emerald-500 rounded-full" style={{ width: `${(CLINIC_STATS.avgSessions.you / 15) * 100}%` }} />
-                  </div>
-                  <p className="text-[10px] text-emerald-600 mt-1 font-medium">28% faster than average</p>
-                </div>
-                {/* Resolution rate */}
-                <div>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-slate-600 font-medium">Episode resolution rate</span>
-                    <span className="font-bold text-emerald-600">{CLINIC_STATS.resolutionRate.you}% <span className="font-normal text-slate-400">vs {CLINIC_STATS.resolutionRate.network}% avg</span></span>
-                  </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden relative">
-                    <div className="absolute h-full bg-slate-300 rounded-full" style={{ width: `${CLINIC_STATS.resolutionRate.network}%` }} />
-                    <div className="absolute h-full bg-emerald-500 rounded-full" style={{ width: `${CLINIC_STATS.resolutionRate.you}%` }} />
-                  </div>
-                  <p className="text-[10px] text-emerald-600 mt-1 font-medium">13 pts above average</p>
-                </div>
+                ))}
               </div>
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Contribution rank</p>
-                <span className="text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">{CLINIC_STATS.rank}</span>
-              </div>
+              <p className="text-[10px] text-slate-400 mt-4 pt-3 border-t border-slate-100">
+                Derived from anonymised contributions in Sydney CBD, last 30 days.
+              </p>
             </div>
 
             {/* Top conditions in region */}
