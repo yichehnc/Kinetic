@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Heart, Eye, Clock, Send, X, TrendingUp, Users, Search } from 'lucide-react';
+import { MessageSquare, Heart, Eye, Clock, Send, X, TrendingUp, Search, ArrowRight, Zap } from 'lucide-react';
 
 interface Clinic {
   id: string;
@@ -24,15 +24,6 @@ interface Post {
   liked: boolean;
 }
 
-interface Recommendation {
-  clinic: string;
-  title: string;
-  body: string;
-  match: number;
-  views: number;
-  upvotes: number;
-}
-
 interface Message {
   type: 'in' | 'out';
   text: string;
@@ -54,10 +45,48 @@ const INITIAL_POSTS: Post[] = [
   { id: 'p4', clinic: 'c4', time: '2d ago', title: 'Ankle sprains: taping vs bracing for grade II', body: 'Quick observation from recent grade II lateral ankle cases — functional bracing showing better compliance and comparable outcomes to taping at 6 weeks.', tags: ['Ankle/Foot', 'Acute'], views: 167, likes: 14, liked: false },
 ];
 
+interface Recommendation {
+  clinic: string;
+  region: string;
+  stage: string;
+  protocol: string;
+  matchReasons: string[];
+  cases: number;
+  resolutionRate: number;
+  match: number;
+}
+
 const RECOMMENDATIONS: Recommendation[] = [
-  { clinic: 'c2', title: 'Shoulder - Sub-acute - Dry Needling', body: 'High match to your recent contribution pattern. Southbank Physio has 12 similar cases.', match: 94, views: 220, upvotes: 18 },
-  { clinic: 'c3', title: 'Lumbar Spine - Chronic - Exercise Rehab', body: 'Northcote Clinic has 8 relevant chronic LBP cases with strong outcome data.', match: 87, views: 175, upvotes: 15 },
-  { clinic: 'c5', title: 'Knee - Post-Operative - Return to Sport', body: 'Fitzroy Physio contributed 5 ACL post-op cases this month, all with RTS outcomes.', match: 79, views: 140, upvotes: 11 },
+  {
+    clinic: 'c2',
+    region: 'Shoulder',
+    stage: 'Sub-acute',
+    protocol: 'Dry Needling',
+    matchReasons: ['Same body region', 'Same rehab stage', 'Overlapping protocol'],
+    cases: 12,
+    resolutionRate: 82,
+    match: 94,
+  },
+  {
+    clinic: 'c3',
+    region: 'Lumbar Spine',
+    stage: 'Chronic',
+    protocol: 'Exercise Rehab',
+    matchReasons: ['Same condition profile', 'Matching complaint type', 'Similar patient cohort'],
+    cases: 8,
+    resolutionRate: 76,
+    match: 87,
+  },
+  {
+    clinic: 'c5',
+    region: 'Knee',
+    stage: 'Post-operative',
+    protocol: 'Return to Sport',
+    matchReasons: ['Same body region', 'Post-op overlap', 'RTS outcome data'],
+    cases: 5,
+    resolutionRate: 71,
+    match: 79,
+  },
 ];
 
 export const Community: React.FC = () => {
@@ -212,45 +241,92 @@ export const Community: React.FC = () => {
             })}
           </div>
         ) : (
-          <div className="space-y-6">
-            <div className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-6 py-2 px-4 bg-emerald-50 rounded-lg inline-block border border-emerald-100">
-              High-confidence matches based on your recent cases
+          <div className="space-y-4">
+            {/* Header bar */}
+            <div className="flex items-center gap-2 mb-6 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+              <Zap className="w-4 h-4 text-emerald-600 shrink-0" />
+              <p className="text-xs font-bold text-emerald-700">
+                {RECOMMENDATIONS.length} high-confidence matches based on your recent contributions
+              </p>
             </div>
+
             {RECOMMENDATIONS.map((rec, i) => {
               const clinic = CLINICS.find(c => c.id === rec.clinic)!;
+              const matchColor =
+                rec.match >= 90 ? 'bg-emerald-500' :
+                rec.match >= 80 ? 'bg-blue-500' : 'bg-amber-400';
+              const matchTextColor =
+                rec.match >= 90 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
+                rec.match >= 80 ? 'text-blue-700 bg-blue-50 border-blue-200' :
+                                  'text-amber-700 bg-amber-50 border-amber-200';
+
               return (
-                <div key={i} className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white transition-all duration-500 group">
-                  <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xs font-brand font-bold transition-transform group-hover:scale-110 duration-500 ${clinic.color}`}>
-                      {clinic.initials}
+                <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-slate-300 hover:shadow-md transition-all duration-200">
+                  {/* Match score bar — top edge */}
+                  <div className="h-1 w-full bg-slate-100">
+                    <div className={`h-full ${matchColor} transition-all duration-700`} style={{ width: `${rec.match}%` }} />
+                  </div>
+
+                  <div className="p-5">
+                    {/* Top row: clinic + score */}
+                    <div className="flex items-center justify-between gap-3 mb-4">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-brand font-bold shrink-0 ${clinic.color}`}>
+                          {clinic.initials}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-slate-900 truncate">{clinic.name}</p>
+                          <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{clinic.suburb}</p>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border shrink-0 ${matchTextColor}`}>
+                        {rec.match}% match
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-brand font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{clinic.name}</div>
+
+                    {/* Case summary */}
+                    <div className="flex items-center gap-4 mb-4 p-3 bg-slate-50 rounded-xl">
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-slate-900">{rec.cases}</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Cases</p>
+                      </div>
+                      <div className="w-px h-8 bg-slate-200 shrink-0" />
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-emerald-600">{rec.resolutionRate}%</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Resolution</p>
+                      </div>
+                      <div className="w-px h-8 bg-slate-200 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-700 truncate">{rec.region} · {rec.stage}</p>
+                        <p className="text-[10px] text-slate-500 truncate">{rec.protocol}</p>
+                      </div>
                     </div>
-                    <div className="px-3 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded-lg uppercase tracking-widest shadow-md">
-                      {rec.match}% match
+
+                    {/* Why it matched */}
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {rec.matchReasons.map(reason => (
+                        <span key={reason} className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+                          {reason}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                      <button
+                        onClick={() => openDM(rec.clinic)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition-colors"
+                      >
+                        Request data exchange <ArrowRight className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={() => openDM(rec.clinic)}
+                        className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-medium hover:bg-slate-50 transition-colors"
+                      >
+                        Message
+                      </button>
                     </div>
                   </div>
-                  <h4 className="text-xl font-brand font-extrabold text-slate-900 mb-3 tracking-tight relative z-10">{rec.title}</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-6 font-medium relative z-10">{rec.body}</p>
-                  <div className="flex items-center justify-between pt-6 border-t border-slate-900/5 relative z-10">
-          <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-xs font-bold text-slate-400">
-            <div className="flex items-center gap-2 hover:text-slate-900 transition-colors">
-              <Eye className="w-4 h-4" />
-              {rec.views}
-            </div>
-            <div className="flex items-center gap-2 hover:text-slate-900 transition-colors">
-              <TrendingUp className="w-4 h-4" />
-              {rec.upvotes}
-            </div>
-          </div>
-          <button 
-            className="w-full sm:w-auto px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-brand font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95 mt-4 sm:mt-0"
-            onClick={() => openDM(rec.clinic)}
-          >
-            Contact Clinic
-          </button>
-        </div>
                 </div>
               );
             })}
