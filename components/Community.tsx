@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Heart, Eye, Clock, Send, X, TrendingUp, Search, ArrowRight, Zap } from 'lucide-react';
+import { MessageSquare, Heart, Eye, Clock, Send, X, TrendingUp, Search, Upload, Unlock, Award } from 'lucide-react';
 
 interface Clinic {
   id: string;
@@ -45,52 +45,33 @@ const INITIAL_POSTS: Post[] = [
   { id: 'p4', clinic: 'c4', time: '2d ago', title: 'Ankle sprains: taping vs bracing for grade II', body: 'Quick observation from recent grade II lateral ankle cases — functional bracing showing better compliance and comparable outcomes to taping at 6 weeks.', tags: ['Ankle/Foot', 'Acute'], views: 167, likes: 14, liked: false },
 ];
 
-interface Recommendation {
-  clinic: string;
+type ActivityType = 'contribution' | 'unlock' | 'milestone';
+
+interface Activity {
+  id: string;
+  type: ActivityType;
+  clinicId: string | null;   // null = network-level milestone
   region: string;
-  stage: string;
-  protocol: string;
-  matchReasons: string[];
-  cases: number;
-  resolutionRate: number;
-  match: number;
+  time: string;
+  credit: number;            // +1 contribution, -1 unlock, 0 milestone
+  isYours: boolean;
 }
 
-const RECOMMENDATIONS: Recommendation[] = [
-  {
-    clinic: 'c2',
-    region: 'Shoulder',
-    stage: 'Sub-acute',
-    protocol: 'Dry Needling',
-    matchReasons: ['Same body region', 'Same rehab stage', 'Overlapping protocol'],
-    cases: 12,
-    resolutionRate: 82,
-    match: 94,
-  },
-  {
-    clinic: 'c3',
-    region: 'Lumbar Spine',
-    stage: 'Chronic',
-    protocol: 'Exercise Rehab',
-    matchReasons: ['Same condition profile', 'Matching complaint type', 'Similar patient cohort'],
-    cases: 8,
-    resolutionRate: 76,
-    match: 87,
-  },
-  {
-    clinic: 'c5',
-    region: 'Knee',
-    stage: 'Post-operative',
-    protocol: 'Return to Sport',
-    matchReasons: ['Same body region', 'Post-op overlap', 'RTS outcome data'],
-    cases: 5,
-    resolutionRate: 71,
-    match: 79,
-  },
+const ACTIVITY_FEED: Activity[] = [
+  { id: 'a1',  type: 'contribution', clinicId: 'c1', region: 'Shoulder',     time: '14 min ago',  credit: +1, isYours: true  },
+  { id: 'a2',  type: 'unlock',       clinicId: 'c2', region: 'Lumbar Spine', time: '31 min ago',  credit: -1, isYours: false },
+  { id: 'a3',  type: 'contribution', clinicId: 'c3', region: 'Knee',         time: '1h ago',      credit: +1, isYours: false },
+  { id: 'a4',  type: 'unlock',       clinicId: 'c1', region: 'Shoulder',     time: '2h ago',      credit: -1, isYours: true  },
+  { id: 'a5',  type: 'milestone',    clinicId: null,  region: '',             time: '3h ago',      credit: 0,  isYours: false },
+  { id: 'a6',  type: 'contribution', clinicId: 'c4', region: 'Ankle/Foot',   time: '4h ago',      credit: +1, isYours: false },
+  { id: 'a7',  type: 'unlock',       clinicId: 'c5', region: 'Cervical Spine', time: '5h ago',    credit: -1, isYours: false },
+  { id: 'a8',  type: 'contribution', clinicId: 'c2', region: 'Hip',          time: '7h ago',      credit: +1, isYours: false },
+  { id: 'a9',  type: 'contribution', clinicId: 'c1', region: 'Lumbar Spine', time: '9h ago',      credit: +1, isYours: true  },
+  { id: 'a10', type: 'unlock',       clinicId: 'c6', region: 'Knee',         time: '12h ago',     credit: -1, isYours: false },
 ];
 
 export const Community: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'feed' | 'recs'>('feed');
+  const [activeTab, setActiveTab] = useState<'feed' | 'activity'>('feed');
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [currentDMClinic, setCurrentDMClinic] = useState<Clinic | null>(null);
   const [dmMessages, setDmMessages] = useState<Record<string, Message[]>>({});
@@ -171,13 +152,13 @@ export const Community: React.FC = () => {
           >
             Insights Feed
           </button>
-          <button 
+          <button
             className={`pb-4 text-sm font-brand font-bold transition-all border-b-2 -mb-px tracking-tight ${
-              activeTab === 'recs' ? 'text-slate-900 border-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600'
+              activeTab === 'activity' ? 'text-slate-900 border-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600'
             }`}
-            onClick={() => setActiveTab('recs')}
+            onClick={() => setActiveTab('activity')}
           >
-            Clinical Match
+            Network Activity
           </button>
         </div>
 
@@ -241,91 +222,77 @@ export const Community: React.FC = () => {
             })}
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* Header bar */}
-            <div className="flex items-center gap-2 mb-6 p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
-              <Zap className="w-4 h-4 text-emerald-600 shrink-0" />
-              <p className="text-xs font-bold text-emerald-700">
-                {RECOMMENDATIONS.length} high-confidence matches based on your recent contributions
-              </p>
+          <div className="space-y-1">
+            {/* Feed header */}
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Live across the network</p>
+              <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                Live
+              </span>
             </div>
 
-            {RECOMMENDATIONS.map((rec, i) => {
-              const clinic = CLINICS.find(c => c.id === rec.clinic)!;
-              const matchColor =
-                rec.match >= 90 ? 'bg-emerald-500' :
-                rec.match >= 80 ? 'bg-blue-500' : 'bg-amber-400';
-              const matchTextColor =
-                rec.match >= 90 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
-                rec.match >= 80 ? 'text-blue-700 bg-blue-50 border-blue-200' :
-                                  'text-amber-700 bg-amber-50 border-amber-200';
+            {ACTIVITY_FEED.map((activity) => {
+              const clinic = activity.clinicId ? CLINICS.find(c => c.id === activity.clinicId) : null;
+              const actorLabel = activity.isYours ? 'You' : (clinic?.name ?? 'Network');
+
+              // Icon + colours per activity type
+              const iconConfig = {
+                contribution: {
+                  bg: 'bg-emerald-50',
+                  icon: <Upload className="w-4 h-4 text-emerald-600" />,
+                },
+                unlock: {
+                  bg: 'bg-blue-50',
+                  icon: <Unlock className="w-4 h-4 text-blue-600" />,
+                },
+                milestone: {
+                  bg: 'bg-amber-50',
+                  icon: <Award className="w-4 h-4 text-amber-600" />,
+                },
+              }[activity.type];
+
+              // Action description
+              const description =
+                activity.type === 'contribution'
+                  ? <><span className="font-bold text-slate-900">{actorLabel}</span> contributed a <span className="font-semibold text-slate-700">{activity.region}</span> record</>
+                  : activity.type === 'unlock'
+                  ? <><span className="font-bold text-slate-900">{actorLabel}</span> unlocked a <span className="font-semibold text-slate-700">{activity.region}</span> patient history</>
+                  : <span className="font-semibold text-slate-700">The network crossed <span className="font-bold text-amber-700">400 safe deposits</span> — a new milestone 🎉</span>;
+
+              // Credit badge
+              const creditBadge =
+                activity.credit > 0 ? (
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
+                    +{activity.credit} Credit
+                  </span>
+                ) : activity.credit < 0 ? (
+                  <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full shrink-0">
+                    {activity.credit} Credit
+                  </span>
+                ) : null;
 
               return (
-                <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:border-slate-300 hover:shadow-md transition-all duration-200">
-                  {/* Match score bar — top edge */}
-                  <div className="h-1 w-full bg-slate-100">
-                    <div className={`h-full ${matchColor} transition-all duration-700`} style={{ width: `${rec.match}%` }} />
+                <div
+                  key={activity.id}
+                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-colors hover:bg-slate-50 ${
+                    activity.isYours ? 'border-l-2 border-emerald-400 bg-emerald-50/30 pl-3' : ''
+                  }`}
+                >
+                  {/* Icon */}
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconConfig.bg}`}>
+                    {iconConfig.icon}
                   </div>
 
-                  <div className="p-5">
-                    {/* Top row: clinic + score */}
-                    <div className="flex items-center justify-between gap-3 mb-4">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-brand font-bold shrink-0 ${clinic.color}`}>
-                          {clinic.initials}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-900 truncate">{clinic.name}</p>
-                          <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{clinic.suburb}</p>
-                        </div>
-                      </div>
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border shrink-0 ${matchTextColor}`}>
-                        {rec.match}% match
-                      </span>
-                    </div>
+                  {/* Text */}
+                  <p className="flex-1 text-sm text-slate-600 leading-snug min-w-0">
+                    {description}
+                  </p>
 
-                    {/* Case summary */}
-                    <div className="flex items-center gap-4 mb-4 p-3 bg-slate-50 rounded-xl">
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-slate-900">{rec.cases}</p>
-                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Cases</p>
-                      </div>
-                      <div className="w-px h-8 bg-slate-200 shrink-0" />
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-emerald-600">{rec.resolutionRate}%</p>
-                        <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Resolution</p>
-                      </div>
-                      <div className="w-px h-8 bg-slate-200 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-slate-700 truncate">{rec.region} · {rec.stage}</p>
-                        <p className="text-[10px] text-slate-500 truncate">{rec.protocol}</p>
-                      </div>
-                    </div>
-
-                    {/* Why it matched */}
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {rec.matchReasons.map(reason => (
-                        <span key={reason} className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
-                          {reason}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                      <button
-                        onClick={() => openDM(rec.clinic)}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition-colors"
-                      >
-                        Request data exchange <ArrowRight className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => openDM(rec.clinic)}
-                        className="px-4 py-2 border border-slate-200 text-slate-600 rounded-xl text-xs font-medium hover:bg-slate-50 transition-colors"
-                      >
-                        Message
-                      </button>
-                    </div>
+                  {/* Right side: credit + time */}
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    {creditBadge}
+                    <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">{activity.time}</span>
                   </div>
                 </div>
               );
