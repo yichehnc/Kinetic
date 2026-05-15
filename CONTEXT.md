@@ -110,8 +110,14 @@ npx vitest run --reporter=verbose
 
 ## What has NOT been built yet (known backlog)
 
-- Referrals tab is mostly a placeholder — not recently worked on
-- Settings tab not yet built
+- Referrals tab is a placeholder — intentionally left simple
 - No real backend / auth — all mock data
 - AI import (PDF/DOCX extraction) disabled, planned for later
-- `lockedAttempts` prop on Dashboard wired but not surfaced to user yet
+
+## Settings tab (built, inline in App.tsx)
+
+- Network Opt-in toggle — awards 5 trial credits on first opt-in
+- Credit Auto-Refill toggle — purchases +5 credits on next unlock attempt when balance is zero; persists to `kinetic_auto_refill`
+- Audit Log modal — shows last 5 mock events (contributions, unlocks, opt-in, credit grants)
+- Data Security & Privacy section — static badges (Encryption ENABLED, Anonymization ACTIVE)
+- Reset demo button — clears all localStorage keys and reloads; useful for live demos

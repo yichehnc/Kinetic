@@ -392,6 +392,18 @@ const App: React.FC = () => {
              Clinic ID: KIN-ORG-882192<br/>
              Version: v0.4.3 (Beta)
            </div>
+
+           <div className="mt-4 text-right">
+             <button
+               onClick={() => {
+                 ['kinetic_onboarding_done','kinetic_opted_in','kinetic_credits','kinetic_contribution_draft','kinetic_initial_credits_awarded','kinetic_auto_refill'].forEach(k => localStorage.removeItem(k));
+                 window.location.reload();
+               }}
+               className="text-xs text-slate-400 hover:text-red-500 transition-colors"
+             >
+               Reset demo
+             </button>
+           </div>
         </div>
       )}
 
