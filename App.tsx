@@ -12,6 +12,37 @@ import { MOCK_PATIENTS, MOCK_HISTORY } from './constants';
 import { Patient, HistoryEntry } from './types';
 import { CheckCircle, Shield } from 'lucide-react';
 
+const AUDIT_EVENTS = [
+  { time: '2026-05-15 09:14', event: 'Contribution submitted', detail: 'PID: 3482 91024 1' },
+  { time: '2026-05-15 09:14', event: 'Credit earned', detail: '+1 credit' },
+  { time: '2026-05-14 16:32', event: 'Patient history unlocked', detail: 'PID: 7291 83047 2 · −1 credit' },
+  { time: '2026-05-14 11:05', event: 'Network opt-in confirmed', detail: 'Clinic KIN-ORG-882192' },
+  { time: '2026-05-13 14:22', event: 'Trial credits awarded', detail: '+5 credits (one-time)' },
+];
+
+const AuditLogModal = ({ onClose }: { onClose: () => void }) => (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-lg font-bold text-slate-900">Audit Log</h3>
+        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+      </div>
+      <div className="space-y-3 text-sm">
+        {AUDIT_EVENTS.map((entry, i) => (
+          <div key={i} className="flex items-start gap-3 pb-3 border-b border-slate-100 last:border-0">
+            <span className="font-mono text-xs text-slate-400 shrink-0 pt-0.5">{entry.time}</span>
+            <div>
+              <p className="font-medium text-slate-800">{entry.event}</p>
+              <p className="text-slate-500">{entry.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-slate-400 mt-4">Showing last 5 events · All times AEST</p>
+    </div>
+  </div>
+);
+
 // Simple Alert Component for notifications
 const Notification = ({ message, onClose }: { message: string; onClose: () => void }) => (
   <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center animate-bounce-in z-50">
@@ -38,6 +69,8 @@ const App: React.FC = () => {
   // Track if initial credits were awarded (only once ever)
   const [hasReceivedInitialCredits, setHasReceivedInitialCredits] = useState(false);
   const [isOptedIn, setIsOptedIn] = useState(false); // Default to false - user must opt in
+  const [autoRefill, setAutoRefill] = useState(false);
+  const [showAuditLog, setShowAuditLog] = useState(false);
   const [showTour, setShowTour] = useState(() => !localStorage.getItem('kinetic_onboarding_done'));
 
   // Load initial credits flag and opt-in status from storage on mount
@@ -50,6 +83,8 @@ const App: React.FC = () => {
       setHasReceivedInitialCredits(true);
     }
     
+    if (localStorage.getItem('kinetic_auto_refill') === 'true') setAutoRefill(true);
+
     // Set opt-in status
     if (optInStatus === 'true') {
       setIsOptedIn(true);
@@ -86,11 +121,24 @@ const App: React.FC = () => {
       setUnlockedPatients(prev => [...prev, patientId]);
       setNotification(`Unlocked history. Balance: ${credits - 1}`);
       setTimeout(() => setNotification(null), 3000);
+    } else if (autoRefill) {
+      setCredits(prev => prev + 4); // +5 refill − 1 unlock
+      setUnlockedPatients(prev => [...prev, patientId]);
+      setNotification('Auto-refill: +5 credits purchased. History unlocked.');
+      setTimeout(() => setNotification(null), 3000);
     } else {
       setLockedAttempts(prev => prev + 1);
       setNotification('Not enough credits — contribute to unlock this history.');
       setTimeout(() => setNotification(null), 3000);
     }
+  };
+
+  const handleAutoRefillToggle = () => {
+    const next = !autoRefill;
+    setAutoRefill(next);
+    localStorage.setItem('kinetic_auto_refill', next.toString());
+    setNotification(next ? 'Auto-refill enabled — credits will top up as needed.' : 'Auto-refill disabled.');
+    setTimeout(() => setNotification(null), 3000);
   };
 
   // Auto-unlock contributed patient history
@@ -270,11 +318,22 @@ const App: React.FC = () => {
               <div className="flex items-center justify-between pb-6 border-b border-slate-100">
                 <div>
                   <h3 className="font-semibold text-slate-900">Credit Auto-Refill</h3>
-                  <p className="text-sm text-slate-500">Purchase credits if contribution isn't possible</p>
+                  <p className="text-sm text-slate-500">Purchase 5 credits automatically when your balance hits zero</p>
+                  {autoRefill && (
+                    <p className="text-xs text-emerald-600 mt-1 font-semibold">Active — top-up triggers on next unlock attempt</p>
+                  )}
                 </div>
-                 <div className="relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full bg-slate-200">
-                   <span className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md"></span>
-                </div>
+                <button
+                  onClick={handleAutoRefillToggle}
+                  aria-label={autoRefill ? 'Disable auto-refill' : 'Enable auto-refill'}
+                  className={`relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full ${
+                    autoRefill ? 'bg-emerald-500' : 'bg-slate-200'
+                  }`}
+                >
+                  <span className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform ${
+                    autoRefill ? 'transform translate-x-6' : ''
+                  }`}></span>
+                </button>
               </div>
 
               {/* Data Security & Privacy Section */}
@@ -310,7 +369,10 @@ const App: React.FC = () => {
                       <h4 className="font-semibold text-slate-900">Audit Logging</h4>
                       <p className="text-sm text-slate-500">Track all data access and contributions</p>
                     </div>
-                    <button className="text-sm text-blue-600 hover:text-blue-700 font-medium self-start sm:self-auto">
+                    <button
+                      onClick={() => setShowAuditLog(true)}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium self-start sm:self-auto"
+                    >
                       View Logs
                     </button>
                   </div>
@@ -332,6 +394,8 @@ const App: React.FC = () => {
            </div>
         </div>
       )}
+
+      {showAuditLog && <AuditLogModal onClose={() => setShowAuditLog(false)} />}
 
       {notification && (
         <Notification message={notification} onClose={() => setNotification(null)} />
