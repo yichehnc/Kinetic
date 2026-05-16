@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useTransition } from 'react';
 import {
   Search, Lock, Unlock, Clock, CheckCircle, AlertCircle,
   Download, FileText, ChevronRight, Share2,
@@ -906,13 +906,11 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [activeTab,       setActiveTab]       = useState<ChartTab>('summary');
   const [viewingSOAP,     setViewingSOAP]     = useState<HistoryEntry | null>(null);
-  // mobileView: drives single-pane navigation on screens < md
   const [mobileView,      setMobileView]      = useState<'list' | 'detail'>('list');
-  // infoOpen: drives the right-panel slide-over below xl breakpoint
   const [infoOpen,        setInfoOpen]        = useState(false);
+  const [, startTransition]                   = useTransition();
 
-  // If the search contains a digit we're in ID mode — only digits and spaces allowed.
-  const handleSearch = (raw: string) => {
+  const handleSearch = useCallback((raw: string) => {
     const hasDigit = /\d/.test(raw);
     if (hasDigit) {
       const cleaned = raw.replace(/[^\d\s]/g, '');
@@ -925,29 +923,39 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
       setSearchIdError(false);
       setSearchTerm(raw);
     }
-  };
+  }, []);
+
+  const handleSelect = useCallback((patient: Patient) => {
+    startTransition(() => {
+      setSelectedPatient(patient);
+      setActiveTab('summary');
+      setMobileView('detail');
+      setInfoOpen(false);
+    });
+  }, [startTransition]);
 
   const isIdSearch = /\d/.test(searchTerm);
 
-  const filtered = patients.filter(p =>
+  const filtered = useMemo(() => patients.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ), [patients, searchTerm]);
 
-  const patientHistories = selectedPatient
-    ? histories.filter(h => h.patientId === selectedPatient.id)
-    : [];
+  const patientHistories = useMemo(() =>
+    selectedPatient ? histories.filter(h => h.patientId === selectedPatient.id) : [],
+    [histories, selectedPatient]);
 
-  const handleSelect = (patient: Patient) => {
-    setSelectedPatient(patient);
-    setActiveTab('summary');
-    setMobileView('detail');
-    setInfoOpen(false);
-  };
+  const isSelectedUnlocked = useMemo(() =>
+    selectedPatient ? unlockedPatients.includes(selectedPatient.id) : false,
+    [selectedPatient, unlockedPatients]);
 
-  const exerciseProgramCount = (MOCK_EXERCISE_PROGRAMS[selectedPatient?.id ?? ''] ?? []).length;
-  const isSelectedUnlocked = selectedPatient ? unlockedPatients.includes(selectedPatient.id) : false;
-  const isSelectedLocked = selectedPatient?.historyAvailable && !isSelectedUnlocked;
+  const isSelectedLocked = useMemo(() =>
+    !!(selectedPatient?.historyAvailable && !isSelectedUnlocked),
+    [selectedPatient, isSelectedUnlocked]);
+
+  const exerciseProgramCount = useMemo(() =>
+    (MOCK_EXERCISE_PROGRAMS[selectedPatient?.id ?? ''] ?? []).length,
+    [selectedPatient]);
 
   const tabDefs: { id: ChartTab; label: string; count?: number }[] = [
     { id: 'summary',    label: 'Summary' },
