@@ -22,7 +22,7 @@ const NETWORK_META = { networkSize: 847, totalEpisodes: 24312 };
 
 const NETWORK_SIGNALS = [
   {
-    label: 'Rotator cuff presentations up 22% in Sydney CBD this month',
+    label: 'Rotator cuff presentations up 22% in Melbourne this month',
     tag: 'Trending', tagColor: 'bg-rose-50 text-rose-600 border-rose-100',
   },
   {
@@ -377,7 +377,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex items-center gap-2 mb-4">
             <Zap className="w-4 h-4 text-amber-500" />
             <h3 className="text-sm font-brand font-extrabold text-slate-900 tracking-tight">Network Intelligence</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-1">Sydney CBD · {NETWORK_META.networkSize} clinics · {NETWORK_META.totalEpisodes.toLocaleString()} episodes</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-1">Melbourne · {NETWORK_META.networkSize} clinics · {NETWORK_META.totalEpisodes.toLocaleString()} episodes</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -390,8 +390,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <div className="space-y-3">
                 {NETWORK_SIGNALS.map((signal) => (
-                  <div key={signal.label} className="flex items-start gap-3">
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 mt-0.5 ${signal.tagColor}`}>
+                  <div key={signal.label} className="flex items-baseline gap-2">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${signal.tagColor}`}>
                       {signal.tag}
                     </span>
                     <p className="text-xs text-slate-700 leading-snug font-medium">{signal.label}</p>
@@ -399,7 +399,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 ))}
               </div>
               <p className="text-[10px] text-slate-400 mt-4 pt-3 border-t border-slate-100">
-                Derived from anonymised contributions in Sydney CBD, last 30 days.
+                Derived from anonymised contributions in Melbourne, last 30 days.
               </p>
             </div>
 
@@ -422,7 +422,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-slate-400 mt-4">Based on contributed episodes in Sydney CBD, last 90 days.</p>
+              <p className="text-[10px] text-slate-400 mt-4">Based on contributed episodes in Melbourne, last 90 days.</p>
             </div>
 
             {/* Top protocols */}
