@@ -390,8 +390,8 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </div>
               <div className="space-y-3">
                 {NETWORK_SIGNALS.map((signal) => (
-                  <div key={signal.label} className="flex items-baseline gap-2">
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${signal.tagColor}`}>
+                  <div key={signal.label} className="flex items-start gap-3">
+                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 w-[68px] text-center ${signal.tagColor}`}>
                       {signal.tag}
                     </span>
                     <p className="text-xs text-slate-700 leading-snug font-medium">{signal.label}</p>
