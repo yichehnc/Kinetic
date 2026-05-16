@@ -185,9 +185,10 @@ const EpisodeTimeline: React.FC<{ histories: HistoryEntry[] }> = ({ histories })
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5">
-      <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-1.5">
-        <Clock className="w-3.5 h-3.5" /> Episode Timeline
-      </h4>
+      <div className="flex items-center gap-2 mb-4">
+        <Clock className="w-4 h-4 text-slate-400" />
+        <h4 className="text-sm font-semibold text-slate-900">Episode Timeline</h4>
+      </div>
 
       <div className="flex justify-between text-[10px] text-slate-400 mb-1.5">
         {yearMarkers.map(y => <span key={y}>{y}</span>)}
