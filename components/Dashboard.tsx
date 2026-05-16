@@ -61,6 +61,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
   onOptOut
 }) => {
   const [privacyOpen, setPrivacyOpen] = useState(false);
+  const earned = contributionCount;
+  const spent = unlockedCount;
+  const loopMax = Math.max(earned, spent, 1);
+  const earnedPct = Math.round((earned / loopMax) * 100);
+  const spentPct = Math.round((spent / loopMax) * 100);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-0 pb-12">
@@ -137,9 +142,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
-      {/* Hero Credit Loop */}
+      {/* Credit Loop — earned vs spent progress bars */}
       {isOptedIn && (
-        <div className="mb-8">
+        <div className="mb-6 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">Credit Loop</p>
             <button
@@ -151,54 +156,120 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="grid grid-cols-3">
-              <button
-                onClick={() => onNavigate('contribute')}
-                className="p-6 text-center hover:bg-blue-50/50 transition-colors group border-r border-slate-100"
-              >
-                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-blue-100 group-hover:scale-105 group-hover:bg-blue-100 transition-all">
-                  <Plus className="w-6 h-6 text-blue-600" />
-                </div>
-                <p className="text-3xl font-brand font-extrabold text-slate-900 mb-1 tabular-nums">{contributionCount}</p>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Contributed</p>
-                <p className="text-[10px] text-blue-600 font-semibold flex items-center justify-center gap-1">
-                  Add record <ArrowRight className="w-3 h-3" />
-                </p>
-              </button>
-
-              <div className="p-6 text-center bg-slate-900 border-r border-slate-800 flex flex-col items-center justify-center">
-                <div className="w-12 h-12 bg-emerald-500/15 rounded-2xl flex items-center justify-center mb-3 border border-emerald-500/20">
-                  <Award className="w-6 h-6 text-emerald-400" />
-                </div>
-                <p className="text-3xl font-brand font-extrabold text-white mb-1 tabular-nums">{credits}</p>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Credits</p>
-                <p className="text-[10px] text-slate-500">Available</p>
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-600 w-14">Earned</span>
+              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${earnedPct}%` }} />
               </div>
-
-              <button
-                onClick={() => onNavigate('intake')}
-                className="p-6 text-center hover:bg-purple-50/50 transition-colors group"
-              >
-                <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-purple-100 group-hover:scale-105 group-hover:bg-purple-100 transition-all">
-                  <Users className="w-6 h-6 text-purple-600" />
-                </div>
-                <p className="text-3xl font-brand font-extrabold text-slate-900 mb-1 tabular-nums">{unlockedCount}</p>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Unlocked</p>
-                <p className="text-[10px] text-purple-600 font-semibold flex items-center justify-center gap-1">
-                  Search patient <ArrowRight className="w-3 h-3" />
-                </p>
-              </button>
+              <span className="text-[10px] font-mono text-slate-500 w-8 text-right">{earned}</span>
             </div>
-
-            <div className="px-6 py-3 border-t border-slate-100 bg-slate-50/50">
-              <p className="text-[10px] text-slate-400 text-center">
-                Contribute records → earn credits → spend credits to unlock patient histories
-              </p>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-blue-600 w-14">Spent</span>
+              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-500 rounded-full transition-all duration-700" style={{ width: `${spentPct}%` }} />
+              </div>
+              <span className="text-[10px] font-mono text-slate-500 w-8 text-right">{spent}</span>
             </div>
           </div>
         </div>
       )}
+
+      {/* Stats Grid - Refined Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {/* Credits Card */}
+        <div className="bg-white/70 backdrop-blur-xl rounded-2xl p-5 border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white transition-all duration-500">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+          <div className="relative z-10 h-full flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
+                <Award className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div className="flex items-center space-x-1 text-[11px] font-bold text-emerald-600 uppercase tracking-[0.1em]">
+                <TrendingUp className="w-3 h-3" />
+                <span>Active Rank</span>
+              </div>
+            </div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-1">Available Credits</p>
+            <p className="text-4xl font-brand font-extrabold text-slate-900 mb-4">{credits}</p>
+            <div className="mt-auto">
+              <p className="text-[11px] text-slate-400 pt-3 border-t border-slate-900/5 mb-3">
+                {isOptedIn ? 'Share clinical data to boost liquidity' : 'Connect to start earning'}
+              </p>
+              <button
+                className="text-xs font-bold font-brand text-emerald-600 hover:text-emerald-700 flex items-center group/btn"
+                onClick={() => {}}
+              >
+                Explore payment plan <ArrowRight className="w-3 h-3 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Contributions Card */}
+        <div
+          onClick={() => isOptedIn && onNavigate('contribute')}
+          className={`rounded-2xl p-5 border shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group transition-all duration-500 ${
+            isOptedIn
+              ? 'bg-white/70 backdrop-blur-xl border-white/80 hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white cursor-pointer'
+              : 'bg-white/40 border-white/20 opacity-75'
+          }`}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+          <div className="flex flex-col h-full relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-slate-100/50 rounded-xl flex items-center justify-center transition-colors group-hover:bg-blue-50/80 backdrop-blur-sm">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+              </div>
+            </div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-1">Total Contributions</p>
+            <p className="text-4xl font-brand font-extrabold text-slate-900 mb-4">{contributionCount}</p>
+            <div className="mt-auto">
+              <p className="text-[11px] text-slate-400 pt-3 border-t border-slate-900/5 mb-3">Protocols shared</p>
+              <button
+                disabled={!isOptedIn}
+                className={`text-xs font-bold flex items-center font-brand tracking-tight transition-colors ${
+                  isOptedIn ? 'text-blue-600 group-hover:text-blue-700' : 'text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                Contribute <ArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Unlocked Records Card */}
+        <div
+          onClick={() => isOptedIn && onNavigate('intake')}
+          className={`rounded-2xl p-5 border shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group transition-all duration-500 ${
+            isOptedIn
+              ? 'bg-white/70 backdrop-blur-xl border-white/80 hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white cursor-pointer'
+              : 'bg-white/40 border-white/20 opacity-75'
+          }`}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-125 transition-transform duration-700"></div>
+          <div className="flex flex-col h-full relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 bg-slate-100/50 rounded-xl flex items-center justify-center transition-colors group-hover:bg-purple-50/80 backdrop-blur-sm">
+                <Users className="w-5 h-5 text-purple-600" />
+              </div>
+            </div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400 mb-1">Unlocked Records</p>
+            <p className="text-4xl font-brand font-extrabold text-slate-900 mb-4">{unlockedCount}</p>
+            <div className="mt-auto">
+              <p className="text-[11px] text-slate-400 pt-3 border-t border-slate-900/5 mb-3">Histories accessed</p>
+              <button
+                disabled={!isOptedIn}
+                className={`text-xs font-bold flex items-center font-brand tracking-tight transition-colors ${
+                  isOptedIn ? 'text-purple-600 group-hover:text-purple-700' : 'text-slate-400 cursor-not-allowed'
+                }`}
+              >
+                Open Intake <ArrowRight className="w-3 h-3 ml-1 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
 
       {/* Quick Actions - Bento style */}
