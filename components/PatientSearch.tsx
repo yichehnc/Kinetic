@@ -1029,7 +1029,7 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
                       </div>
                       <p className="text-xs text-slate-400 font-mono mt-1">{patient.id}</p>
                       {latestH && (
-                        <p className="text-xs text-slate-500 truncate mt-0.5">{latestH.condition}</p>
+                        <p className="text-sm text-slate-700 font-medium truncate mt-0.5">{latestH.condition}</p>
                       )}
                     </div>
                     {patient.historyAvailable && unlocked && (
