@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Award, TrendingUp, Users, Plus, Search, ArrowRight, LogOut, LogIn, Shield, BarChart2, Zap } from 'lucide-react';
+import { Award, TrendingUp, Users, Plus, Search, ArrowRight, LogOut, LogIn, Shield, BarChart2, Zap, CheckCircle2, Circle } from 'lucide-react';
 import { PrivacyExplainer } from './PrivacyExplainer';
 
 // ─── Mock network intelligence data ──────────────────────────────────────────
@@ -62,10 +62,22 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const earned = contributionCount;
-  const spent = unlockedCount;
-  const loopMax = Math.max(earned, spent, 1);
-  const earnedPct = Math.round((earned / loopMax) * 100);
-  const spentPct = Math.round((spent / loopMax) * 100);
+
+  const MILESTONES = [
+    { label: 'Starter',     threshold: 10, perk: 'unlock priority case matching' },
+    { label: 'Contributor', threshold: 30, perk: 'unlock advanced network analytics' },
+    { label: 'Leader',      threshold: 60, perk: 'unlock full network leaderboard'  },
+  ];
+
+  const segmentPct = (i: number) => {
+    const prev = i === 0 ? 0 : MILESTONES[i - 1].threshold;
+    const curr = MILESTONES[i].threshold;
+    if (earned >= curr) return 100;
+    if (earned <= prev) return 0;
+    return Math.round(((earned - prev) / (curr - prev)) * 100);
+  };
+
+  const nextMilestone = MILESTONES.find(m => earned < m.threshold);
 
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-0 pb-12">
@@ -156,26 +168,44 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </div>
 
-          <div className="space-y-2.5">
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-600 w-14">Earned</span>
-              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full transition-all duration-700" style={{ width: `${earnedPct}%` }} />
-              </div>
-              <span className="text-[10px] font-mono text-slate-500 w-8 text-right">{earned}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-blue-600 w-14">Spent</span>
-              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500 rounded-full transition-all duration-700" style={{ width: `${spentPct}%` }} />
-              </div>
-              <span className="text-[10px] font-mono text-slate-500 w-8 text-right">{spent}</span>
-            </div>
+          <div className="flex gap-2 mb-3">
+            {MILESTONES.map((m, i) => {
+              const pct = segmentPct(i);
+              const reached = earned >= m.threshold;
+              return (
+                <div key={m.label} className="flex-1">
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden mb-2">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${reached ? 'bg-emerald-500' : 'bg-emerald-400'}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {reached
+                      ? <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                      : <Circle className="w-3 h-3 text-slate-300 shrink-0" />
+                    }
+                    <span className={`text-[9px] font-bold uppercase tracking-wider truncate ${reached ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      {m.label}
+                    </span>
+                    <span className="text-[9px] text-slate-300 ml-auto shrink-0">{m.threshold}</span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-900/5 flex items-center gap-2">
-            <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-            <span className="text-[10px] font-bold text-amber-700">Network milestone — 400 clinical contributions reached across the network</span>
+          <div className="pt-3 border-t border-slate-900/5">
+            {nextMilestone ? (
+              <p className="text-[10px] text-slate-500">
+                <span className="font-bold text-slate-700">{nextMilestone.threshold - earned} more contribution{nextMilestone.threshold - earned !== 1 ? 's' : ''}</span>
+                {' '}to reach <span className="font-bold text-emerald-600">{nextMilestone.label}</span> — {nextMilestone.perk}
+              </p>
+            ) : (
+              <p className="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5">
+                <Award className="w-3.5 h-3.5" /> All milestones reached — you are a Network Leader
+              </p>
+            )}
           </div>
         </div>
       )}
