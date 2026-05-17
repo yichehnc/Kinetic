@@ -410,7 +410,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         <div className={!isOptedIn ? 'blur-sm pointer-events-none select-none' : ''}>
           <div className="flex items-center gap-2 mb-4">
-            <Zap className="w-4 h-4 text-amber-500" />
             <h3 className="text-sm font-brand font-extrabold text-slate-900 tracking-tight">Network Intelligence</h3>
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 ml-1">Melbourne · {NETWORK_META.networkSize} clinics · {NETWORK_META.totalEpisodes.toLocaleString()} episodes</span>
           </div>
