@@ -256,18 +256,33 @@ const SummaryTab: React.FC<{
   return (
     <div className="space-y-5">
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Network Episodes', value: histories.length },
-          { label: 'Resolved',         value: resolved },
-          { label: 'Ongoing',          value: ongoing },
-          { label: 'Sessions Logged',  value: sessions },
-        ].map(stat => (
-          <div key={stat.label} className="bg-white rounded-xl border border-slate-200 p-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">{stat.label}</p>
-            <p className="text-2xl sm:text-3xl font-bold text-slate-900">{stat.value}</p>
+      <div className="bg-white rounded-xl border border-slate-200 p-5">
+        <div className="grid grid-cols-4 divide-x divide-slate-100">
+          <div className="pr-5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Episodes</p>
+            <p className="text-2xl font-bold text-slate-900">{histories.length}</p>
+            <p className="text-[10px] text-slate-400 mt-1">on network</p>
           </div>
-        ))}
+          <div className="px-5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1">Resolved</p>
+            <p className="text-2xl font-bold text-slate-900">{resolved}</p>
+            <div className="h-1 bg-slate-100 rounded-full mt-2">
+              <div className="h-1 bg-emerald-500 rounded-full transition-all" style={{ width: `${histories.length ? (resolved / histories.length) * 100 : 0}%` }} />
+            </div>
+          </div>
+          <div className="px-5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 mb-1">Ongoing</p>
+            <p className="text-2xl font-bold text-slate-900">{ongoing}</p>
+            <div className="h-1 bg-slate-100 rounded-full mt-2">
+              <div className="h-1 bg-blue-500 rounded-full transition-all" style={{ width: `${histories.length ? (ongoing / histories.length) * 100 : 0}%` }} />
+            </div>
+          </div>
+          <div className="pl-5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Sessions</p>
+            <p className="text-2xl font-bold text-slate-900">{sessions}</p>
+            <p className="text-[10px] text-slate-400 mt-1">logged</p>
+          </div>
+        </div>
       </div>
 
       {/* Clinical synopsis */}
