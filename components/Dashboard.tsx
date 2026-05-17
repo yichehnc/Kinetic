@@ -172,6 +172,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <span className="text-[10px] font-mono text-slate-500 w-8 text-right">{spent}</span>
             </div>
           </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-900/5 flex items-center gap-2">
+            <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span className="text-[10px] font-bold text-amber-700">Network milestone — 400 clinical contributions reached across the network</span>
+          </div>
         </div>
       )}
 

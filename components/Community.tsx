@@ -71,7 +71,7 @@ const ACTIVITY_FEED: Activity[] = [
   { id: 'a2',  type: 'unlock',       clinicId: 'c2', region: 'Lumbar Spine',   time: '31 min ago', isYours: false, detail: '4-episode history · chronic presentation · motor control focus' },
   { id: 'a3',  type: 'contribution', clinicId: 'c3', region: 'Knee',           time: '1h ago',     isYours: false, detail: 'Post-op ACL · return-to-sport milestone at 9 months' },
   { id: 'a4',  type: 'unlock',       clinicId: 'c1', region: 'Shoulder',       time: '2h ago',     isYours: true,  detail: '2-episode history · acute rotator cuff · manual therapy led' },
-  { id: 'a5',  type: 'milestone',    clinicId: null,  region: '',              time: '3h ago',     isYours: false, detail: 'The network crossed 400 safe deposits — a new milestone 🎉' },
+  { id: 'a5',  type: 'milestone',    clinicId: null,  region: '',              time: '3h ago',     isYours: false, detail: 'The network crossed 400 clinical contributions — a new milestone 🎉' },
   { id: 'a6',  type: 'contribution', clinicId: 'c4', region: 'Ankle/Foot',     time: '4h ago',     isYours: false, detail: 'Grade II lateral sprain · functional bracing · 6-week outcome' },
   { id: 'a7',  type: 'unlock',       clinicId: 'c5', region: 'Cervical Spine', time: '5h ago',     isYours: false, detail: '3-episode history · chronic headache · manipulation + exercise' },
   { id: 'a8',  type: 'contribution', clinicId: 'c2', region: 'Hip',            time: '7h ago',     isYours: false, detail: 'FAI post-op · strength-biased rehab · full RTW at 12 weeks' },
@@ -317,7 +317,7 @@ export const Community: React.FC = () => {
             </div>
             <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
               <div className="text-2xl sm:text-3xl font-brand font-extrabold text-white">412</div>
-              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Safe Deposits</div>
+              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Contributions</div>
             </div>
             <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
               <div className="text-2xl sm:text-3xl font-brand font-extrabold text-white">91</div>
