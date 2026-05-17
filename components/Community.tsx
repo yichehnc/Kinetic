@@ -77,6 +77,7 @@ export const Community: React.FC = () => {
   const [dmMessages, setDmMessages] = useState<Record<string, Message[]>>({});
   const [dmInput, setDmInput] = useState('');
   const [clinicSearch, setClinicSearch] = useState('');
+  const [showAllClinics, setShowAllClinics] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -351,7 +352,7 @@ export const Community: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {sortedClinics
             .filter(c => c.name.toLowerCase().includes(clinicSearch.toLowerCase()) || c.suburb.toLowerCase().includes(clinicSearch.toLowerCase()))
-            .slice(0, 4).map((clinic, i) => {
+            .slice(0, showAllClinics ? 6 : 4).map((clinic, i) => {
             const badges = [
               { label: 'Network Alpha', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
               { label: 'High Impact', color: 'bg-blue-50 text-blue-700 border-blue-100' },
@@ -410,8 +411,11 @@ export const Community: React.FC = () => {
           })}
         </div>
         
-        <button className="w-full py-6 text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.3em] font-brand">
-          Browse Full Directory
+        <button
+          className="w-full py-6 text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.3em] font-brand"
+          onClick={() => setShowAllClinics(prev => !prev)}
+        >
+          {showAllClinics ? 'Show Less' : 'Browse Full Directory'}
         </button>
       </div>
 
