@@ -47,27 +47,36 @@ const INITIAL_POSTS: Post[] = [
 
 type ActivityType = 'contribution' | 'unlock' | 'milestone';
 
+const REGION_COLORS: Record<string, string> = {
+  'Shoulder':       'bg-blue-50   text-blue-700   border-blue-100',
+  'Lumbar Spine':   'bg-amber-50  text-amber-700  border-amber-100',
+  'Knee':           'bg-emerald-50 text-emerald-700 border-emerald-100',
+  'Ankle/Foot':     'bg-rose-50   text-rose-700   border-rose-100',
+  'Hip':            'bg-purple-50 text-purple-700 border-purple-100',
+  'Cervical Spine': 'bg-indigo-50 text-indigo-700 border-indigo-100',
+};
+
 interface Activity {
   id: string;
   type: ActivityType;
-  clinicId: string | null;   // null = network-level milestone
+  clinicId: string | null;
   region: string;
   time: string;
-  credit: number;            // +1 contribution, -1 unlock, 0 milestone
   isYours: boolean;
+  detail: string;
 }
 
 const ACTIVITY_FEED: Activity[] = [
-  { id: 'a1',  type: 'contribution', clinicId: 'c1', region: 'Shoulder',     time: '14 min ago',  credit: +1, isYours: true  },
-  { id: 'a2',  type: 'unlock',       clinicId: 'c2', region: 'Lumbar Spine', time: '31 min ago',  credit: -1, isYours: false },
-  { id: 'a3',  type: 'contribution', clinicId: 'c3', region: 'Knee',         time: '1h ago',      credit: +1, isYours: false },
-  { id: 'a4',  type: 'unlock',       clinicId: 'c1', region: 'Shoulder',     time: '2h ago',      credit: -1, isYours: true  },
-  { id: 'a5',  type: 'milestone',    clinicId: null,  region: '',             time: '3h ago',      credit: 0,  isYours: false },
-  { id: 'a6',  type: 'contribution', clinicId: 'c4', region: 'Ankle/Foot',   time: '4h ago',      credit: +1, isYours: false },
-  { id: 'a7',  type: 'unlock',       clinicId: 'c5', region: 'Cervical Spine', time: '5h ago',    credit: -1, isYours: false },
-  { id: 'a8',  type: 'contribution', clinicId: 'c2', region: 'Hip',          time: '7h ago',      credit: +1, isYours: false },
-  { id: 'a9',  type: 'contribution', clinicId: 'c1', region: 'Lumbar Spine', time: '9h ago',      credit: +1, isYours: true  },
-  { id: 'a10', type: 'unlock',       clinicId: 'c6', region: 'Knee',         time: '12h ago',     credit: -1, isYours: false },
+  { id: 'a1',  type: 'contribution', clinicId: 'c1', region: 'Shoulder',       time: '14 min ago', isYours: true,  detail: 'Sub-acute · dry needling + graded loading · 6-week protocol' },
+  { id: 'a2',  type: 'unlock',       clinicId: 'c2', region: 'Lumbar Spine',   time: '31 min ago', isYours: false, detail: '4-episode history · chronic presentation · motor control focus' },
+  { id: 'a3',  type: 'contribution', clinicId: 'c3', region: 'Knee',           time: '1h ago',     isYours: false, detail: 'Post-op ACL · return-to-sport milestone at 9 months' },
+  { id: 'a4',  type: 'unlock',       clinicId: 'c1', region: 'Shoulder',       time: '2h ago',     isYours: true,  detail: '2-episode history · acute rotator cuff · manual therapy led' },
+  { id: 'a5',  type: 'milestone',    clinicId: null,  region: '',              time: '3h ago',     isYours: false, detail: 'The network crossed 400 safe deposits — a new milestone 🎉' },
+  { id: 'a6',  type: 'contribution', clinicId: 'c4', region: 'Ankle/Foot',     time: '4h ago',     isYours: false, detail: 'Grade II lateral sprain · functional bracing · 6-week outcome' },
+  { id: 'a7',  type: 'unlock',       clinicId: 'c5', region: 'Cervical Spine', time: '5h ago',     isYours: false, detail: '3-episode history · chronic headache · manipulation + exercise' },
+  { id: 'a8',  type: 'contribution', clinicId: 'c2', region: 'Hip',            time: '7h ago',     isYours: false, detail: 'FAI post-op · strength-biased rehab · full RTW at 12 weeks' },
+  { id: 'a9',  type: 'contribution', clinicId: 'c1', region: 'Lumbar Spine',   time: '9h ago',     isYours: true,  detail: 'Chronic LBP · strength emphasis · 8-week structured program' },
+  { id: 'a10', type: 'unlock',       clinicId: 'c6', region: 'Knee',           time: '12h ago',    isYours: false, detail: '5-episode history · patellofemoral · load management protocol' },
 ];
 
 export const Community: React.FC = () => {
@@ -237,63 +246,55 @@ export const Community: React.FC = () => {
               const clinic = activity.clinicId ? CLINICS.find(c => c.id === activity.clinicId) : null;
               const actorLabel = activity.isYours ? 'You' : (clinic?.name ?? 'Network');
 
-              // Icon + colours per activity type
               const iconConfig = {
-                contribution: {
-                  bg: 'bg-emerald-50',
-                  icon: <Upload className="w-4 h-4 text-emerald-600" />,
-                },
-                unlock: {
-                  bg: 'bg-blue-50',
-                  icon: <Unlock className="w-4 h-4 text-blue-600" />,
-                },
-                milestone: {
-                  bg: 'bg-amber-50',
-                  icon: <Award className="w-4 h-4 text-amber-600" />,
-                },
+                contribution: { bg: 'bg-emerald-50', icon: <Upload className="w-4 h-4 text-emerald-600" /> },
+                unlock:       { bg: 'bg-blue-50',    icon: <Unlock  className="w-4 h-4 text-blue-600"    /> },
+                milestone:    { bg: 'bg-amber-50',   icon: <Award   className="w-4 h-4 text-amber-600"   /> },
               }[activity.type];
 
-              // Action description
-              const description =
-                activity.type === 'contribution'
-                  ? <><span className="font-bold text-slate-900">{actorLabel}</span> contributed a <span className="font-semibold text-slate-700">{activity.region}</span> record</>
-                  : activity.type === 'unlock'
-                  ? <><span className="font-bold text-slate-900">{actorLabel}</span> unlocked a <span className="font-semibold text-slate-700">{activity.region}</span> patient history</>
-                  : <span className="font-semibold text-slate-700">The network crossed <span className="font-bold text-amber-700">400 safe deposits</span> — a new milestone 🎉</span>;
+              const actionLabel =
+                activity.type === 'contribution' ? 'contributed a record' :
+                activity.type === 'unlock'       ? 'accessed a history'   : '';
 
-              // Credit badge
-              const creditBadge =
-                activity.credit > 0 ? (
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full shrink-0">
-                    +{activity.credit} Credit
-                  </span>
-                ) : activity.credit < 0 ? (
-                  <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full shrink-0">
-                    {activity.credit} Credit
-                  </span>
-                ) : null;
+              const regionColor = REGION_COLORS[activity.region] ?? 'bg-slate-50 text-slate-600 border-slate-100';
+
+              if (activity.type === 'milestone') {
+                return (
+                  <div key={activity.id} className="flex items-center gap-4 px-4 py-4 rounded-xl bg-amber-50/60 border border-amber-100">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-amber-50">
+                      <Award className="w-4 h-4 text-amber-600" />
+                    </div>
+                    <p className="flex-1 text-sm font-semibold text-amber-800 leading-snug">{activity.detail}</p>
+                    <span className="text-[10px] text-amber-500 font-medium whitespace-nowrap shrink-0">{activity.time}</span>
+                  </div>
+                );
+              }
 
               return (
                 <div
                   key={activity.id}
-                  className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-colors hover:bg-slate-50 ${
+                  className={`flex items-start gap-3 px-4 py-4 rounded-xl transition-colors hover:bg-slate-50 ${
                     activity.isYours ? 'border-l-2 border-emerald-400 bg-emerald-50/30 pl-3' : ''
                   }`}
                 >
-                  {/* Icon */}
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${iconConfig.bg}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${iconConfig.bg}`}>
                     {iconConfig.icon}
                   </div>
 
-                  {/* Text */}
-                  <p className="flex-1 text-sm text-slate-600 leading-snug min-w-0">
-                    {description}
-                  </p>
-
-                  {/* Right side: credit + time */}
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    {creditBadge}
-                    <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">{activity.time}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-sm font-bold text-slate-900 truncate">
+                        {actorLabel}
+                        <span className="font-normal text-slate-500"> · {actionLabel}</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap shrink-0">{activity.time}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wide shrink-0 ${regionColor}`}>
+                        {activity.region}
+                      </span>
+                      <span className="text-[11px] text-slate-500 leading-snug truncate">{activity.detail}</span>
+                    </div>
                   </div>
                 </div>
               );
