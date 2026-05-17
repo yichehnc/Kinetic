@@ -32,9 +32,9 @@ const calcAge = (dob: string) => {
 };
 
 const statusColors = (s: string) => {
-  if (s === 'Resolved') return { bar: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' };
-  if (s === 'Ongoing')  return { bar: 'bg-blue-500',    badge: 'bg-blue-100 text-blue-700' };
-  return                       { bar: 'bg-amber-400',   badge: 'bg-amber-100 text-amber-700' };
+  if (s === 'Resolved') return { bar: 'bg-emerald-500', text: 'text-white',     badge: 'bg-emerald-100 text-emerald-700' };
+  if (s === 'Ongoing')  return { bar: 'bg-blue-500',    text: 'text-white',     badge: 'bg-blue-100 text-blue-700' };
+  return                       { bar: 'bg-amber-400',   text: 'text-amber-900', badge: 'bg-amber-100 text-amber-700' };
 };
 
 // ─── Mock per-patient enrichment data ─────────────────────────────────────────
@@ -219,7 +219,7 @@ const EpisodeTimeline: React.FC<{ histories: HistoryEntry[] }> = ({ histories })
               style={{ top: `${i * 32 + 8}px`, left: `${start}%`, width: `${width}%`, height: '20px' }}
             >
               <div className={`${colors.bar} rounded h-full w-full opacity-85 flex items-center px-1.5 min-w-[6px]`}>
-                <span className="text-white text-[9px] font-medium truncate leading-none">{h.condition}</span>
+                <span className={`${colors.text} text-[11px] font-semibold truncate leading-none`}>{h.condition}</span>
               </div>
             </div>
           );
@@ -307,17 +307,13 @@ const SummaryTab: React.FC<{
 
           {/* Clinical flags — full width */}
           <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              <h4 className="text-sm font-semibold text-slate-900">Clinical Flags</h4>
-            </div>
+            <h4 className="text-sm font-semibold text-slate-900 mb-3">Clinical Flags</h4>
             {flags.length === 0 ? (
               <p className="text-sm text-slate-400 italic">No flags recorded</p>
             ) : (
-              <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+              <div className="flex flex-wrap gap-2">
                 {flags.map(flag => (
-                  <span key={flag} className="flex items-center gap-2 text-sm text-slate-700">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span key={flag} className="px-3 py-1 bg-amber-50 text-amber-800 text-xs font-semibold rounded-lg border border-amber-200">
                     {flag}
                   </span>
                 ))}
