@@ -258,28 +258,28 @@ const SummaryTab: React.FC<{
       {/* Stats */}
       <div className="bg-white rounded-xl border border-slate-200 p-5">
         <div className="grid grid-cols-4 divide-x divide-slate-100">
-          <div className="pr-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Episodes</p>
-            <p className="text-2xl font-bold text-slate-900">{histories.length}</p>
+          <div className="pr-5 flex flex-col">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 h-4 leading-4 whitespace-nowrap overflow-hidden">Episodes</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1">{histories.length}</p>
             <p className="text-[10px] text-slate-400 mt-1">on network</p>
           </div>
-          <div className="px-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1">Resolved</p>
-            <p className="text-2xl font-bold text-slate-900">{resolved}</p>
+          <div className="px-5 flex flex-col">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 h-4 leading-4 whitespace-nowrap overflow-hidden">Resolved</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1">{resolved}</p>
             <div className="h-1 bg-slate-100 rounded-full mt-2">
               <div className="h-1 bg-emerald-500 rounded-full transition-all" style={{ width: `${histories.length ? (resolved / histories.length) * 100 : 0}%` }} />
             </div>
           </div>
-          <div className="px-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 mb-1">Ongoing</p>
-            <p className="text-2xl font-bold text-slate-900">{ongoing}</p>
+          <div className="px-5 flex flex-col">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 h-4 leading-4 whitespace-nowrap overflow-hidden">Ongoing</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1">{ongoing}</p>
             <div className="h-1 bg-slate-100 rounded-full mt-2">
               <div className="h-1 bg-blue-500 rounded-full transition-all" style={{ width: `${histories.length ? (ongoing / histories.length) * 100 : 0}%` }} />
             </div>
           </div>
-          <div className="pl-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Sessions</p>
-            <p className="text-2xl font-bold text-slate-900">{sessions}</p>
+          <div className="pl-5 flex flex-col">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 h-4 leading-4 whitespace-nowrap overflow-hidden">Sessions</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1">{sessions}</p>
             <p className="text-[10px] text-slate-400 mt-1">logged</p>
           </div>
         </div>
