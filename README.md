@@ -46,27 +46,38 @@ A three-column longitudinal clinical record:
 - Live sync indicator, Prescribe and Open-in-platform actions
 
 ### Contribute Evidence
-- Two-step structured contribution form with inline validation and friendly copy
-- AI Import CTA — upload a medical report (PDF/DOCX/image) and Kinetic AI extracts structured fields (demo)
+- Three-step structured contribution form with inline validation and friendly copy
+- AI Import disabled — marked "Coming soon" (PDF/DOCX/image extraction, planned)
+- Patient ID field: digits and spaces only (`inputMode="numeric"`, timed inline error)
 - Draft auto-save to localStorage with corruption and quota guards
 - Anonymised snapshot: condition, body region, rehab stage, treatment categories
 - No clinician names, clinic names, or subjective clinical notes
-- Error boundary prevents form crashes from blanking the page
 
-### Credit System
-- Earn credits by contributing patient history
-- Spend credits to unlock locked network records
-- Network rank and contribution dashboard
+### Credit System & Dashboard
+- Earn credits by contributing patient history; spend to unlock records
+- Credit Loop progress bars (earned vs spent) on the dashboard
+- **Network Intelligence** — aggregate signals from the network: top conditions by region, top protocols by resolution rate, and curated "Network Signals" insight rows (trending patterns, emerging insights). No clinic ranking or comparison.
+- Settings tab: network opt-in toggle, credit auto-refill toggle, audit log modal, reset demo button
 
-### Network & Community
-- Clinic-level referral network
-- Treatment efficacy signals from aggregate network data
-- Audit trail (access log) meeting Australian Privacy Act APP 11 requirements
+### Patient Intake — Locked Record Preview
+- Searching for a patient not yet unlocked shows a `LockedPreview`:  episode count, prior clinics, session count, last visit — real stats, redacted teasers
+- "Unlock record · 1 Credit" CTA; locked tab content hidden until unlocked
+- Mirrors LinkedIn/Stripe value-gating patterns
+
+### Community
+- **Insights Feed** — clinic-authored posts with tags, likes, views, and direct message
+- **Network Activity** — Stripe-style live feed of contributions and unlocks across the network; green `+1 Credit` / slate `−1 Credit` badges; your clinic's rows highlighted with an emerald left border
+- Clinic Spotlight leaderboard with searchable directory
+- Direct message overlay (simulated async reply)
 
 ### Privacy Policy & Terms of Service
-- Full Privacy Policy page — APP 11 compliance language, SHA-256 hashing details, NDB scheme reference, data retention and your-rights sections
-- Full Terms of Service page — eligibility, credit rules, prohibited use, disclaimers, NSW governing law
-- Accessible from footer links throughout the app; Back button returns to Dashboard
+- Full Privacy Policy — APP 11 compliance, SHA-256 hashing, NDB scheme, data retention
+- Full Terms of Service — eligibility, credit rules, prohibited use, NSW governing law
+- Accessible from footer buttons; Back button returns to previous view
+
+### Onboarding Tour
+- 3-step first-visit overlay: Welcome → Contribute → Unlock
+- Dismissed via `kinetic_onboarding_done` localStorage key; skippable at any step
 
 ---
 
@@ -131,12 +142,14 @@ npm install
 npm run dev
 ```
 
-App runs at `http://localhost:3000`
+App runs at `http://localhost:5173`
 
 ### Run Tests
 
 ```bash
 npm test
+# or
+npx vitest run --reporter=verbose
 ```
 
 36 unit tests covering validation logic, tooltip rendering, and draft persistence.
