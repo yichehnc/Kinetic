@@ -7,8 +7,8 @@ interface OnboardingTourProps {
 
 const STEPS = [
   {
-    icon: <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3">
-            <span className="text-white font-brand font-bold text-3xl">K</span>
+    icon: <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center">
+            <span className="text-white font-brand font-bold text-xl">K</span>
           </div>,
     label: 'Welcome',
     title: "Patient history shouldn't start from scratch",
@@ -16,8 +16,8 @@ const STEPS = [
     cta: 'How it works',
   },
   {
-    icon: <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center">
-            <Upload className="w-8 h-8 text-emerald-600" />
+    icon: <div className="w-12 h-12 bg-accent-tint rounded-lg flex items-center justify-center">
+            <Upload className="w-5 h-5 text-accent" strokeWidth={1.8} />
           </div>,
     label: 'Contribute',
     title: 'Contribute history, earn credits',
@@ -25,8 +25,8 @@ const STEPS = [
     cta: 'Next',
   },
   {
-    icon: <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center">
-            <Unlock className="w-8 h-8 text-blue-600" />
+    icon: <div className="w-12 h-12 bg-accent-tint rounded-lg flex items-center justify-center">
+            <Unlock className="w-5 h-5 text-accent" strokeWidth={1.8} />
           </div>,
     label: 'Unlock',
     title: 'Spend credits to unlock prior care',
@@ -50,21 +50,21 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) =>
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-ink/50"
         onClick={onComplete}
         aria-hidden="true"
       />
 
       {/* Card — fixed height so size doesn't shift between steps */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 flex flex-col gap-5" style={{ minHeight: '420px' }}>
+      <div className="relative bg-surface-card border border-line rounded-lg shadow-[0_8px_24px_rgba(0,0,0,.12)] w-full max-w-md p-7 flex flex-col gap-5" style={{ minHeight: '400px' }}>
 
         {/* Skip */}
         <button
           onClick={onComplete}
           aria-label="Skip tour"
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
+          className="absolute top-4 right-4 text-ink-5 hover:text-ink transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {/* Progress dots */}
@@ -75,8 +75,8 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) =>
               role="tab"
               aria-selected={i === step}
               aria-label={`Step ${i + 1}: ${s.label}`}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === step ? 'w-8 bg-emerald-500' : i < step ? 'w-4 bg-emerald-200' : 'w-4 bg-slate-200'
+              className={`h-1 rounded-full transition-all duration-300 ${
+                i === step ? 'w-8 bg-accent' : i < step ? 'w-4 bg-accent-soft' : 'w-4 bg-line-soft'
               }`}
             />
           ))}
@@ -84,20 +84,20 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) =>
 
         {/* Icon + text — flex-1 so they fill available space consistently */}
         <div className="flex-1 flex flex-col items-center justify-center gap-4">
-          <div className="motion-safe:animate-fade-in-up">
+          <div className="motion-safe:animate-page-in">
             {current.icon}
           </div>
 
           <div className="text-center space-y-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">{current.label}</p>
-            <h2 className="text-xl font-brand font-extrabold text-slate-900 leading-snug">{current.title}</h2>
-            <p className="text-sm text-slate-500 leading-relaxed">{current.body}</p>
+            <p className="text-[11px] font-[550] text-accent-text">{current.label}</p>
+            <h2 className="text-[15px] font-semibold text-ink leading-snug">{current.title}</h2>
+            <p className="text-xs text-ink-4 leading-[1.5]">{current.body}</p>
           </div>
 
           {isLast && (
-            <div className="w-full flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 mt-1">
-              <Award className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-              <p className="text-sm text-emerald-800 font-medium">Opt in to get <strong>5 free trial credits</strong> — unlock 5 patients straight away.</p>
+            <div className="w-full flex items-center gap-3 bg-positive-tint border border-positive/20 rounded-lg px-4 py-3 mt-1">
+              <Award className="w-4 h-4 text-positive-text flex-shrink-0" strokeWidth={1.8} />
+              <p className="text-xs text-positive-deep">Opt in to get <strong className="font-semibold">5 free trial credits</strong> — unlock 5 patients straight away.</p>
             </div>
           )}
         </div>
@@ -107,7 +107,7 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) =>
           {step > 0 ? (
             <button
               onClick={() => setStep(s => s - 1)}
-              className="text-sm text-slate-500 hover:text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 rounded"
+              className="text-xs text-ink-4 hover:text-ink transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
             >
               Back
             </button>
@@ -117,10 +117,10 @@ export const OnboardingTour: React.FC<OnboardingTourProps> = ({ onComplete }) =>
 
           <button
             onClick={isLast ? onComplete : () => setStep(s => s + 1)}
-            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+            className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-white text-[12.5px] font-medium px-4 py-2 rounded-md transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
             {current.cta}
-            {!isLast && <ArrowRight className="w-4 h-4" />}
+            {!isLast && <ArrowRight className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>

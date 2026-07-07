@@ -47,13 +47,13 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   const style = styles[type];
 
   return (
-    <div className={`${style.bg} border ${style.border} rounded-xl p-4 flex items-start mb-4`}>
+    <div className={`${style.bg} border ${style.border} rounded-lg p-4 flex items-start mb-4`}>
       <div className="flex-shrink-0 mr-3 mt-0.5">
         {style.icon}
       </div>
       <div className="flex-1">
-        <h4 className={`font-semibold ${style.text} mb-1 text-sm`}>{title}</h4>
-        <p className={`text-sm ${style.text} opacity-80`}>{message}</p>
+        <h4 className={`font-semibold ${style.text} mb-1 text-[13px]`}>{title}</h4>
+        <p className={`text-xs ${style.text} opacity-80`}>{message}</p>
       </div>
       {onDismiss && (
         <button

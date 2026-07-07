@@ -21,37 +21,34 @@ const AUDIT_EVENTS = [
 ];
 
 const AuditLogModal = ({ onClose }: { onClose: () => void }) => (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+  <div className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50 p-4">
+    <div className="bg-surface-card border border-line rounded-lg shadow-[0_8px_24px_rgba(0,0,0,.12)] max-w-lg w-full p-6">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-bold text-slate-900">Audit Log</h3>
-        <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+        <h3 className="text-[13.5px] font-semibold text-ink">Audit log</h3>
+        <button onClick={onClose} className="text-ink-5 hover:text-ink text-lg leading-none transition-colors duration-150">✕</button>
       </div>
-      <div className="space-y-3 text-sm">
+      <div className="space-y-3 text-xs">
         {AUDIT_EVENTS.map((entry, i) => (
-          <div key={i} className="flex items-start gap-3 pb-3 border-b border-slate-100 last:border-0">
-            <span className="font-mono text-xs text-slate-400 shrink-0 pt-0.5">{entry.time}</span>
+          <div key={i} className="flex items-start gap-3 pb-3 border-b border-line-soft last:border-0">
+            <span className="font-mono text-[11px] text-ink-5 shrink-0 pt-0.5">{entry.time}</span>
             <div>
-              <p className="font-medium text-slate-800">{entry.event}</p>
-              <p className="text-slate-500">{entry.detail}</p>
+              <p className="font-medium text-ink-2">{entry.event}</p>
+              <p className="text-ink-4">{entry.detail}</p>
             </div>
           </div>
         ))}
       </div>
-      <p className="text-xs text-slate-400 mt-4">Showing last 5 events · All times AEST</p>
+      <p className="text-[11px] text-ink-5 mt-4">Showing last 5 events · All times AEST</p>
     </div>
   </div>
 );
 
 // Simple Alert Component for notifications
 const Notification = ({ message, onClose }: { message: string; onClose: () => void }) => (
-  <div className="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center animate-bounce-in z-50">
-    <CheckCircle className="w-6 h-6 text-emerald-400 mr-3" />
-    <div>
-      <h4 className="font-bold text-sm">Success</h4>
-      <p className="text-sm text-slate-300">{message}</p>
-    </div>
-    <button onClick={onClose} className="ml-6 text-slate-400 hover:text-white">✕</button>
+  <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-ink text-white text-[13px] rounded-lg px-4 py-3 shadow-[0_8px_24px_rgba(0,0,0,.12)] motion-safe:animate-toast-in">
+    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+    <p>{message}</p>
+    <button onClick={onClose} className="ml-3 text-zinc-400 hover:text-white transition-colors duration-150">✕</button>
   </div>
 );
 
@@ -238,7 +235,13 @@ const App: React.FC = () => {
   };
 
   return (
-    <Layout activeTab={activeTab} onTabChange={setActiveTab} credits={credits}>
+    <Layout
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      credits={credits}
+      contributionCount={contributionCount}
+      isOptedIn={isOptedIn}
+    >
       {activeTab === 'dashboard' && (
         <Dashboard
           credits={credits}
@@ -288,16 +291,16 @@ const App: React.FC = () => {
       )}
 
       {activeTab === 'settings' && (
-        <div className="max-w-2xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
-           <h2 className="text-2xl font-bold mb-6">Settings</h2>
+        <div className="max-w-2xl mx-auto bg-surface-card p-6 rounded-lg border border-line">
+           <h2 className="text-[13.5px] font-semibold text-ink mb-6">Settings</h2>
            <div className="space-y-6">
               {/* Network Opt-in/Opt-out Toggle */}
-              <div className="flex items-center justify-between pb-6 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-6 border-b border-line-soft">
                 <div>
-                  <h3 className="font-semibold text-slate-900">Network Opt-in</h3>
-                  <p className="text-sm text-slate-500">Allow other clinics to request your data (anonymized)</p>
+                  <h3 className="text-[13px] font-semibold text-ink">Network opt-in</h3>
+                  <p className="text-xs text-ink-4">Allow other clinics to request your data (anonymized)</p>
                   {!isOptedIn && !hasReceivedInitialCredits && (
-                    <p className="text-xs text-emerald-600 mt-1 font-semibold">✨ Get 5 free trial credits when you opt in!</p>
+                    <p className="text-xs text-positive-text mt-1 font-medium">✨ Get 5 free trial credits when you opt in!</p>
                   )}
                   {!isOptedIn && hasReceivedInitialCredits && (
                     <p className="text-xs text-amber-600 mt-1">⚠️ Opting out removed your credits</p>
@@ -306,7 +309,7 @@ const App: React.FC = () => {
                 <button
                   onClick={isOptedIn ? handleOptOut : handleOptIn}
                   className={`relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full ${
-                    isOptedIn ? 'bg-emerald-500' : 'bg-slate-200'
+                    isOptedIn ? 'bg-accent' : 'bg-line'
                   }`}
                 >
                    <span className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform ${
@@ -315,19 +318,19 @@ const App: React.FC = () => {
                 </button>
               </div>
               
-              <div className="flex items-center justify-between pb-6 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-6 border-b border-line-soft">
                 <div>
-                  <h3 className="font-semibold text-slate-900">Credit Auto-Refill</h3>
-                  <p className="text-sm text-slate-500">Purchase 5 credits automatically when your balance hits zero</p>
+                  <h3 className="text-[13px] font-semibold text-ink">Credit auto-refill</h3>
+                  <p className="text-xs text-ink-4">Purchase 5 credits automatically when your balance hits zero</p>
                   {autoRefill && (
-                    <p className="text-xs text-emerald-600 mt-1 font-semibold">Active — top-up triggers on next unlock attempt</p>
+                    <p className="text-xs text-positive-text mt-1 font-medium">Active — top-up triggers on next unlock attempt</p>
                   )}
                 </div>
                 <button
                   onClick={handleAutoRefillToggle}
                   aria-label={autoRefill ? 'Disable auto-refill' : 'Enable auto-refill'}
                   className={`relative inline-block w-12 h-6 transition duration-200 ease-in-out rounded-full ${
-                    autoRefill ? 'bg-emerald-500' : 'bg-slate-200'
+                    autoRefill ? 'bg-accent' : 'bg-line'
                   }`}
                 >
                   <span className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform ${
@@ -337,58 +340,58 @@ const App: React.FC = () => {
               </div>
 
               {/* Data Security & Privacy Section */}
-              <div className="pt-6 border-t border-slate-200">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center">
-                  <Shield className="w-5 h-5 mr-2 text-blue-600" />
-                  Data Security & Privacy
+              <div className="pt-6 border-t border-line">
+                <h3 className="text-[13px] font-semibold text-ink mb-4 flex items-center">
+                  <Shield className="w-4 h-4 mr-2 text-accent" strokeWidth={1.8} />
+                  Data security & privacy
                 </h3>
                 
                 <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-line-soft gap-2">
                     <div>
-                      <h4 className="font-semibold text-slate-900">Data Encryption</h4>
-                      <p className="text-sm text-slate-500">All patient data encrypted at rest and in transit</p>
+                      <h4 className="text-[13px] font-semibold text-ink">Data Encryption</h4>
+                      <p className="text-xs text-ink-4">All patient data encrypted at rest and in transit</p>
                     </div>
-                    <div className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold self-start sm:self-auto">
-                      ENABLED
+                    <div className="px-2 py-0.5 bg-positive-tint text-positive-deep rounded text-[11px] font-semibold self-start sm:self-auto">
+                      Enabled
                     </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-line-soft gap-2">
                     <div>
-                      <h4 className="font-semibold text-slate-900">Anonymization</h4>
-                      <p className="text-sm text-slate-500">Patient identifiers are hashed before network sharing</p>
+                      <h4 className="text-[13px] font-semibold text-ink">Anonymization</h4>
+                      <p className="text-xs text-ink-4">Patient identifiers are hashed before network sharing</p>
                     </div>
-                    <div className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold self-start sm:self-auto">
-                      ACTIVE
+                    <div className="px-2 py-0.5 bg-positive-tint text-positive-deep rounded text-[11px] font-semibold self-start sm:self-auto">
+                      Active
                     </div>
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-line-soft gap-2">
                     <div>
-                      <h4 className="font-semibold text-slate-900">Audit Logging</h4>
-                      <p className="text-sm text-slate-500">Track all data access and contributions</p>
+                      <h4 className="text-[13px] font-semibold text-ink">Audit Logging</h4>
+                      <p className="text-xs text-ink-4">Track all data access and contributions</p>
                     </div>
                     <button
                       onClick={() => setShowAuditLog(true)}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium self-start sm:self-auto"
+                      className="text-xs text-accent hover:text-accent-hover font-medium self-start sm:self-auto transition-colors duration-150"
                     >
-                      View Logs
+                      View logs
                     </button>
                   </div>
                   
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                      <h4 className="font-semibold text-slate-900">Data Retention</h4>
-                      <p className="text-sm text-slate-500">Contributed data retained for 24 months</p>
+                      <h4 className="text-[13px] font-semibold text-ink">Data Retention</h4>
+                      <p className="text-xs text-ink-4">Contributed data retained for 24 months</p>
                     </div>
-                    <span className="text-sm text-slate-600 font-medium self-start sm:self-auto">24 months</span>
+                    <span className="text-xs text-ink-3 font-medium self-start sm:self-auto">24 months</span>
                   </div>
                 </div>
               </div>
            </div>
            
-           <div className="mt-8 p-4 bg-slate-50 rounded-lg text-xs text-slate-500 font-mono">
+           <div className="mt-8 p-4 bg-surface-sidebar border border-line-soft rounded-lg text-[11px] text-ink-4 font-mono">
              Clinic ID: KIN-ORG-882192<br/>
              Version: v0.4.3 (Beta)
            </div>
@@ -399,7 +402,7 @@ const App: React.FC = () => {
                  ['kinetic_onboarding_done','kinetic_opted_in','kinetic_credits','kinetic_contribution_draft','kinetic_initial_credits_awarded','kinetic_auto_refill'].forEach(k => localStorage.removeItem(k));
                  window.location.reload();
                }}
-               className="text-xs text-slate-400 hover:text-red-500 transition-colors"
+               className="text-[11.5px] text-ink-5 hover:text-red-600 transition-colors duration-150"
              >
                Reset demo
              </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Heart, Eye, Clock, Send, X, TrendingUp, Search, Upload, Unlock, Award } from 'lucide-react';
+import { MessageSquare, Heart, Eye, Send, X, Search, Upload, Unlock, Award } from 'lucide-react';
 
 interface Clinic {
   id: string;
@@ -46,15 +46,6 @@ const INITIAL_POSTS: Post[] = [
 ];
 
 type ActivityType = 'contribution' | 'unlock' | 'milestone';
-
-const REGION_COLORS: Record<string, string> = {
-  'Shoulder':       'bg-blue-50   text-blue-700   border-blue-100',
-  'Lumbar Spine':   'bg-amber-50  text-amber-700  border-amber-100',
-  'Knee':           'bg-emerald-50 text-emerald-700 border-emerald-100',
-  'Ankle/Foot':     'bg-rose-50   text-rose-700   border-rose-100',
-  'Hip':            'bg-purple-50 text-purple-700 border-purple-100',
-  'Cervical Spine': 'bg-indigo-50 text-indigo-700 border-indigo-100',
-};
 
 interface Activity {
   id: string;
@@ -129,10 +120,10 @@ export const Community: React.FC = () => {
 
   const sendDM = () => {
     if (!dmInput.trim() || !currentDMClinic) return;
-    
+
     const clinicId = currentDMClinic.id;
     const newMessage: Message = { type: 'out', text: dmInput.trim() };
-    
+
     setDmMessages(prev => ({
       ...prev,
       [clinicId]: [...(prev[clinicId] || []), newMessage]
@@ -150,122 +141,119 @@ export const Community: React.FC = () => {
   const sortedClinics = [...CLINICS].sort((a, b) => b.contributions - a.contributions);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-10 pb-20">
+    <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* Main Content - Feed First */}
       <div className="min-w-0">
-        <div className="flex gap-4 sm:gap-8 mb-8 border-b border-slate-200">
-          <button 
-            className={`pb-4 text-sm font-brand font-bold transition-all border-b-2 -mb-px tracking-tight ${
-              activeTab === 'feed' ? 'text-slate-900 border-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600'
+        <div className="flex gap-6 mb-5 border-b border-line">
+          <button
+            className={`pb-2.5 text-[12.5px] transition-colors duration-[120ms] border-b-2 -mb-px ${
+              activeTab === 'feed' ? 'text-ink border-accent font-[550]' : 'text-ink-4 border-transparent font-[450] hover:text-ink'
             }`}
             onClick={() => setActiveTab('feed')}
           >
-            Insights Feed
+            Insights feed
           </button>
           <button
-            className={`pb-4 text-sm font-brand font-bold transition-all border-b-2 -mb-px tracking-tight ${
-              activeTab === 'activity' ? 'text-slate-900 border-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600'
+            className={`pb-2.5 text-[12.5px] transition-colors duration-[120ms] border-b-2 -mb-px ${
+              activeTab === 'activity' ? 'text-ink border-accent font-[550]' : 'text-ink-4 border-transparent font-[450] hover:text-ink'
             }`}
             onClick={() => setActiveTab('activity')}
           >
-            Network Activity
+            Network activity
           </button>
         </div>
 
         {activeTab === 'feed' ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {posts.map(post => {
               const clinic = CLINICS.find(c => c.id === post.clinic)!;
               return (
-                <div key={post.id} className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white transition-all duration-500 group">
-                  <div className="flex items-center gap-4 mb-6 relative z-10">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xs font-brand font-bold shadow-sm transition-transform group-hover:scale-110 duration-500 ${clinic.color}`}>
+                <div key={post.id} className="bg-surface-card border border-line rounded-lg px-[18px] py-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-8 h-8 rounded-md flex items-center justify-center text-[11px] font-brand font-bold ${clinic.color}`}>
                       {clinic.initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-brand font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">{clinic.name}</div>
-                      <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">{clinic.suburb}</div>
+                      <div className="text-[12.5px] font-semibold text-ink">{clinic.name}</div>
+                      <div className="text-[11px] text-ink-5">{clinic.suburb}</div>
                     </div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center gap-1 bg-white/50 backdrop-blur-sm px-2 py-1 rounded-md border border-white/50">
-                      <Clock className="w-3 h-3" />
-                      {post.time}
-                    </div>
+                    <div className="text-[11px] text-ink-5">{post.time}</div>
                   </div>
-                  <h4 className="text-xl font-brand font-extrabold text-slate-900 mb-3 tracking-tight relative z-10">{post.title}</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed mb-6 font-medium relative z-10">{post.body}</p>
-                  <div className="flex flex-wrap gap-2 mb-6 relative z-10">
+                  <h4 className="text-[13.5px] font-semibold text-ink mb-1.5">{post.title}</h4>
+                  <p className="text-[12.5px] text-ink-3 leading-[1.5] mb-3">{post.body}</p>
+                  <div className="flex flex-wrap gap-1.5 mb-3">
                     {post.tags.map(tag => (
-                      <span key={tag} className="px-3 py-1 bg-white/40 text-slate-600 text-[10px] font-bold rounded-lg border border-white/60 uppercase tracking-wider backdrop-blur-sm">
+                      <span key={tag} className="px-1.5 py-px bg-accent-tint text-accent-text text-[10.5px] font-medium rounded">
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <div className="flex items-center justify-between pt-6 border-t border-slate-900/5 relative z-10">
-            <div className="flex flex-wrap items-center gap-4 sm:gap-8">
-              <button 
-                className={`flex items-center gap-2 text-xs font-bold transition-colors ${
-                  post.liked ? 'text-rose-500' : 'text-slate-400 hover:text-slate-900'
-                }`}
-                onClick={() => toggleLike(post.id)}
-              >
-                <Heart className={`w-4 h-4 ${post.liked ? 'fill-current' : ''}`} />
-                {post.likes}
-              </button>
-              <button className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-900">
-                <MessageSquare className="w-4 h-4" />
-                Reply
-              </button>
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                <Eye className="w-4 h-4" />
-                {post.views}
-              </div>
-            </div>
-            <button 
-              className="w-full sm:w-auto px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-brand font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95 mt-4 sm:mt-0"
-              onClick={() => openDM(post.clinic)}
-            >
-              Contact Clinic
-            </button>
-          </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-line-soft">
+                    <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                      <button
+                        className={`flex items-center gap-1.5 text-[11.5px] font-medium transition-colors duration-[120ms] ${
+                          post.liked ? 'text-rose-500' : 'text-ink-4 hover:text-ink'
+                        }`}
+                        onClick={() => toggleLike(post.id)}
+                      >
+                        <Heart className={`w-3.5 h-3.5 ${post.liked ? 'fill-current' : ''}`} strokeWidth={1.8} />
+                        {post.likes}
+                      </button>
+                      <button className="flex items-center gap-1.5 text-[11.5px] font-medium text-ink-4 hover:text-ink transition-colors duration-[120ms]">
+                        <MessageSquare className="w-3.5 h-3.5" strokeWidth={1.8} />
+                        Reply
+                      </button>
+                      <div className="flex items-center gap-1.5 text-[11.5px] text-ink-5">
+                        <Eye className="w-3.5 h-3.5" strokeWidth={1.8} />
+                        {post.views}
+                      </div>
+                    </div>
+                    <button
+                      className="text-xs font-medium text-accent-text border border-accent-line bg-accent-tint2 hover:bg-accent-tint rounded-md px-2.5 py-[5px] transition-colors duration-150"
+                      onClick={() => openDM(post.clinic)}
+                    >
+                      Contact clinic
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="bg-surface-card border border-line rounded-lg">
             {/* Feed header */}
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Live across the network</p>
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <div className="flex items-center justify-between px-[18px] py-[13px] border-b border-line-soft">
+              <p className="text-[12.5px] font-semibold text-ink">Live across the network</p>
+              <span className="flex items-center gap-1.5 text-[11px] text-ink-4">
+                <span className="w-1.5 h-1.5 bg-positive rounded-full motion-safe:animate-pulse" />
                 Live
               </span>
             </div>
 
-            {ACTIVITY_FEED.map((activity) => {
+            {ACTIVITY_FEED.map((activity, idx) => {
               const clinic = activity.clinicId ? CLINICS.find(c => c.id === activity.clinicId) : null;
               const actorLabel = activity.isYours ? 'You' : (clinic?.name ?? 'Network');
 
               const iconConfig = {
-                contribution: { bg: 'bg-emerald-50', icon: <Upload className="w-4 h-4 text-emerald-600" /> },
-                unlock:       { bg: 'bg-blue-50',    icon: <Unlock  className="w-4 h-4 text-blue-600"    /> },
-                milestone:    { bg: 'bg-amber-50',   icon: <Award   className="w-4 h-4 text-amber-600"   /> },
+                contribution: { bg: 'bg-positive-tint', icon: <Upload className="w-3.5 h-3.5 text-positive-text" strokeWidth={1.8} /> },
+                unlock:       { bg: 'bg-accent-tint',   icon: <Unlock className="w-3.5 h-3.5 text-accent" strokeWidth={1.8} /> },
+                milestone:    { bg: 'bg-accent-tint',   icon: <Award  className="w-3.5 h-3.5 text-accent" strokeWidth={1.8} /> },
               }[activity.type];
 
               const actionLabel =
                 activity.type === 'contribution' ? 'contributed a record' :
                 activity.type === 'unlock'       ? 'accessed a history'   : '';
 
-              const regionColor = REGION_COLORS[activity.region] ?? 'bg-slate-50 text-slate-600 border-slate-100';
+              const rowBorder = idx < ACTIVITY_FEED.length - 1 ? 'border-b border-line-softer' : '';
 
               if (activity.type === 'milestone') {
                 return (
-                  <div key={activity.id} className="flex items-center gap-4 px-4 py-4 rounded-xl bg-amber-50/60 border border-amber-100">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-amber-50">
-                      <Award className="w-4 h-4 text-amber-600" />
+                  <div key={activity.id} className={`flex items-center gap-3 px-[18px] py-3 ${rowBorder}`}>
+                    <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${iconConfig.bg}`}>
+                      {iconConfig.icon}
                     </div>
-                    <p className="flex-1 text-sm font-semibold text-amber-800 leading-snug">{activity.detail}</p>
-                    <span className="text-[10px] text-amber-500 font-medium whitespace-nowrap shrink-0">{activity.time}</span>
+                    <p className="flex-1 text-[12.5px] font-medium text-accent-deep leading-snug">{activity.detail}</p>
+                    <span className="text-[11px] text-ink-5 whitespace-nowrap shrink-0">{activity.time}</span>
                   </div>
                 );
               }
@@ -273,27 +261,25 @@ export const Community: React.FC = () => {
               return (
                 <div
                   key={activity.id}
-                  className={`flex items-start gap-3 px-4 py-4 rounded-xl transition-colors hover:bg-slate-50 ${
-                    activity.isYours ? 'border-l-2 border-emerald-400 bg-emerald-50/30 pl-3' : ''
-                  }`}
+                  className={`flex items-start gap-3 px-[18px] py-3 ${rowBorder} ${activity.isYours ? 'bg-accent-tint2/60' : ''}`}
                 >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${iconConfig.bg}`}>
+                  <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${iconConfig.bg}`}>
                     {iconConfig.icon}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-sm font-bold text-slate-900 truncate">
+                      <span className="text-[12.5px] font-semibold text-ink truncate">
                         {actorLabel}
-                        <span className="font-normal text-slate-500"> · {actionLabel}</span>
+                        <span className="font-normal text-ink-4"> · {actionLabel}</span>
                       </span>
-                      <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap shrink-0">{activity.time}</span>
+                      <span className="text-[11px] text-ink-5 whitespace-nowrap shrink-0">{activity.time}</span>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-wide shrink-0 ${regionColor}`}>
+                      <span className="text-[10.5px] font-medium px-1.5 py-px rounded bg-accent-tint text-accent-text shrink-0">
                         {activity.region}
                       </span>
-                      <span className="text-[11px] text-slate-500 leading-snug truncate">{activity.detail}</span>
+                      <span className="text-[11.5px] text-ink-4 leading-snug truncate">{activity.detail}</span>
                     </div>
                   </div>
                 </div>
@@ -303,106 +289,94 @@ export const Community: React.FC = () => {
         )}
       </div>
 
-      {/* Stats Section - Refined Glass Dark */}
-      <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl relative overflow-hidden group hover:scale-[1.005] transition-all duration-700">
-        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-1000">
-          <TrendingUp className="w-32 h-32 text-white" />
-        </div>
-        <div className="relative z-10">
-          <h3 className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em] mb-10">Network Growth Metrics</h3>
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-y-8 gap-x-4 sm:gap-8">
-            <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
-              <div className="text-2xl sm:text-3xl font-brand font-extrabold text-white">38</div>
-              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Verified Units</div>
-            </div>
-            <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
-              <div className="text-2xl sm:text-3xl font-brand font-extrabold text-white">412</div>
-              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Contributions</div>
-            </div>
-            <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
-              <div className="text-2xl sm:text-3xl font-brand font-extrabold text-white">91</div>
-              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Active Unlocks</div>
-            </div>
-            <div className="text-left border-l border-white/10 pl-4 sm:pl-6">
-              <div className="text-2xl sm:text-3xl font-brand font-extrabold text-emerald-400">5.2k</div>
-              <div className="text-[9px] text-slate-400 uppercase font-bold tracking-widest mt-2">Global Reach</div>
-            </div>
+      {/* Network growth metrics */}
+      <div className="bg-surface-card border border-line rounded-lg px-[18px] py-4">
+        <h3 className="text-[12.5px] font-semibold text-ink mb-4">Network growth metrics</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <div className="font-brand font-bold text-2xl tracking-[-0.02em] text-ink">38</div>
+            <div className="text-[11.5px] text-ink-5 mt-1">Verified units</div>
+          </div>
+          <div>
+            <div className="font-brand font-bold text-2xl tracking-[-0.02em] text-ink">412</div>
+            <div className="text-[11.5px] text-ink-5 mt-1">Contributions</div>
+          </div>
+          <div>
+            <div className="font-brand font-bold text-2xl tracking-[-0.02em] text-ink">91</div>
+            <div className="text-[11.5px] text-ink-5 mt-1">Active unlocks</div>
+          </div>
+          <div>
+            <div className="font-brand font-bold text-2xl tracking-[-0.02em] text-positive-text">5.2k</div>
+            <div className="text-[11.5px] text-ink-5 mt-1">Global reach</div>
           </div>
         </div>
       </div>
 
       {/* Clinic Spotlight Section */}
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Clinic Spotlight</h3>
-            <span className="text-[10px] text-slate-400 italic">Leaderboard reflecting clinical impact score</span>
+            <h3 className="text-[12.5px] font-semibold text-ink">Clinic spotlight</h3>
+            <span className="text-[11px] text-ink-5">Leaderboard reflecting clinical impact score</span>
           </div>
-          <div className="relative w-full sm:w-80 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
-            <input 
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-5" strokeWidth={1.8} />
+            <input
               type="text"
-              placeholder="Search by clinic or locality..."
+              placeholder="Search by clinic or locality…"
               value={clinicSearch}
               onChange={(e) => setClinicSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 outline-none transition-all shadow-sm"
+              className="w-full pl-9 pr-3 py-2 bg-surface-card border border-line rounded-md text-xs focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors duration-150"
             />
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {sortedClinics
             .filter(c => c.name.toLowerCase().includes(clinicSearch.toLowerCase()) || c.suburb.toLowerCase().includes(clinicSearch.toLowerCase()))
             .slice(0, showAllClinics ? 6 : 4).map((clinic, i) => {
-            const badges = [
-              { label: 'Network Alpha', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-              { label: 'High Impact', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-              { label: 'Top Contributor', color: 'bg-slate-900 text-white border-slate-800' },
-              { label: 'Quality Leader', color: 'bg-purple-50 text-purple-700 border-purple-100' },
-            ];
+            const badges = ['Network alpha', 'High impact', 'Top contributor', 'Quality leader'];
             const badge = badges[i % badges.length];
 
             return (
-              <div 
-                key={clinic.id} 
-                className="bg-white/70 backdrop-blur-xl border border-white/80 rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 cursor-pointer group hover:shadow-2xl hover:scale-[1.015] hover:bg-white/85 hover:border-white"
+              <div
+                key={clinic.id}
+                className="bg-surface-card border border-line rounded-lg px-[18px] py-4 transition-colors duration-150 hover:border-[#D9D9DE] cursor-pointer"
                 onClick={() => openDM(clinic.id)}
               >
-                <div className="flex items-start gap-5 relative z-10">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-sm font-brand font-bold flex-shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500 ${clinic.color}`}>
+                <div className="flex items-start gap-3">
+                  <div className={`w-9 h-9 rounded-md flex items-center justify-center text-[11px] font-brand font-bold flex-shrink-0 ${clinic.color}`}>
                     {clinic.initials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-base font-brand font-extrabold text-slate-900 truncate group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{clinic.name}</div>
-                    </div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{clinic.suburb}</span>
-                      <span className="text-slate-200">•</span>
-                      <span className={`text-[8px] font-bold px-2 py-0.5 rounded-md border uppercase tracking-widest transition-colors ${badge.color}`}>
-                        {badge.label}
+                    <div className="text-[12.5px] font-semibold text-ink truncate">{clinic.name}</div>
+                    <div className="flex items-center gap-1.5 mt-0.5 mb-3">
+                      <span className="text-[11px] text-ink-5">{clinic.suburb}</span>
+                      <span className="text-ink-6">·</span>
+                      <span className="text-[10.5px] font-medium px-1.5 py-px rounded bg-accent-tint text-accent-text">
+                        {badge}
                       </span>
                     </div>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="text-center py-2 bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm group-hover:bg-white/60 transition-colors">
-                        <div className="text-sm font-brand font-bold text-slate-900">{clinic.contributions}</div>
-                        <div className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">Deposits</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center py-1.5 bg-surface-sidebar rounded-md border border-line-soft">
+                        <div className="text-[13px] font-brand font-bold text-ink">{clinic.contributions}</div>
+                        <div className="text-[10.5px] text-ink-5">Deposits</div>
                       </div>
-                      <div className="text-center py-2 bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm group-hover:bg-white/60 transition-colors">
-                        <div className="text-sm font-brand font-bold text-slate-900">{clinic.upvotes}</div>
-                        <div className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">Upvotes</div>
+                      <div className="text-center py-1.5 bg-surface-sidebar rounded-md border border-line-soft">
+                        <div className="text-[13px] font-brand font-bold text-ink">{clinic.upvotes}</div>
+                        <div className="text-[10.5px] text-ink-5">Upvotes</div>
                       </div>
-                      <div className="text-center py-2 bg-white/40 rounded-xl border border-white/50 backdrop-blur-sm group-hover:bg-white/60 transition-colors">
-                        <div className="text-sm font-brand font-bold text-slate-900">{(clinic.views / 100).toFixed(1)}k</div>
-                        <div className="text-[8px] text-slate-400 uppercase font-bold tracking-tighter">Impact</div>
+                      <div className="text-center py-1.5 bg-surface-sidebar rounded-md border border-line-soft">
+                        <div className="text-[13px] font-brand font-bold text-ink">{(clinic.views / 100).toFixed(1)}k</div>
+                        <div className="text-[10.5px] text-ink-5">Impact</div>
                       </div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-slate-900/5">
-                      <button 
-                        className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-bold hover:bg-slate-800 transition-all uppercase tracking-widest shadow-lg active:scale-95"
+                    <div className="mt-3 pt-3 border-t border-line-soft">
+                      <button
+                        className="w-full text-xs font-medium text-accent-text border border-accent-line bg-accent-tint2 hover:bg-accent-tint rounded-md py-[6px] transition-colors duration-150"
                         onClick={() => openDM(clinic.id)}
                       >
-                        Contact Clinic
+                        Contact clinic
                       </button>
                     </div>
                   </div>
@@ -411,48 +385,48 @@ export const Community: React.FC = () => {
             );
           })}
         </div>
-        
+
         <button
-          className="w-full py-6 text-[10px] font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-[0.3em] font-brand"
+          className="w-full py-3 text-[11.5px] font-medium text-ink-5 hover:text-ink transition-colors duration-150"
           onClick={() => setShowAllClinics(prev => !prev)}
         >
-          {showAllClinics ? 'Show Less' : 'Browse Full Directory'}
+          {showAllClinics ? 'Show less' : 'Browse full directory'}
         </button>
       </div>
 
       {/* DM Overlay */}
       {currentDMClinic && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] flex items-end justify-end p-6">
-          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-[360px] h-[500px] flex flex-col shadow-2xl animate-in slide-in-from-bottom-4 duration-300">
-            <div className="p-4 border-b border-slate-100 flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold ${currentDMClinic.color}`}>
+        <div className="fixed inset-0 bg-ink/40 z-[60] flex items-end justify-end p-6">
+          <div className="bg-surface-card border border-line rounded-lg w-full max-w-[360px] h-[500px] flex flex-col shadow-[0_8px_24px_rgba(0,0,0,.12)]">
+            <div className="p-4 border-b border-line-soft flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-md flex items-center justify-center text-[11px] font-brand font-bold ${currentDMClinic.color}`}>
                 {currentDMClinic.initials}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-slate-900 truncate">{currentDMClinic.name}</div>
-                <div className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <div className="text-[12.5px] font-semibold text-ink truncate">{currentDMClinic.name}</div>
+                <div className="text-[11px] text-ink-4 flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-positive rounded-full motion-safe:animate-pulse" />
                   Online
                 </div>
               </div>
-              <button 
-                className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+              <button
+                className="p-1.5 text-ink-5 hover:text-ink transition-colors duration-150"
                 onClick={closeDM}
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
-            
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-surface-page">
               {(dmMessages[currentDMClinic.id] || []).map((msg, i) => (
-                <div 
-                  key={i} 
+                <div
+                  key={i}
                   className={`flex ${msg.type === 'out' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm shadow-sm ${
-                    msg.type === 'out' 
-                      ? 'bg-emerald-600 text-white rounded-tr-none' 
-                      : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
+                  <div className={`max-w-[80%] px-3 py-2 rounded-lg text-xs leading-[1.45] ${
+                    msg.type === 'out'
+                      ? 'bg-accent text-white rounded-tr-none'
+                      : 'bg-surface-card text-ink-2 border border-line rounded-tl-none'
                   }`}>
                     {msg.text}
                   </div>
@@ -461,22 +435,22 @@ export const Community: React.FC = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-4 border-t border-slate-100 bg-white rounded-b-2xl">
+            <div className="p-4 border-t border-line-soft bg-surface-card rounded-b-lg">
               <div className="flex gap-2">
-                <input 
-                  type="text" 
-                  className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-emerald-500 transition-all"
-                  placeholder="Type a message..."
+                <input
+                  type="text"
+                  className="flex-1 bg-surface-sidebar border border-line rounded-md px-3 py-2 text-xs focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors duration-150"
+                  placeholder="Type a message…"
                   value={dmInput}
                   onChange={(e) => setDmInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && sendDM()}
                 />
-                <button 
-                  className="p-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                <button
+                  className="p-2 bg-accent text-white rounded-md hover:bg-accent-hover transition-colors duration-150 disabled:opacity-50"
                   onClick={sendDM}
                   disabled={!dmInput.trim()}
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 h-4" strokeWidth={1.8} />
                 </button>
               </div>
             </div>

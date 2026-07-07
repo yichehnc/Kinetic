@@ -184,24 +184,24 @@ const EpisodeTimeline: React.FC<{ histories: HistoryEntry[] }> = ({ histories })
   const toPercent = (d: Date) => ((d.getTime() - minMs) / spanMs) * 100;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5">
+    <div className="bg-white rounded-lg border border-line p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Clock className="w-4 h-4 text-slate-400" />
-        <h4 className="text-sm font-semibold text-slate-900">Episode Timeline</h4>
+        <Clock className="w-4 h-4 text-ink-5" />
+        <h4 className="text-sm font-semibold text-ink">Episode Timeline</h4>
       </div>
 
-      <div className="flex justify-between text-[10px] text-slate-400 mb-1.5">
+      <div className="flex justify-between text-[10px] text-ink-5 mb-1.5">
         {yearMarkers.map(y => <span key={y}>{y}</span>)}
       </div>
 
       <div
-        className="relative bg-slate-50 rounded-lg overflow-hidden border border-slate-100"
+        className="relative bg-surface-sidebar rounded-lg overflow-hidden border border-line-soft"
         style={{ height: `${histories.length * 32 + 16}px` }}
       >
         {/* Grid lines */}
         <div className="absolute inset-0 flex">
           {yearMarkers.map((_, i) => (
-            <div key={i} className="flex-1 border-r border-slate-200 border-dashed last:border-0" />
+            <div key={i} className="flex-1 border-r border-line border-dashed last:border-0" />
           ))}
         </div>
 
@@ -226,7 +226,7 @@ const EpisodeTimeline: React.FC<{ histories: HistoryEntry[] }> = ({ histories })
         })}
       </div>
 
-      <div className="flex items-center gap-4 mt-2.5 text-[10px] text-slate-500">
+      <div className="flex items-center gap-4 mt-2.5 text-[10px] text-ink-4">
         <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-500 inline-block" /> Resolved</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-500 inline-block" /> Ongoing</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-amber-400 inline-block" /> Plateaued</span>
@@ -256,31 +256,31 @@ const SummaryTab: React.FC<{
   return (
     <div className="space-y-5">
       {/* Stats */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
-        <div className="grid grid-cols-4 divide-x divide-slate-100">
+      <div className="bg-white rounded-lg border border-line p-5">
+        <div className="grid grid-cols-4 divide-x divide-line-softer">
           <div className="pr-5 flex flex-col">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 h-4 leading-4 whitespace-nowrap overflow-hidden">Episodes</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{histories.length}</p>
-            <p className="text-[10px] text-slate-400 mt-1">on network</p>
+            <p className="text-[11px] font-[550] text-ink-4 h-4 leading-4 whitespace-nowrap overflow-hidden">Episodes</p>
+            <p className="text-2xl font-bold text-ink mt-1">{histories.length}</p>
+            <p className="text-[10px] text-ink-5 mt-1">on network</p>
           </div>
           <div className="px-5 flex flex-col">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 h-4 leading-4 whitespace-nowrap overflow-hidden">Resolved</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{resolved}</p>
-            <div className="h-1 bg-slate-100 rounded-full mt-2">
+            <p className="text-[11px] font-[550] text-positive-text h-4 leading-4 whitespace-nowrap overflow-hidden">Resolved</p>
+            <p className="text-2xl font-bold text-ink mt-1">{resolved}</p>
+            <div className="h-1 bg-line-soft rounded-full mt-2">
               <div className="h-1 bg-emerald-500 rounded-full transition-all" style={{ width: `${histories.length ? (resolved / histories.length) * 100 : 0}%` }} />
             </div>
           </div>
           <div className="px-5 flex flex-col">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 h-4 leading-4 whitespace-nowrap overflow-hidden">Ongoing</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{ongoing}</p>
-            <div className="h-1 bg-slate-100 rounded-full mt-2">
+            <p className="text-[11px] font-[550] text-accent-text h-4 leading-4 whitespace-nowrap overflow-hidden">Ongoing</p>
+            <p className="text-2xl font-bold text-ink mt-1">{ongoing}</p>
+            <div className="h-1 bg-line-soft rounded-full mt-2">
               <div className="h-1 bg-blue-500 rounded-full transition-all" style={{ width: `${histories.length ? (ongoing / histories.length) * 100 : 0}%` }} />
             </div>
           </div>
           <div className="pl-5 flex flex-col">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 h-4 leading-4 whitespace-nowrap overflow-hidden">Sessions</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{sessions}</p>
-            <p className="text-[10px] text-slate-400 mt-1">logged</p>
+            <p className="text-[11px] font-[550] text-ink-4 h-4 leading-4 whitespace-nowrap overflow-hidden">Sessions</p>
+            <p className="text-2xl font-bold text-ink mt-1">{sessions}</p>
+            <p className="text-[10px] text-ink-5 mt-1">logged</p>
           </div>
         </div>
       </div>
@@ -288,12 +288,12 @@ const SummaryTab: React.FC<{
       {/* Clinical synopsis */}
       {(unlocked || !patient.historyAvailable) && (
         <>
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white rounded-lg border border-line p-6">
             <div className="flex items-center gap-2 mb-3">
-              <FileText className="w-4 h-4 text-slate-400" />
-              <h4 className="text-sm font-semibold text-slate-900">Clinical Synopsis</h4>
+              <FileText className="w-4 h-4 text-ink-5" />
+              <h4 className="text-sm font-semibold text-ink">Clinical Synopsis</h4>
             </div>
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="text-sm text-ink-3 leading-relaxed">
               <strong>{patient.name.split(' ')[0]}</strong> has <strong>{histories.length}</strong> episode{histories.length !== 1 ? 's' : ''} on the network.
               {latestH && (
                 <> Most recent: <strong>{latestH.condition}</strong> ({latestH.status.toLowerCase()}, started {latestH.timelineStart}).</>
@@ -308,10 +308,10 @@ const SummaryTab: React.FC<{
             </p>
             {effectiveTreatments.length > 0 && (
               <div className="mt-4">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Historical Efficacy</p>
+                <p className="text-[11px] font-[550] text-ink-4 mb-2">Historical Efficacy</p>
                 <div className="flex flex-wrap gap-1.5">
                   {effectiveTreatments.map(t => (
-                    <span key={t} className="flex items-center gap-1 px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-full text-xs font-medium text-slate-700">
+                    <span key={t} className="flex items-center gap-1 px-2.5 py-1 bg-surface-sidebar border border-line rounded-full text-xs font-medium text-ink-2">
                       <CheckCircle className="w-3 h-3 text-emerald-500" /> {t}
                     </span>
                   ))}
@@ -321,10 +321,10 @@ const SummaryTab: React.FC<{
           </div>
 
           {/* Clinical flags — full width */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h4 className="text-sm font-semibold text-slate-900 mb-3">Clinical Flags</h4>
+          <div className="bg-white rounded-lg border border-line p-6">
+            <h4 className="text-sm font-semibold text-ink mb-3">Clinical Flags</h4>
             {flags.length === 0 ? (
-              <p className="text-sm text-slate-400 italic">No flags recorded</p>
+              <p className="text-sm text-ink-5 italic">No flags recorded</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {flags.map(flag => (
@@ -361,9 +361,9 @@ const EpisodesTab: React.FC<{
     return (
       <div className="flex items-center justify-center h-48">
         <div className="text-center">
-          <Lock className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p className="font-semibold text-slate-600 mb-1">Episodes locked</p>
-          <p className="text-xs text-slate-400">Use the unlock button in the patient list</p>
+          <Lock className="w-10 h-10 text-ink-6 mx-auto mb-3" />
+          <p className="font-semibold text-ink-3 mb-1">Episodes locked</p>
+          <p className="text-xs text-ink-5">Use the unlock button in the patient list</p>
         </div>
       </div>
     );
@@ -372,65 +372,65 @@ const EpisodesTab: React.FC<{
   return (
     <div className="space-y-3">
       {histories.length === 0 && (
-        <p className="text-slate-500 text-center py-12">No episodes on record</p>
+        <p className="text-ink-4 text-center py-12">No episodes on record</p>
       )}
       {histories.map(h => {
         const colors = statusColors(h.status);
         const isOpen = expanded === h.id;
         return (
-          <div key={h.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div key={h.id} className="bg-white rounded-lg border border-line overflow-hidden">
             <button
               onClick={() => setExpanded(isOpen ? null : h.id)}
-              className="w-full p-5 flex items-start justify-between text-left hover:bg-slate-50 transition-colors"
+              className="w-full p-5 flex items-start justify-between text-left hover:bg-black/[.02] transition-colors"
             >
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-semibold text-slate-900">{h.condition}</h4>
+                  <h4 className="font-semibold text-ink">{h.condition}</h4>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors.badge}`}>{h.status}</span>
                 </div>
-                <p className="text-xs text-slate-500 flex items-center gap-1">
+                <p className="text-xs text-ink-4 flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {h.timelineStart}{h.timelineEnd ? ` → ${h.timelineEnd}` : ' → present'}
                 </p>
               </div>
-              <ChevronRight className={`w-4 h-4 text-slate-400 shrink-0 mt-0.5 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+              <ChevronRight className={`w-4 h-4 text-ink-5 shrink-0 mt-0.5 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
             </button>
 
             {isOpen && (
-              <div className="px-5 pb-5 pt-4 border-t border-slate-100 bg-white">
+              <div className="px-5 pb-5 pt-4 border-t border-line-soft bg-white">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1.5">Effective</p>
+                    <p className="text-[11px] font-[550] text-positive-text mb-1.5">Effective</p>
                     {h.successfulTreatments.length ? (
                       <ul className="space-y-1">
                         {h.successfulTreatments.map(t => (
-                          <li key={t} className="text-sm text-slate-800">{t}</li>
+                          <li key={t} className="text-sm text-ink-2">{t}</li>
                         ))}
                       </ul>
-                    ) : <p className="text-sm text-slate-400 italic">None listed</p>}
+                    ) : <p className="text-sm text-ink-5 italic">None listed</p>}
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-rose-500 mb-1.5">Ineffective</p>
+                    <p className="text-[11px] font-[550] text-rose-500 mb-1.5">Ineffective</p>
                     {h.unsuccessfulTreatments.length ? (
                       <ul className="space-y-1">
                         {h.unsuccessfulTreatments.map(t => (
-                          <li key={t} className="text-sm text-slate-800">{t}</li>
+                          <li key={t} className="text-sm text-ink-2">{t}</li>
                         ))}
                       </ul>
-                    ) : <p className="text-sm text-slate-400 italic">None listed</p>}
+                    ) : <p className="text-sm text-ink-5 italic">None listed</p>}
                   </div>
                   {h.contraindications.length > 0 && (
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 mb-1.5">Contraindications</p>
+                      <p className="text-[11px] font-[550] text-amber-600 mb-1.5">Contraindications</p>
                       <ul className="space-y-1">
                         {h.contraindications.map(c => (
-                          <li key={c} className="text-sm text-slate-800">{c}</li>
+                          <li key={c} className="text-sm text-ink-2">{c}</li>
                         ))}
                       </ul>
                     </div>
                   )}
                 </div>
-                <p className="text-[10px] text-slate-400 pt-3 border-t border-slate-100">Source: {h.sourceClinicHash} · {h.createdAt}</p>
+                <p className="text-[10px] text-ink-5 pt-3 border-t border-line-soft">Source: {h.sourceClinicHash} · {h.createdAt}</p>
               </div>
             )}
           </div>
@@ -459,10 +459,10 @@ const TreatmentsTab: React.FC<{ histories: HistoryEntry[] }> = ({ histories }) =
 
   return (
     <div className="space-y-3">
-      {entries.length === 0 && <p className="text-slate-500 text-center py-12">No treatment data available</p>}
+      {entries.length === 0 && <p className="text-ink-4 text-center py-12">No treatment data available</p>}
       {entries.map(([treatment, counts]) => (
-        <div key={treatment} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between">
-          <p className="font-medium text-slate-900 text-sm">{treatment}</p>
+        <div key={treatment} className="bg-white rounded-lg border border-line p-4 flex items-center justify-between">
+          <p className="font-medium text-ink text-sm">{treatment}</p>
           <div className="flex items-center gap-4 text-sm">
             <span className="flex items-center gap-1 text-emerald-600 font-medium">
               <CheckCircle className="w-3.5 h-3.5" /> {counts.effective}×
@@ -485,75 +485,75 @@ const ExercisesTab: React.FC<{ patient: Patient }> = ({ patient }) => {
 
   const statusBadge = (s: 'Active' | 'Completed' | 'Paused') => {
     if (s === 'Active')    return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-    if (s === 'Completed') return 'bg-slate-100 text-slate-600 border-slate-200';
+    if (s === 'Completed') return 'bg-line-soft text-ink-3 border-line';
     return                       'bg-amber-100 text-amber-700 border-amber-200';
   };
 
   return (
     <div className="space-y-4">
       {/* External platform integration banner */}
-      <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-4 flex items-center justify-between gap-3">
+      <div className="bg-accent-tint2 border border-accent-line2 rounded-lg p-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 bg-white rounded-lg border border-indigo-200 flex items-center justify-center shrink-0">
-            <Activity className="w-4 h-4 text-indigo-600" />
+          <div className="w-9 h-9 bg-surface-card rounded-md border border-accent-line flex items-center justify-center shrink-0">
+            <Activity className="w-4 h-4 text-accent" strokeWidth={1.8} />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <p className="text-sm font-semibold text-ink flex items-center gap-2">
               Synced with Physitrack
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Live
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-positive-deep bg-positive-tint px-1.5 py-0.5 rounded">
+                <span className="w-1.5 h-1.5 bg-positive rounded-full" /> Live
               </span>
             </p>
-            <p className="text-xs text-slate-500 truncate">
+            <p className="text-xs text-ink-4 truncate">
               {active.length} active program{active.length === 1 ? '' : 's'} · last sync 4 min ago
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button className="text-xs font-medium text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 flex items-center gap-1.5">
+          <button className="text-xs font-medium text-ink-3 hover:text-ink px-2.5 py-1.5 rounded-md hover:bg-white border border-transparent hover:border-line flex items-center gap-1.5 transition-colors duration-150">
             <RefreshCw className="w-3.5 h-3.5" /> Sync
           </button>
-          <button className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors">
+          <button className="text-xs font-medium text-white bg-accent hover:bg-accent-hover px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors duration-150">
             <Plus className="w-3.5 h-3.5" /> Prescribe
           </button>
         </div>
       </div>
 
       {programs.length === 0 && (
-        <div className="bg-white rounded-xl border border-dashed border-slate-300 p-8 text-center">
-          <Dumbbell className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <p className="text-sm text-slate-500">No exercise programs prescribed yet</p>
-          <p className="text-xs text-slate-400 mt-1">Click "Prescribe" to send a home program via Physitrack</p>
+        <div className="bg-white rounded-lg border border-dashed border-line p-8 text-center">
+          <Dumbbell className="w-8 h-8 text-ink-6 mx-auto mb-2" />
+          <p className="text-sm text-ink-4">No exercise programs prescribed yet</p>
+          <p className="text-xs text-ink-5 mt-1">Click "Prescribe" to send a home program via Physitrack</p>
         </div>
       )}
 
       {programs.map((prog, idx) => (
-        <div key={idx} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div key={idx} className="bg-white rounded-lg border border-line overflow-hidden">
           {/* Program header */}
-          <div className="px-4 py-3 border-b border-slate-100 flex items-start justify-between gap-3">
+          <div className="px-4 py-3 border-b border-line-soft flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-semibold text-slate-900 text-sm">{prog.programName}</p>
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${statusBadge(prog.status)}`}>
+                <p className="font-semibold text-ink text-sm">{prog.programName}</p>
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${statusBadge(prog.status)}`}>
                   {prog.status}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-ink-4 mt-0.5">
                 Prescribed {prog.prescribedDate} · {prog.prescribedBy}
               </p>
             </div>
-            <button className="text-[11px] font-medium text-indigo-600 hover:text-indigo-800 px-2.5 py-1.5 rounded-lg hover:bg-indigo-50 flex items-center gap-1 shrink-0">
+            <button className="text-[11px] font-medium text-accent-text hover:text-accent-deep px-2.5 py-1.5 rounded-md hover:bg-accent-tint flex items-center gap-1 shrink-0 transition-colors duration-150">
               <ExternalLink className="w-3 h-3" /> Open
             </button>
           </div>
 
           {/* Compliance bar */}
-          <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
+          <div className="px-4 py-3 border-b border-line-soft bg-surface-sidebar">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-slate-500">Compliance · last 14 days</span>
-              <span className="font-bold text-slate-900">{prog.compliance}%</span>
+              <span className="text-ink-4">Compliance · last 14 days</span>
+              <span className="font-bold text-ink">{prog.compliance}%</span>
             </div>
-            <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-line rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${
                   prog.compliance >= 75 ? 'bg-emerald-500' :
@@ -562,20 +562,20 @@ const ExercisesTab: React.FC<{ patient: Patient }> = ({ patient }) => {
                 style={{ width: `${prog.compliance}%` }}
               />
             </div>
-            <p className="text-[10px] text-slate-400 mt-1.5">Last logged: {prog.lastActivity}</p>
+            <p className="text-[10px] text-ink-5 mt-1.5">Last logged: {prog.lastActivity}</p>
           </div>
 
           {/* Exercise list */}
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-line-softer">
             {prog.exercises.map((ex, i) => (
-              <li key={i} className="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-slate-50">
+              <li key={i} className="px-4 py-2.5 flex items-center justify-between gap-3 hover:bg-black/[.02]">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-indigo-50">
-                    <PlayCircle className="w-4 h-4 text-slate-400" />
+                  <div className="w-9 h-9 bg-line-soft rounded-lg flex items-center justify-center shrink-0 group-hover:bg-indigo-50">
+                    <PlayCircle className="w-4 h-4 text-ink-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">{ex.name}</p>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-sm font-medium text-ink-2 truncate">{ex.name}</p>
+                    <p className="text-[11px] text-ink-4">
                       {ex.sets} × {ex.reps} · {ex.frequency}
                     </p>
                   </div>
@@ -601,17 +601,17 @@ const DocumentsTab: React.FC<{ patient: Patient }> = ({ patient }) => {
   return (
     <div className="space-y-3">
       {docs.map(doc => (
-        <div key={doc.name} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between">
+        <div key={doc.name} className="bg-white rounded-lg border border-line p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
               <FileText className="w-4 h-4 text-blue-600" />
             </div>
             <div>
-              <p className="font-medium text-slate-900 text-sm">{doc.name} — {doc.date}</p>
-              <p className="text-xs text-slate-500">{doc.type}</p>
+              <p className="font-medium text-ink text-sm">{doc.name} — {doc.date}</p>
+              <p className="text-xs text-ink-4">{doc.type}</p>
             </div>
           </div>
-          <button className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium px-3 py-1.5 border border-emerald-200 rounded-lg hover:bg-emerald-50 transition-colors">
+          <button className="flex items-center gap-1.5 text-xs text-accent-text font-medium px-2.5 py-[5px] border border-accent-line bg-accent-tint2 rounded-md hover:bg-accent-tint transition-colors duration-150">
             <Download className="w-3.5 h-3.5" /> Download
           </button>
         </div>
@@ -623,21 +623,21 @@ const DocumentsTab: React.FC<{ patient: Patient }> = ({ patient }) => {
 // ─── Audit Trail Tab ──────────────────────────────────────────────────────────
 
 const AuditTab: React.FC<{ patient: Patient }> = () => (
-  <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-    <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Access & Activity Log</p>
+  <div className="bg-white rounded-lg border border-line overflow-hidden">
+    <div className="px-4 py-3 bg-surface-sidebar border-b border-line">
+      <p className="text-[11px] font-[550] text-ink-4">Access & activity log</p>
     </div>
-    <ul className="divide-y divide-slate-100">
+    <ul className="divide-y divide-line-softer">
       {MOCK_AUDIT.map((entry, i) => (
         <li key={i} className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-slate-300 rounded-full shrink-0" />
+            <div className="w-2 h-2 bg-zinc-300 rounded-full shrink-0" />
             <div>
-              <p className="text-sm font-medium text-slate-800">{entry.action}</p>
-              <p className="text-xs text-slate-400">{entry.actor}</p>
+              <p className="text-sm font-medium text-ink-2">{entry.action}</p>
+              <p className="text-xs text-ink-5">{entry.actor}</p>
             </div>
           </div>
-          <p className="text-xs text-slate-400 font-mono">{entry.time}</p>
+          <p className="text-xs text-ink-5 font-mono">{entry.time}</p>
         </li>
       ))}
     </ul>
@@ -665,53 +665,53 @@ const RightPanel: React.FC<{
     <div className="p-4 space-y-6">
       {/* Coverage */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Coverage</p>
-        <div className="bg-white rounded-xl border border-slate-200 p-4">
-          <p className="font-semibold text-slate-900 text-sm">{coverage.plan}</p>
+        <p className="text-[11px] font-[550] text-ink-4 mb-2">Coverage</p>
+        <div className="bg-white rounded-lg border border-line p-4">
+          <p className="font-semibold text-ink text-sm">{coverage.plan}</p>
           <div className="mt-3">
-            <div className="flex justify-between text-xs text-slate-500 mb-1.5">
+            <div className="flex justify-between text-xs text-ink-4 mb-1.5">
               <span>Sessions used</span>
-              <span className="font-bold text-slate-700">{coverage.used} / {coverage.total}</span>
+              <span className="font-bold text-ink-2">{coverage.used} / {coverage.total}</span>
             </div>
-            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-line-soft rounded-full overflow-hidden">
               <div
                 className="h-full bg-emerald-500 rounded-full"
                 style={{ width: `${coverage.total ? (coverage.used / coverage.total) * 100 : 0}%` }}
               />
             </div>
           </div>
-          <p className="text-[10px] text-slate-400 mt-2">Resets {coverage.resets}</p>
+          <p className="text-[10px] text-ink-5 mt-2">Resets {coverage.resets}</p>
         </div>
       </div>
 
       {/* Network Insights */}
       {insight && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+          <p className="text-[11px] font-[550] text-ink-4 mb-2 flex items-center gap-1.5">
             <Zap className="w-3 h-3" /> Network Insights
           </p>
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
-            <p className="text-xs font-bold text-emerald-800 mb-1">{insight.headline}</p>
-            <p className="text-xs text-emerald-700 leading-relaxed">{insight.detail}</p>
+          <div className="bg-accent-tint2 border border-accent-line2 rounded-lg p-4">
+            <p className="text-xs font-semibold text-accent-deep mb-1">{insight.headline}</p>
+            <p className="text-[11.5px] text-accent-text leading-[1.5]">{insight.detail}</p>
           </div>
         </div>
       )}
 
       {/* Referral Path */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Referral Path</p>
+        <p className="text-[11px] font-[550] text-ink-4 mb-2">Referral Path</p>
         <div className="space-y-2.5">
           {referralPath.map((stop, i) => (
             <div key={i} className="flex items-start gap-2.5">
-              <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${stop.isCurrent ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+              <div className={`w-2 h-2 rounded-full mt-1 shrink-0 ${stop.isCurrent ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
               <div>
-                <p className={`text-xs font-medium ${stop.isCurrent ? 'text-emerald-700' : 'text-slate-600'}`}>
+                <p className={`text-xs font-medium ${stop.isCurrent ? 'text-emerald-700' : 'text-ink-3'}`}>
                   {stop.name}
                   {!stop.isCurrent && stop.name.includes('CLINIC_') && (
-                    <span className="text-[10px] text-slate-400 font-normal ml-1">(anonymised)</span>
+                    <span className="text-[10px] text-ink-5 font-normal ml-1">(anonymised)</span>
                   )}
                 </p>
-                <p className={`text-[10px] ${stop.isCurrent ? 'text-emerald-500' : 'text-slate-400'}`}>
+                <p className={`text-[10px] ${stop.isCurrent ? 'text-emerald-500' : 'text-ink-5'}`}>
                   {stop.isCurrent ? 'Current' : stop.period}
                 </p>
               </div>
@@ -722,7 +722,7 @@ const RightPanel: React.FC<{
 
       {/* Quick Actions */}
       <div>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Quick Actions</p>
+        <p className="text-[11px] font-[550] text-ink-4 mb-2">Quick Actions</p>
         <div className="space-y-0.5">
           {[
             { icon: Plus,         label: 'Add clinical note' },
@@ -732,9 +732,9 @@ const RightPanel: React.FC<{
           ].map(({ icon: Icon, label }) => (
             <button
               key={label}
-              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-700 hover:bg-slate-50 rounded-lg transition-colors text-left"
+              className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-ink-2 hover:bg-black/[.02] rounded-lg transition-colors text-left"
             >
-              <Icon className="w-4 h-4 text-slate-400 shrink-0" /> {label}
+              <Icon className="w-4 h-4 text-ink-5 shrink-0" /> {label}
             </button>
           ))}
         </div>
@@ -774,19 +774,19 @@ const SOAPModal: React.FC<{
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden">
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 flex items-center gap-2">
+      <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden">
+        <div className="p-5 border-b border-line flex items-center justify-between">
+          <h3 className="font-bold text-ink flex items-center gap-2">
             <FileText className="w-4 h-4 text-blue-600" /> SOAP Report
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl leading-none">×</button>
+          <button onClick={onClose} className="text-ink-5 hover:text-ink-3 text-2xl leading-none">×</button>
         </div>
         <div className="flex-1 overflow-y-auto p-5">
-          <pre className="whitespace-pre-wrap font-mono text-sm text-slate-700 bg-slate-50 p-4 rounded-lg">{report}</pre>
+          <pre className="whitespace-pre-wrap font-mono text-sm text-ink-2 bg-surface-sidebar p-4 rounded-lg">{report}</pre>
         </div>
-        <div className="p-5 border-t border-slate-200 flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 text-sm transition-colors">Close</button>
-          <button onClick={handleDownload} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm transition-colors flex items-center gap-1.5">
+        <div className="p-5 border-t border-line flex justify-end gap-3">
+          <button onClick={onClose} className="px-3.5 py-2 border border-line text-ink-2 rounded-md hover:bg-black/[.02] text-xs font-medium transition-colors duration-150">Close</button>
+          <button onClick={handleDownload} className="px-3.5 py-2 bg-accent text-white rounded-md hover:bg-accent-hover text-xs font-medium transition-colors duration-150 flex items-center gap-1.5">
             <Download className="w-3.5 h-3.5" /> Download
           </button>
         </div>
@@ -825,39 +825,39 @@ const LockedPreview: React.FC<{
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-slate-50 flex flex-col gap-6">
+    <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-surface-sidebar flex flex-col gap-6">
 
       {/* Stats row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {stats.map(s => (
-          <div key={s.label} className="bg-white rounded-xl border border-slate-200 p-4 text-center">
-            <p className="text-2xl font-bold text-slate-900">{s.value}</p>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">{s.label}</p>
+          <div key={s.label} className="bg-white rounded-lg border border-line p-4 text-center">
+            <p className="text-2xl font-bold text-ink">{s.value}</p>
+            <p className="text-[11px] font-[550] text-ink-4 mt-1">{s.label}</p>
           </div>
         ))}
       </div>
 
       {/* Redacted content teaser */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+      <div className="bg-white rounded-lg border border-line overflow-hidden">
+        <div className="px-5 py-3 border-b border-line-soft flex items-center justify-between">
+          <p className="text-[11px] font-[550] text-ink-4 flex items-center gap-1.5">
             <Lock className="w-3.5 h-3.5" /> Record preview
           </p>
-          <span className="text-[10px] text-slate-400">Unlock to view full details</span>
+          <span className="text-[10px] text-ink-5">Unlock to view full details</span>
         </div>
         <div className="p-5 space-y-3" aria-hidden="true">
           {REDACTED_ROWS.map((row, i) => (
             <div key={i} className="flex items-center gap-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300 w-16 shrink-0">{row.label}</span>
-              <div className={`${row.width} h-3.5 bg-slate-100 rounded-full blur-[3px]`} />
+              <span className="text-[11px] font-[550] text-ink-6 w-16 shrink-0">{row.label}</span>
+              <div className={`${row.width} h-3.5 bg-line-soft rounded-full blur-[3px]`} />
             </div>
           ))}
         </div>
       </div>
 
       {/* What you'll unlock */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">What you'll unlock</p>
+      <div className="bg-white rounded-lg border border-line p-5">
+        <p className="text-[11px] font-[550] text-ink-4 mb-3">What you'll unlock</p>
         <ul className="space-y-2.5">
           {[
             'Full episode history with conditions and outcomes',
@@ -865,7 +865,7 @@ const LockedPreview: React.FC<{
             'Contraindications and clinical flags',
             'Longitudinal timeline across all contributing clinics',
           ].map(item => (
-            <li key={item} className="flex items-start gap-2.5 text-sm text-slate-700">
+            <li key={item} className="flex items-start gap-2.5 text-sm text-ink-2">
               <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
               {item}
             </li>
@@ -878,10 +878,10 @@ const LockedPreview: React.FC<{
         <button
           onClick={() => onUnlock(patient.id)}
           disabled={credits < 1}
-          className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-xl text-sm font-semibold transition-colors ${
+          className={`flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 rounded-md text-[12.5px] font-medium transition-colors duration-150 ${
             credits >= 1
-              ? 'bg-slate-900 text-white hover:bg-slate-700'
-              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              ? 'bg-accent text-white hover:bg-accent-hover'
+              : 'bg-line-soft text-ink-5 cursor-not-allowed'
           }`}
         >
           <Unlock className="w-4 h-4" />
@@ -890,14 +890,14 @@ const LockedPreview: React.FC<{
         {credits < 1 && (
           <button
             onClick={onNavigateContribute}
-            className="text-sm text-emerald-700 font-medium hover:text-emerald-900 underline underline-offset-4"
+            className="text-xs text-accent-text font-medium hover:text-accent-deep underline underline-offset-4 transition-colors duration-150"
           >
             No credits? Contribute to earn →
           </button>
         )}
       </div>
       {credits >= 1 && (
-        <p className="text-xs text-slate-400 -mt-3">
+        <p className="text-xs text-ink-5 -mt-3">
           You have {credits} credit{credits !== 1 ? 's' : ''}. Balance after unlock: {credits - 1}.
         </p>
       )}
@@ -979,24 +979,23 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-brand font-extrabold text-slate-900 tracking-tight mb-1">Patient Intake</h2>
-        <p className="text-sm text-slate-500">Search for a patient to view their longitudinal clinical chart, synced across the network.</p>
+      <div className="mb-4">
+        <p className="text-xs text-ink-4">Search for a patient to view their longitudinal clinical chart, synced across the network.</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex relative h-[calc(100vh-220px)] min-h-[560px]">
+      <div className="bg-surface-card rounded-lg border border-line overflow-hidden flex relative h-[calc(100vh-160px)] min-h-[560px]">
 
       {/* ── LEFT: Patient List ────────────────────────────────────────────── */}
-      <div className={`w-full md:w-64 lg:w-72 shrink-0 border-r border-slate-200 bg-white flex-col ${mobileView === 'list' ? 'flex' : 'hidden md:flex'}`}>
-        <div className="px-4 py-3 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+      <div className={`w-full md:w-64 lg:w-72 shrink-0 border-r border-line bg-white flex-col ${mobileView === 'list' ? 'flex' : 'hidden md:flex'}`}>
+        <div className="px-4 py-3 border-b border-line bg-surface-sidebar flex items-center justify-between">
+          <span className="text-[12.5px] font-semibold text-ink">
             Patients · 47
           </span>
-          <Filter className="w-4 h-4 text-slate-400" />
+          <Filter className="w-4 h-4 text-ink-5" />
         </div>
-        <div className="p-3 border-b border-slate-200 space-y-1.5">
+        <div className="p-3 border-b border-line space-y-1.5">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-5" />
             <input
               type="text"
               inputMode={isIdSearch ? 'numeric' : 'text'}
@@ -1004,10 +1003,10 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
               value={searchTerm}
               onChange={e => handleSearch(e.target.value)}
               aria-describedby={searchIdError ? 'search-id-error' : undefined}
-              className={`w-full pl-9 pr-3 py-2 text-sm border rounded-lg outline-none focus:ring-1 transition-colors ${
+              className={`w-full pl-9 pr-3 py-2 text-xs border rounded-md outline-none focus:ring-1 transition-colors duration-150 ${
                 searchIdError
                   ? 'border-red-400 focus:ring-red-400 bg-red-50'
-                  : 'border-slate-200 focus:ring-emerald-500'
+                  : 'border-line focus:ring-accent focus:border-accent'
               }`}
             />
           </div>
@@ -1018,10 +1017,10 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
             </p>
           )}
           {isIdSearch && !searchIdError && (
-            <p className="text-[10px] text-slate-400 px-1">Searching by patient ID</p>
+            <p className="text-[10px] text-ink-5 px-1">Searching by patient ID</p>
           )}
         </div>
-        <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+        <div className="flex-1 overflow-y-auto divide-y divide-line-softer">
           {filtered.map(patient => {
             const ph       = histories.filter(h => h.patientId === patient.id);
             const latestH  = ph[ph.length - 1];
@@ -1030,8 +1029,8 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
             return (
               <div
                 key={patient.id}
-                className={`w-full px-4 py-3.5 text-left transition-colors ${
-                  isActive ? 'bg-emerald-50 border-l-2 border-l-emerald-500' : 'hover:bg-slate-50'
+                className={`w-full px-4 py-3.5 text-left transition-colors duration-[120ms] ${
+                  isActive ? 'bg-accent-tint2 border-l-2 border-l-accent' : 'hover:bg-black/[.02]'
                 }`}
               >
                 <button
@@ -1042,17 +1041,17 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         {patient.historyAvailable && (
-                          <div className={`w-2 h-2 rounded-full shrink-0 ${unlocked ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                          <div className={`w-2 h-2 rounded-full shrink-0 ${unlocked ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
                         )}
-                        <p className="text-sm font-semibold text-slate-900 truncate">{patient.name}</p>
+                        <p className="text-sm font-semibold text-ink truncate">{patient.name}</p>
                       </div>
-                      <p className="text-xs text-slate-400 font-mono mt-1">{patient.id}</p>
+                      <p className="text-xs text-ink-5 font-mono mt-1">{patient.id}</p>
                       {latestH && (
-                        <p className="text-sm text-slate-700 font-medium truncate mt-0.5">{latestH.condition}</p>
+                        <p className="text-sm text-ink-2 font-medium truncate mt-0.5">{latestH.condition}</p>
                       )}
                     </div>
                     {patient.historyAvailable && unlocked && (
-                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded shrink-0">ACTIVE</span>
+                      <span className="text-[10px] font-semibold text-positive-deep bg-positive-tint px-1.5 py-0.5 rounded shrink-0">Active</span>
                     )}
                   </div>
                 </button>
@@ -1060,8 +1059,8 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
                   <button
                     onClick={(e) => { e.stopPropagation(); handleSelect(patient); onUnlock(patient.id); }}
                     disabled={credits < 1}
-                    className={`mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                      credits >= 1 ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    className={`mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-150 ${
+                      credits >= 1 ? 'bg-accent text-white hover:bg-accent-hover' : 'bg-line-soft text-ink-5 cursor-not-allowed'
                     }`}
                   >
                     <Unlock className="w-3 h-3" /> Unlock (1 Credit)
@@ -1075,23 +1074,23 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
 
       {/* ── CENTER: Clinical Chart ────────────────────────────────────────── */}
       {!selectedPatient ? (
-        <div className="flex-1 hidden md:flex items-center justify-center bg-slate-50">
+        <div className="flex-1 hidden md:flex items-center justify-center bg-surface-sidebar">
           <div className="text-center px-6 max-w-xs">
-            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <Search className="w-7 h-7 text-slate-300" />
+            <div className="w-16 h-16 bg-line-soft rounded-full flex items-center justify-center mx-auto mb-5">
+              <Search className="w-7 h-7 text-ink-6" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Select a patient</h3>
-            <p className="text-sm text-slate-500 leading-relaxed">Choose from the list or search by name / Medicare number to open their clinical chart.</p>
+            <h3 className="text-lg font-semibold text-ink mb-2">Select a patient</h3>
+            <p className="text-sm text-ink-4 leading-relaxed">Choose from the list or search by name / Medicare number to open their clinical chart.</p>
           </div>
         </div>
       ) : (
         <div className={`flex-1 flex-col overflow-hidden min-w-0 ${mobileView === 'detail' ? 'flex' : 'hidden md:flex'}`}>
           {/* Top action bar */}
-          <div className="px-3 sm:px-5 py-2.5 bg-white border-b border-slate-200 flex items-center justify-between gap-2 shrink-0">
+          <div className="px-3 sm:px-5 py-2.5 bg-white border-b border-line flex items-center justify-between gap-2 shrink-0">
             {/* Back to list — mobile only */}
             <button
               onClick={() => setMobileView('list')}
-              className="md:hidden p-1.5 -ml-1 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 shrink-0"
+              className="md:hidden p-1.5 -ml-1 text-ink-4 hover:text-ink rounded-lg hover:bg-line-soft shrink-0"
               aria-label="Back to patient list"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -1100,20 +1099,20 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               <button
                 title="Refer"
-                className="flex items-center gap-1.5 text-xs px-2 sm:px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
+                className="flex items-center gap-1.5 text-xs px-2 sm:px-2.5 py-1.5 border border-line rounded-lg text-ink-2 hover:bg-black/[.02] transition-colors"
               >
                 <Share2 className="w-3 h-3" /><span className="hidden sm:inline">Refer</span>
               </button>
               <button
                 onClick={() => patientHistories[0] && setViewingSOAP(patientHistories[0])}
-                className="flex items-center gap-1.5 text-xs px-2 sm:px-2.5 py-1.5 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium px-2 sm:px-2.5 py-1.5 bg-accent text-white rounded-md hover:bg-accent-hover transition-colors duration-150"
               >
                 <FileText className="w-3 h-3" /><span className="hidden sm:inline">Generate SOAP</span><span className="sm:hidden">SOAP</span>
               </button>
               {/* Info panel toggle — visible below xl */}
               <button
                 onClick={() => setInfoOpen(true)}
-                className="xl:hidden flex items-center justify-center p-1.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
+                className="xl:hidden flex items-center justify-center p-1.5 border border-line rounded-lg text-ink-2 hover:bg-black/[.02] transition-colors"
                 aria-label="Show patient details"
                 title="Coverage, insights & referral path"
               >
@@ -1123,19 +1122,19 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
           </div>
 
           {/* Patient header */}
-          <div className={`px-3 sm:px-6 pt-5 pb-0 border-b border-slate-200 shrink-0 ${isSelectedLocked ? 'bg-slate-50' : 'bg-white'}`}>
+          <div className={`px-3 sm:px-6 pt-5 pb-0 border-b border-line shrink-0 ${isSelectedLocked ? 'bg-surface-sidebar' : 'bg-white'}`}>
             <div className="flex items-start gap-4 mb-5">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 bg-slate-900 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 bg-ink rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0">
                 {initials(selectedPatient.name)}
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate mb-1.5">{selectedPatient.name}</h2>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 mb-2.5">
+                <h2 className="text-base sm:text-lg font-bold text-ink truncate mb-1.5">{selectedPatient.name}</h2>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-4 mb-2.5">
                   <span>DOB {selectedPatient.dob} · {calcAge(selectedPatient.dob)}y</span>
-                  <span className="hidden sm:inline text-slate-300">|</span>
+                  <span className="hidden sm:inline text-ink-6">|</span>
                   <span className="hidden sm:inline">Last visit {selectedPatient.lastVisit}</span>
-                  <span className="hidden md:inline text-slate-300">|</span>
-                  <span className="hidden md:inline">Home clinic <span className="font-medium text-slate-700">Cremorne Physio</span></span>
+                  <span className="hidden md:inline text-ink-6">|</span>
+                  <span className="hidden md:inline">Home clinic <span className="font-medium text-ink-2">Cremorne Physio</span></span>
                 </div>
                 {unlockedPatients.includes(selectedPatient.id) && (
                   <p className="text-xs text-emerald-600 font-medium flex items-center gap-1.5">
@@ -1151,16 +1150,16 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-2.5 text-xs font-semibold border-b-2 whitespace-nowrap transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 sm:px-4 py-2.5 text-xs border-b-2 whitespace-nowrap transition-colors duration-[120ms] ${
                     activeTab === tab.id
-                      ? 'border-emerald-600 text-emerald-700'
-                      : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                      ? 'border-accent text-accent-deep font-[550]'
+                      : 'border-transparent text-ink-4 font-[450] hover:text-ink'
                   }`}
                 >
                   {tab.label}
                   {tab.count !== undefined && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                      activeTab === tab.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                    <span className={`text-[10px] px-1.5 py-px rounded font-semibold ${
+                      activeTab === tab.id ? 'bg-accent-tint text-accent-text' : 'bg-line-soft text-ink-4'
                     }`}>
                       {tab.count}
                     </span>
@@ -1180,7 +1179,7 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
               onNavigateContribute={onNavigateContribute}
             />
           ) : (
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-surface-sidebar">
               {activeTab === 'summary' && (
                 <SummaryTab patient={selectedPatient} histories={patientHistories} unlockedPatients={unlockedPatients} onUnlock={onUnlock} credits={credits} />
               )}
@@ -1206,7 +1205,7 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
 
       {/* ── RIGHT: Sidebar Panel — always visible at xl+ ──────────────────── */}
       {selectedPatient && (
-        <div className="hidden xl:flex w-64 shrink-0 border-l border-slate-200 bg-white overflow-y-auto">
+        <div className="hidden xl:flex w-64 shrink-0 border-l border-line bg-white overflow-y-auto">
           <RightPanel
             patient={selectedPatient}
             histories={patientHistories}
@@ -1225,12 +1224,12 @@ export const PatientSearch: React.FC<PatientSearchProps> = ({
             className="xl:hidden absolute inset-0 bg-black/30 z-10"
             aria-hidden="true"
           />
-          <div className="xl:hidden absolute inset-y-0 right-0 w-full sm:w-80 bg-white border-l border-slate-200 z-20 flex flex-col shadow-2xl">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 bg-slate-50">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Patient Details</span>
+          <div className="xl:hidden absolute inset-y-0 right-0 w-full sm:w-80 bg-white border-l border-line z-20 flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-line bg-surface-sidebar">
+              <span className="text-[11px] font-[550] text-ink-4">Patient details</span>
               <button
                 onClick={() => setInfoOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded hover:bg-slate-200"
+                className="text-ink-5 hover:text-ink-3 p-1 rounded hover:bg-line"
                 aria-label="Close details panel"
               >
                 <XIcon className="w-4 h-4" />
