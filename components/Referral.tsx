@@ -12,8 +12,8 @@ export const Referral: React.FC = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto pt-8">
-      <div className="bg-surface-card border border-line rounded-lg px-8 py-10 text-center">
+    <div className="max-w-xl mx-auto pt-4 sm:pt-8">
+      <div className="bg-surface-card border border-line rounded-lg px-5 py-8 sm:px-8 sm:py-10 text-center">
         <div className="w-10 h-10 bg-accent-tint rounded-lg flex items-center justify-center mx-auto mb-5">
           <Share2 className="w-5 h-5 text-accent" strokeWidth={1.8} />
         </div>
@@ -43,7 +43,7 @@ export const Referral: React.FC = () => {
 
         <div className="mt-8 pt-6 border-t border-line-soft text-left">
           <h4 className="text-[11px] font-[550] text-ink-4 mb-4">How it works</h4>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <div className="text-xs font-semibold text-ink mb-1">1. Share</div>
               <p className="text-[11.5px] text-ink-4 leading-[1.45]">Send your unique code to a partner clinic.</p>
